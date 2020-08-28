@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VSCodium
+.vscode/
+
+# Development database
+*.sqlite
