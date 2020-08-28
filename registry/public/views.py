@@ -49,10 +49,3 @@ def logout():
     logout_user()
     flash("Odhlášení bylo úspěšné.", "info")
     return redirect(url_for("public.home"))
-
-
-@blueprint.route("/about/")
-def about():
-    """About page."""
-    form = LoginForm(request.form)
-    return render_template("public/about.html", form=form)
