@@ -18,6 +18,8 @@ SECRET_KEY=<some_random_string_here>
 
 1. Add a user account via `flask create-user <email> <password>`
 
+1. You can install anonymized test data via `flask install-test-data` (needs empty database and with all migrations applied)
+
 1. run the app with `flask run`
 
 ## Testing
