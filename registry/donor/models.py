@@ -7,6 +7,9 @@ class DonationCenter(db.Model):
     slug = db.Column(db.String, unique=True, nullable=False)
     title = db.Column(db.String, nullable=False)
 
+    def __repr__(self):
+        return f"<DonationCenter({self.id}) {self.title}>"
+
 
 class Batch(db.Model):
     __tablename__ = "batches"
@@ -14,12 +17,8 @@ class Batch(db.Model):
     donation_center = db.Column(db.ForeignKey(DonationCenter.id))
     imported_at = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, slug, title):
-        self.slug = slug
-        self.title = title
-
     def __repr__(self):
-        return f"<Batch({self.slug!r})>"
+        return f"<Batch({self.id}) from {self.imported_at}>"
 
 
 class Record(db.Model):
