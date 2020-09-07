@@ -13,7 +13,7 @@
     {% block css %}{% endblock %}
   </head>
   <body class="{% block body_class %}{% endblock %}">
-    {% block body %} {% with form=form %} {% include "nav.html" %} {% endwith %}
+    {% block body %} {% include "nav.html" %}
 
     <header>{% block header %}{% endblock %}</header>
 
