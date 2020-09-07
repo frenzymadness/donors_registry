@@ -14,10 +14,6 @@ class Batch(db.Model):
     donation_center = db.Column(db.ForeignKey(DonationCenter.id))
     imported_at = db.Column(db.DateTime, nullable=False)
 
-    def __init__(self, slug, title):
-        self.slug = slug
-        self.title = title
-
     def __repr__(self):
         return f"<Batch({self.slug!r})>"
 
@@ -34,3 +30,17 @@ class Record(db.Model):
     postal_code = db.Column(db.String(5), nullable=False)
     kod_pojistovny = db.Column(db.String(3), nullable=False)
     donation_count = db.Column(db.Integer, nullable=False)
+
+    @classmethod
+    def from_list(cls, list):
+        return cls(
+            batch=list[0],
+            rodne_cislo=list[1],
+            first_name=list[2],
+            last_name=list[3],
+            address=list[4],
+            city=list[5],
+            postal_code=list[6],
+            kod_pojistovny=list[7],
+            donation_count=list[8],
+        )

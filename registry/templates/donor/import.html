@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Import záznamů</h1>
+
+{% with form=form %}
+<form id="importForm" action="{{ url_for('donor.import_data') }}" method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    Odběrné místo: {{ form.donation_center_id }}<br>
+    {% if form.valid_lines_content is not none %}
+    <div>Validní řádky (není třeba nijak měnit)</div>
+    {{ form.valid_lines(cols=70, rows=30) }}<br>
+    <div>Řádky s chybami a informace o chybách</div>
+    {{ form.invalid_lines(cols=70, rows=30) }}{{ form.invalid_lines_errors(cols=70, rows=30) }}<br>
+    {% else %}
+    <div>Pole pro vstupní data z odběrného místa</div>
+    {{ form.input_data(cols=70, rows=30) }}<br>
+    {% endif %}
+    <input type="submit" value="Zpracovat">
+</form>
+{% endwith %}
+
+{% endblock %}
