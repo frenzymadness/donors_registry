@@ -7,6 +7,7 @@ import pytest
 from webtest import TestApp
 
 from registry.app import create_app
+from registry.donor.models import DonationCenter
 from registry.extensions import db as _db
 from registry.user.models import User
 
@@ -45,9 +46,28 @@ def db(app):
 
 
 @pytest.fixture
+def test_data(db):
+    objects = [
+        DonationCenter(title="FM", slug="fm"),
+        DonationCenter(title="Trinex", slug="trinec"),
+    ]
+    db.session.add_all(objects)
+    db.session.commit()
+
+
+@pytest.fixture
 def user(db):
     """Create user for the tests."""
     user = User("test@example.com", "test123")
+    user.test_password = "test123"
+    user.active = True
     db.session.add(user)
     db.session.commit()
     return user
+
+
+def login(user, testapp):
+    res = testapp.post(
+        "/", params={"email": user.email, "password": user.test_password}
+    ).follow()
+    assert "Přihlášení proběhlo úspěšně" in res
