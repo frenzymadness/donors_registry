@@ -12,7 +12,7 @@
     {% if current_user and current_user.is_authenticated %}
     <ul class="navbar-nav my-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="{{ url_for('user.members') }}">Přihlášen jako {{ current_user.email }}</a>
+        Přihlášen jako {{ current_user.email }}
       </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('public.logout') }}">Odhlásit se</a>
