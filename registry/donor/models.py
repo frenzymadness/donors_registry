@@ -1,14 +1,5 @@
 from registry.extensions import db
-
-
-class DonationCenter(db.Model):
-    __tablename__ = "donation_center"
-    id = db.Column(db.Integer, primary_key=True)
-    slug = db.Column(db.String, unique=True, nullable=False)
-    title = db.Column(db.String, nullable=False)
-
-    def __repr__(self):
-        return f"<DonationCenter({self.id}) {self.title}>"
+from registry.list.models import DonationCenter, Medals
 
 
 class Batch(db.Model):
@@ -47,3 +38,10 @@ class Record(db.Model):
             kod_pojistovny=list[7],
             donation_count=list[8],
         )
+
+
+class AwardedMedals(db.Model):
+    __tablename__ = "awarded_medals"
+    rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
+    medal = db.Column(db.ForeignKey(Medals.id))
+    __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal),)
