@@ -96,7 +96,7 @@ def validate_import_data(text_input):
             repaired_line = repair_two_semicolons(line)
             if is_line_valid(repaired_line):
                 invalid_lines.append(
-                    (repaired_line, ["rádek obsahoval dvojici středníků"])
+                    (repaired_line, ["řádek obsahoval dvojici středníků"])
                 )
                 continue
 
