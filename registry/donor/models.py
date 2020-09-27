@@ -48,3 +48,28 @@ class AwardedMedals(db.Model):
     rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
     medal = db.Column(db.ForeignKey(Medals.id))
     __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal),)
+
+
+class DonorsOverview(db.Model):
+    __tablename__ = "donors_overview"
+    rodne_cislo = db.Column(db.String(10), primary_key=True)
+    first_name = db.Column(db.String, nullable=False)
+    last_name = db.Column(db.String, nullable=False)
+    address = db.Column(db.String, nullable=False)
+    city = db.Column(db.String, nullable=False)
+    postal_code = db.Column(db.String(5), nullable=False)
+    kod_pojistovny = db.Column(db.String(3), nullable=False)
+    donation_count_fm = db.Column(db.Integer, nullable=False)
+    donation_count_fm_bubenik = db.Column(db.Integer, nullable=False)
+    donation_count_trinec = db.Column(db.Integer, nullable=False)
+    donation_count_manual = db.Column(db.Integer, nullable=False)
+    donation_count_total = db.Column(db.Integer, nullable=False)
+    awarded_medal_br = db.Column(db.Boolean, nullable=False)
+    awarded_medal_st = db.Column(db.Boolean, nullable=False)
+    awarded_medal_zl = db.Column(db.Boolean, nullable=False)
+    awarded_medal_kr3 = db.Column(db.Boolean, nullable=False)
+    awarded_medal_kr2 = db.Column(db.Boolean, nullable=False)
+    awarded_medal_kr1 = db.Column(db.Boolean, nullable=False)
+
+    def __repr__(self):
+        return f"<DonorsOverview ({self.rodne_cislo})>"
