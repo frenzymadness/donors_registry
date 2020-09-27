@@ -34,6 +34,9 @@ class Record(db.Model):
     kod_pojistovny = db.Column(db.String(3), nullable=False)
     donation_count = db.Column(db.Integer, nullable=False)
 
+    def __repr__(self):
+        return f"<Record({self.id}) {self.rodne_cislo} from Batch {self.batch}>"
+
     @classmethod
     def from_list(cls, list):
         return cls(
