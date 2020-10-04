@@ -24,9 +24,11 @@ def create_user(email, password):
 
 @app.cli.command("install-test-data")
 def install_test_data():
-    with open("tests/data/imports.csv") as csv_file:
+    with open("tests/data/imports.csv", encoding="utf-8") as csv_file:
         reader = csv.DictReader(csv_file)
         donation_centers = {}
+        for item in DonationCenter.query.all():
+            donation_centers[item.slug] = item
         batches = {}
         for row in reader:
             (
@@ -43,7 +45,7 @@ def install_test_data():
                 import_date,
             ) = tuple(row.values())
 
-            if donation_center not in donation_centers:
+            if donation_center.lower() not in donation_centers:
                 title = donation_center.replace("_", " ")
                 slug = donation_center.lower()
                 donation_centers[donation_center] = DonationCenter(
@@ -52,11 +54,16 @@ def install_test_data():
                 db.session.add(donation_centers[donation_center])
                 db.session.commit()
                 db.session.flush()
+                
+                donation_centers = {}
+                for item in DonationCenter.query.all():
+                    donation_centers[item.slug] = item
+
                 print(donation_centers[donation_center])
 
             if import_date not in batches:
                 batches[import_date] = Batch(
-                    donation_center=str(donation_centers[donation_center].id),
+                    donation_center=str(donation_centers[donation_center.lower()].id),
                     imported_at=datetime.strptime(import_date, "%Y-%m-%d %H:%M:%S"),
                 )
                 db.session.add(batches[import_date])
