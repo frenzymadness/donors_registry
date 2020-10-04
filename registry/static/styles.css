@@ -1,0 +1,8 @@
+.nav-item.active {
+  color: white;
+  padding: 8px;
+}
+
+body {
+  padding: 5%;
+}
