@@ -1,12 +1,14 @@
 """Commands for CLI"""
 import csv
 from datetime import datetime
+from random import uniform
 
 import click
 from flask import Flask
 
-from registry.donor.models import Batch, DonationCenter, Record
+from registry.donor.models import AwardedMedals, Batch, DonationCenter, Record
 from registry.extensions import db
+from registry.list.models import Medals
 from registry.user.models import User
 
 app = Flask(__name__)
@@ -22,8 +24,8 @@ def create_user(email, password):
     db.session.commit()
 
 
-@app.cli.command("install-test-data")
-def install_test_data():
+@app.cli.command("install-test-data")  # noqa: C901
+def install_test_data():  # noqa: C901
     with open("tests/data/imports.csv", encoding="utf-8") as csv_file:
         reader = csv.DictReader(csv_file)
         donation_centers = {}
@@ -77,5 +79,62 @@ def install_test_data():
                 donation_count=donation_count,
             )
             db.session.add(record)
+
+    db.session.commit()
+
+    def award_medal(rodne_cislo, medal_id):
+        """Helper function for awarding medals"""
+        awarded_medal = AwardedMedals(rodne_cislo=rodne_cislo, medal=medal_id)
+        db.session.add(awarded_medal)
+
+    # Get all medals from DB
+    medals = {}
+    for medal in Medals.query.all():
+        medals[medal.slug] = medal
+
+    # Add test data for Awarded medals
+    for index, record in enumerate(
+        Record.query.with_entities(Record.rodne_cislo).distinct()
+    ):
+        rodne_cislo = record[0]
+
+        # Make sure we have at least one person with all medals awarded
+        if index == 0:
+            for medal in medals.values():
+                award_medal(rodne_cislo, medal.id)
+            continue
+
+        random_number = uniform(0, 1)
+
+        # Bronze medal has ~50 % of donors
+        if random_number < 0.5:
+            award_medal(rodne_cislo, medals["br"].id)
+        else:
+            continue
+        # Silver medal has ~33 % of donors
+        if random_number < 0.33:
+            award_medal(rodne_cislo, medals["st"].id)
+        else:
+            continue
+        # Gold medal has ~19 % of donors
+        if random_number < 0.19:
+            award_medal(rodne_cislo, medals["zl"].id)
+        else:
+            continue
+        # Cross level 3 has ~7 % of donors
+        if random_number < 0.07:
+            award_medal(rodne_cislo, medals["kr3"].id)
+        else:
+            continue
+        # Cross level 2 has ~3 % of donors
+        if random_number < 0.03:
+            award_medal(rodne_cislo, medals["kr2"].id)
+        else:
+            continue
+        # Cross level 1 has ~1 % of donors
+        if random_number < 0.01:
+            award_medal(rodne_cislo, medals["kr1"].id)
+        else:
+            continue
 
     db.session.commit()
