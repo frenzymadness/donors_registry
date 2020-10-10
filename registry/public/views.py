@@ -1,13 +1,5 @@
 """Public section, including homepage and signup."""
-from flask import (
-    Blueprint,
-    current_app,
-    flash,
-    redirect,
-    render_template,
-    request,
-    url_for,
-)
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required, login_user, logout_user
 
 from registry.extensions import login_manager
@@ -24,12 +16,17 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-@blueprint.route("/", methods=["GET", "POST"])
+@blueprint.route("/", methods=("GET",))
 def home():
     """Home page."""
     form = LoginForm(request.form)
-    current_app.logger.info("Vítej v Evidenci dárců!")
-    # Handle logging in
+    return render_template("public/home.html", form=form)
+
+
+@blueprint.route("/", methods=("POST",))
+def home_post():
+    """Home page."""
+    form = LoginForm(request.form)
     if request.method == "POST":
         if form.validate_on_submit():
             login_user(form.user)
