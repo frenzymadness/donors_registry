@@ -4,7 +4,7 @@
 <h1>Import záznamů</h1>
 
 {% with form=form %}
-<form id="importForm" action="{{ url_for('donor.import_data') }}" method="POST">
+<form id="importForm" action="{{ url_for('donor.import_data_post') }}" method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     Odběrné místo: {{ form.donation_center_id }}<br>
     {% if form.valid_lines_content is not none %}
