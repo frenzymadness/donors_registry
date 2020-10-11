@@ -1,0 +1,8 @@
+# Extra functionalities for developers
+-r dev.txt
+
+# Debugging
+ipdb==0.13.4
+
+# Progress bar
+tqdm==4.50.2
