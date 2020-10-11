@@ -6,15 +6,15 @@ import os
 from pathlib import Path
 
 import pytest
+from flask_migrate import Migrate, upgrade
 from webtest import TestApp
 
 from registry.app import create_app
-from registry.donor.models import DonationCenter
 from registry.extensions import db as _db
 from registry.user.models import User
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def app():
     """Create application for the tests."""
     _app = create_app("tests.settings")
@@ -33,12 +33,14 @@ def testapp(app):
     return TestApp(app)
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def db(app):
     """Create database for the tests."""
     _db.app = app
     with app.app_context():
-        _db.create_all()
+        migrate = Migrate()
+        migrate.init_app(app, _db)
+        upgrade()
 
     yield _db
 
@@ -48,17 +50,7 @@ def db(app):
     os.unlink(Path("registry/test.sqlite"))
 
 
-@pytest.fixture
-def test_data(db):
-    objects = [
-        DonationCenter(title="FM", slug="fm"),
-        DonationCenter(title="Trinex", slug="trinec"),
-    ]
-    db.session.add_all(objects)
-    db.session.commit()
-
-
-@pytest.fixture
+@pytest.fixture(scope="session")
 def user(db):
     """Create user for the tests."""
     user = User("test@example.com", "test123")
