@@ -5,10 +5,11 @@ See: http://webtest.readthedocs.org/
 """
 from pathlib import Path
 
-from conftest import login
 from flask import url_for
 
 from registry.donor.models import Batch, Record
+
+from .conftest import login
 
 
 class TestPublicInterface:
