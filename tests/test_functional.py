@@ -6,6 +6,7 @@ See: http://webtest.readthedocs.org/
 from pathlib import Path
 
 from conftest import login
+from flask import url_for
 
 from registry.donor.models import Batch, Record
 
@@ -22,7 +23,7 @@ class TestPublicInterface:
         assert res.status_code == 200
 
     def test_import_page_401(self, testapp):
-        testapp.get("/import/", status=401)
+        testapp.get(url_for("donor.import_data"), status=401)
 
 
 class TestLoggingIn:
@@ -52,7 +53,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get("/import/")
+        res = testapp.get(url_for("donor.import_data"))
         form = res.forms["importForm"]
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -71,7 +72,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get("/import/")
+        res = testapp.get(url_for("donor.import_data"))
         form = res.forms["importForm"]
         form["input_data"] = input_data
         res = form.submit()
@@ -99,7 +100,7 @@ class TestImport:
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
-        res = testapp.get("/import/")
+        res = testapp.get(url_for("donor.import_data"))
         form = res.forms["importForm"]
         form["input_data"] = input_data
         # No matter how many times we submit the form because it contains
