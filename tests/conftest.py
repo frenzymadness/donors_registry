@@ -13,6 +13,8 @@ from registry.app import create_app
 from registry.extensions import db as _db
 from registry.user.models import User
 
+from .utils import test_data_medals, test_data_records
+
 
 @pytest.fixture(scope="session")
 def app():
@@ -41,6 +43,9 @@ def db(app):
         migrate = Migrate()
         migrate.init_app(app, _db)
         upgrade()
+
+    test_data_records(_db, limit=100)
+    test_data_medals(_db)
 
     yield _db
 
