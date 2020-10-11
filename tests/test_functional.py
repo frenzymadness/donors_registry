@@ -34,7 +34,7 @@ class TestLoggingIn:
         # Goes to homepage
         res = testapp.get("/")
         # Fills out login form
-        form = res.forms["loginForm"]
+        form = res.form
         form["email"] = user.email
         form["password"] = user.test_password
         # Submits
@@ -54,7 +54,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("donor.import_data"))
-        form = res.forms["importForm"]
+        form = res.form
         form["input_data"] = input_data
         res = form.submit().follow()
         assert "Import proběhl úspěšně" in res
@@ -73,7 +73,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("donor.import_data"))
-        form = res.forms["importForm"]
+        form = res.form
         form["input_data"] = input_data
         res = form.submit()
         assert res.status_code == 200
@@ -101,7 +101,7 @@ class TestImport:
         existing_batches = Batch.query.count()
         login(user, testapp)
         res = testapp.get(url_for("donor.import_data"))
-        form = res.forms["importForm"]
+        form = res.form
         form["input_data"] = input_data
         # No matter how many times we submit the form because it contains
         # invalid records so they never be imported
