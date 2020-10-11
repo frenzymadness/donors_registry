@@ -66,7 +66,7 @@ def test_data_records(db, limit=None):
                 city=city,
                 postal_code=postal_code,
                 kod_pojistovny=kod_pojistovny,
-                donation_count=donation_count,
+                donation_count=int(float(donation_count)),
             )
             db.session.add(record)
 
