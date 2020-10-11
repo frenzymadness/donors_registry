@@ -45,7 +45,7 @@ class TestLoggingIn:
 class TestImport:
     """Test of imports"""
 
-    def test_valid_input(self, user, testapp, test_data):
+    def test_valid_input(self, user, testapp):
         input_data = Path("tests/data/valid_import.txt").read_text()
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
