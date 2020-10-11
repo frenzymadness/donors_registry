@@ -74,7 +74,7 @@ def install_test_data():
                 city=city,
                 postal_code=postal_code,
                 kod_pojistovny=kod_pojistovny,
-                donation_count=donation_count,
+                donation_count=int(float(donation_count)) if donation_count else 0,
             )
             db.session.add(record)
 
