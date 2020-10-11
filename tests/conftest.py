@@ -2,6 +2,8 @@
 """Defines fixtures available to all tests."""
 
 import logging
+import os
+from pathlib import Path
 
 import pytest
 from webtest import TestApp
@@ -42,7 +44,8 @@ def db(app):
 
     # Explicitly close DB connection
     _db.session.close()
-    _db.drop_all()
+    # Remove test DB file
+    os.unlink(Path("registry/test.sqlite"))
 
 
 @pytest.fixture
