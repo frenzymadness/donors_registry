@@ -1,3 +1,7 @@
+from registry.extensions import db
+
+from .models import DonorsOverview
+
 def get_part_of_line(line, delimiter=";"):
     try:
         del_index = line.index(delimiter)
@@ -104,3 +108,131 @@ def validate_import_data(text_input):
         invalid_lines.append((repaired_line, errors))
 
     return valid_lines, invalid_lines
+
+
+def refresh_overview():
+    DonorsOverview.query.delete()
+    db.session.execute("""INSERT INTO "donors_overview"
+SELECT
+    "records"."rodne_cislo",
+    "records"."first_name",
+    "records"."last_name",
+    "records"."address",
+    "records"."city",
+    "records"."postal_code",
+    "records"."kod_pojistovny",
+    (
+        SELECT COALESCE(SUM("donation_count"), 0)
+        FROM "records" AS "_r"
+            JOIN "batches" AS "_b"
+                ON "_r"."batch" = "_b"."id"
+            JOIN "donation_center" AS "_dc"
+                ON "_b"."donation_center" = "_dc"."id"
+        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_dc"."slug" = 'fm'
+    ) AS "donation_count_fm",
+    (
+        SELECT COALESCE(SUM("donation_count"), 0)
+        FROM "records" AS "_r"
+            JOIN "batches" AS "_b"
+                ON "_r"."batch" = "_b"."id"
+            JOIN "donation_center" AS "_dc"
+                ON "_b"."donation_center" = "_dc"."id"
+        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_dc"."slug" = 'fm_bubenik'
+    ) AS "donation_count_fm_bubenik",
+    (
+        SELECT COALESCE(SUM("donation_count"), 0)
+        FROM "records" AS "_r"
+            JOIN "batches" AS "_b"
+                ON "_r"."batch" = "_b"."id"
+            JOIN "donation_center" AS "_dc"
+                ON "_b"."donation_center" = "_dc"."id"
+        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_dc"."slug" = 'trinec'
+    ) AS "donation_count_trinec",
+    (
+        SELECT COALESCE(SUM("donation_count"), 0)
+        FROM "records" AS "_r"
+            JOIN "batches" AS "_b"
+                ON "_r"."batch" = "_b"."id"
+        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_b"."donation_center" IS NULL
+    ) AS "donation_count_manual",
+    (
+        SELECT COALESCE(SUM("donation_count"), 0)
+        FROM "records" AS "_r"
+            JOIN "batches" AS "_b"
+                ON "_r"."batch" = "_b"."id"
+        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+    ) AS "donation_count_total",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'br'
+    ) AS "awarded_medal_br",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'st'
+    ) AS "awarded_medal_st",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'zl'
+    ) AS "awarded_medal_zl",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'kr3'
+    ) AS "awarded_medal_kr3",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'kr2'
+    ) AS "awarded_medal_kr2",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals" AS "_am"
+            JOIN "medals" AS "_m"
+                ON "_m"."id" = "_am"."medal"
+        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_m"."slug" = 'kr1'
+    ) AS "awarded_medal_kr1"
+FROM (
+    SELECT
+       "rodna_cisla"."rodne_cislo",
+        (
+            SELECT "records"."batch"
+            FROM "records"
+                 JOIN "batches"
+                    ON "batches"."id" = "records"."batch"
+            WHERE "records"."rodne_cislo" = "rodna_cisla"."rodne_cislo"
+            ORDER BY "batches"."imported_at" DESC
+            LIMIT 1
+        ) AS "batch"
+    FROM (
+        SELECT DISTINCT "rodne_cislo"
+        FROM "records"
+    ) AS "rodna_cisla"
+) AS "recent_records"
+    JOIN "batches"
+        ON "batches"."id" = "recent_records"."batch"
+    JOIN "records"
+        ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+            AND "records"."batch" = "batches"."id";""")
