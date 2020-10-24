@@ -9,7 +9,7 @@ from flask import url_for
 
 from registry.donor.models import Batch, Record
 
-from .conftest import login
+from .helpers import login
 
 
 class TestPublicInterface:
