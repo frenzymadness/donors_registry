@@ -115,13 +115,19 @@ def refresh_overview():
     DonorsOverview.query.delete()
     db.session.execute("""INSERT INTO "donors_overview"
 SELECT
+    -- "rodne_cislo" uniquely identifies a person.
     "records"."rodne_cislo",
+    -- Personal data from the person’s most recent batch.
     "records"."first_name",
     "records"."last_name",
     "records"."address",
     "records"."city",
     "records"."postal_code",
     "records"."kod_pojistovny",
+    -- Total donation counts for each donation center. The value in
+    -- a record is incremental. Thus retrieving the one from the most
+    -- recent batch that belongs to the donation center. Coalescing to
+    -- 0 for cases when there is no record from the donation center.
     COALESCE(
         (
             SELECT "records"."donation_count"
@@ -180,38 +186,53 @@ SELECT
         ),
         0
     ) AS "donation_count_manual",
-    COALESCE(
-        (
-            SELECT SUM("donation_count"."donation_count")
-            FROM (
-                SELECT (
-                    SELECT "records"."donation_count"
-                    FROM "records"
-                        JOIN "batches"
-                            ON "batches"."id" = "records"."batch"
-                    WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                        AND (
-                            "batches"."donation_center" =
-                                "donation_center_null"."donation_center"
-                            OR (
-                                "batches"."donation_center" IS NULL AND
-                                "donation_center_null"."donation_center" IS NULL
-                            )
+    -- The grand total of the donation counts. Sums the most recent
+    -- counts from all the donation centers and the most recent manual
+    -- donation count without a donation center. Not coalescing this
+    -- one, because it is not possible for a person not no have any
+    -- donation record at all.
+    (
+        -- Sum all the respective donation counts including manual
+        -- entries.
+        SELECT SUM("donation_count"."donation_count")
+        FROM (
+            SELECT (
+                -- Loads the most recent donation count for the
+                -- donation center.
+                SELECT "records"."donation_count"
+                FROM "records"
+                    JOIN "batches"
+                        ON "batches"."id" = "records"."batch"
+                WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                    AND (
+                        -- NULL values represent manual entries and
+                        -- cannot be compared by =.
+                        "batches"."donation_center" =
+                            "donation_center_null"."donation_center"
+                        OR (
+                            "batches"."donation_center" IS NULL AND
+                            "donation_center_null"."donation_center" IS NULL
                         )
-                    ORDER BY "batches"."imported_at" DESC
-                    LIMIT 1
-                ) AS "donation_count"
-                FROM (
-                    SELECT "donation_center"."id" AS "donation_center"
-                    FROM "donation_center"
-                    UNION
-                    SELECT NULL AS "donation_center"
-                ) AS "donation_center_null"
-             WHERE "donation_count" IS NOT NULL
+                    )
+                ORDER BY "batches"."imported_at" DESC
+                LIMIT 1
             ) AS "donation_count"
-        ),
-        0
+            FROM (
+                -- All possible donation centers including NULL
+                -- for manual entries.
+                SELECT "donation_center"."id" AS "donation_center"
+                FROM "donation_center"
+                UNION
+                SELECT NULL AS "donation_center"
+            ) AS "donation_center_null"
+            -- Removes donation centers from which the person does
+            -- not have any records. This removes the need for
+            -- coalescing the value to 0 before summing.
+            WHERE "donation_count" IS NOT NULL
+        ) AS "donation_count"
     ) AS "donation_count_total",
+    -- Awarded medals checks. Just simply query whether there is a
+    -- record for the given combination of "rodne_cislo" and "medal".
     EXISTS(
         SELECT 1
         FROM "awarded_medals"
@@ -262,8 +283,12 @@ SELECT
     ) AS "awarded_medal_kr1"
 FROM (
     SELECT
-       "rodna_cisla"."rodne_cislo",
+        "rodna_cisla"."rodne_cislo",
         (
+            -- Looks up the most recently imported batch for a given
+            -- person, regardless of the donation center. This is used
+            -- only to link the most recent personal data as the
+            -- combination of "rodne_cislo" and "batch" is unique.
             SELECT "records"."batch"
             FROM "records"
                  JOIN "batches"
@@ -273,13 +298,14 @@ FROM (
             LIMIT 1
         ) AS "batch"
     FROM (
+        -- The ultimate core. We need all people, not records or
+        -- batches. People are uniquely identified by their
+        -- "rodne_cislo". 
         SELECT DISTINCT "rodne_cislo"
         FROM "records"
     ) AS "rodna_cisla"
 ) AS "recent_records"
-    JOIN "batches"
-        ON "batches"."id" = "recent_records"."batch"
     JOIN "records"
         ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-            AND "records"."batch" = "batches"."id";""")
+            AND "records"."batch" = "recent_records"."batch";""")
 
