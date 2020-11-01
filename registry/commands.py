@@ -2,7 +2,7 @@
 import click
 from flask import Flask
 
-from registry.donor.utils import refresh_overview as db_refresh_overview
+from registry.donor.models import DonorsOverview
 from registry.extensions import db
 from registry.user.models import User
 from tests.utils import test_data_medals, test_data_records
@@ -28,4 +28,4 @@ def install_test_data():
 
 @app.cli.command("refresh-overview")
 def refresh_overview():
-    db_refresh_overview()
+    DonorsOverview.refresh_overview()
