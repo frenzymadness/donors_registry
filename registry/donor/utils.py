@@ -183,7 +183,7 @@ SELECT
             SELECT SUM("donation_count"."donation_count")
             FROM (
                 SELECT (
-                    SELECT "records"."batch"
+                    SELECT "records"."donation_count"
                     FROM "records"
                         JOIN "batches"
                             ON "batches"."id" = "records"."batch"
