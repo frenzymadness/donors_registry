@@ -77,7 +77,8 @@ class DonorsOverview(db.Model):
     @classmethod
     def refresh_overview(cls):
         cls.query.delete()
-        db.session.execute("""INSERT INTO "donors_overview"
+        db.session.execute(
+            """INSERT INTO "donors_overview"
     (
         "rodne_cislo",
         "first_name",
@@ -284,12 +285,13 @@ FROM (
     FROM (
         -- The ultimate core. We need all people, not records or
         -- batches. People are uniquely identified by their
-        -- "rodne_cislo". 
+        -- "rodne_cislo".
         SELECT DISTINCT "rodne_cislo"
         FROM "records"
     ) AS "rodna_cisla"
 ) AS "recent_records"
     JOIN "records"
         ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-            AND "records"."batch" = "recent_records"."batch";""")
+            AND "records"."batch" = "recent_records"."batch";"""
+        )
         db.session.commit()
