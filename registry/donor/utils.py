@@ -166,11 +166,32 @@ SELECT
             AND "_b"."donation_center" IS NULL
     ) AS "donation_count_manual",
     (
-        SELECT COALESCE(SUM("donation_count"), 0)
-        FROM "records" AS "_r"
-            JOIN "batches" AS "_b"
-                ON "_r"."batch" = "_b"."id"
-        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+        SELECT SUM("donation_count"."donation_count")
+        FROM (
+            SELECT (
+                SELECT "records"."batch"
+                FROM "records"
+                    JOIN "batches"
+                        ON "batches"."id" = "records"."batch"
+                WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                    AND (
+                        "batches"."donation_center" = "donation_center_null"."donation_center"
+                        OR (
+                            "batches"."donation_center" IS NULL AND
+                            "donation_center_null"."donation_center" IS NULL
+                        )
+                    )
+                ORDER BY "batches"."imported_at" DESC
+                LIMIT 1
+            ) AS "donation_count"
+            FROM (
+                SELECT "donation_center"."id" AS "donation_center"
+                FROM "donation_center"
+                UNION
+                SELECT NULL AS "donation_center"
+            ) AS "donation_center_null"
+         WHERE "donation_count" IS NOT NULL
+        ) AS "donation_count"
     ) AS "donation_count_total",
     EXISTS(
         SELECT 1
