@@ -122,41 +122,47 @@ SELECT
     "records"."postal_code",
     "records"."kod_pojistovny",
     (
-        SELECT COALESCE(SUM("donation_count"), 0)
+        SELECT "_r"."donation_count"
         FROM "records" AS "_r"
             JOIN "batches" AS "_b"
                 ON "_r"."batch" = "_b"."id"
             JOIN "donation_center" AS "_dc"
                 ON "_b"."donation_center" = "_dc"."id"
         WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_b"."id" = "records"."batch"
             AND "_dc"."slug" = 'fm'
     ) AS "donation_count_fm",
     (
-        SELECT COALESCE(SUM("donation_count"), 0)
+        SELECT "_r"."donation_count"
         FROM "records" AS "_r"
             JOIN "batches" AS "_b"
                 ON "_r"."batch" = "_b"."id"
             JOIN "donation_center" AS "_dc"
                 ON "_b"."donation_center" = "_dc"."id"
         WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_b"."id" = "records"."batch"
             AND "_dc"."slug" = 'fm_bubenik'
     ) AS "donation_count_fm_bubenik",
     (
-        SELECT COALESCE(SUM("donation_count"), 0)
+        SELECT "_r"."donation_count"
         FROM "records" AS "_r"
             JOIN "batches" AS "_b"
                 ON "_r"."batch" = "_b"."id"
             JOIN "donation_center" AS "_dc"
                 ON "_b"."donation_center" = "_dc"."id"
         WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_b"."id" = "records"."batch"
             AND "_dc"."slug" = 'trinec'
     ) AS "donation_count_trinec",
     (
-        SELECT COALESCE(SUM("donation_count"), 0)
+        SELECT "_r"."donation_count"
         FROM "records" AS "_r"
             JOIN "batches" AS "_b"
                 ON "_r"."batch" = "_b"."id"
+            JOIN "donation_center" AS "_dc"
+                ON "_b"."donation_center" = "_dc"."id"
         WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+            AND "_b"."id" = "records"."batch"
             AND "_b"."donation_center" IS NULL
     ) AS "donation_count_manual",
     (
