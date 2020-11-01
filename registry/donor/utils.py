@@ -138,7 +138,7 @@ SELECT
      ) AS "donation_count_fm",
     COALESCE(
         (
-            SELECT COALESCE("_r"."donation_count", 0)
+            SELECT "_r"."donation_count"
             FROM "records" AS "_r"
                 JOIN "batches" AS "_b"
                     ON "_r"."batch" = "_b"."id"
@@ -152,7 +152,7 @@ SELECT
     ) AS "donation_count_fm_bubenik",
     COALESCE(
         (
-            SELECT COALESCE("_r"."donation_count", 0)
+            SELECT "_r"."donation_count"
             FROM "records" AS "_r"
                 JOIN "batches" AS "_b"
                     ON "_r"."batch" = "_b"."id"
@@ -166,7 +166,7 @@ SELECT
     ) AS "donation_count_trinec",
     COALESCE(
         (
-            SELECT COALESCE("_r"."donation_count", 0)
+            SELECT "_r"."donation_count"
             FROM "records" AS "_r"
                 JOIN "batches" AS "_b"
                     ON "_r"."batch" = "_b"."id"
@@ -280,3 +280,4 @@ FROM (
     JOIN "records"
         ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
             AND "records"."batch" = "batches"."id";""")
+
