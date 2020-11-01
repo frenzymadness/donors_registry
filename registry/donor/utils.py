@@ -124,57 +124,59 @@ SELECT
     "records"."kod_pojistovny",
     COALESCE(
         (
-            SELECT "_r"."donation_count"
-            FROM "records" AS "_r"
-                JOIN "batches" AS "_b"
-                    ON "_r"."batch" = "_b"."id"
-                JOIN "donation_center" AS "_dc"
-                    ON "_b"."donation_center" = "_dc"."id"
-            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-                AND "_b"."id" = "records"."batch"
-                AND "_dc"."slug" = 'fm'
+            SELECT "records"."donation_count"
+            FROM "records"
+                 JOIN "batches"
+                      ON "batches"."id" = "records"."batch"
+                 JOIN "donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center"
+            WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                AND "donation_center"."slug" = 'fm'
+            ORDER BY "batches"."imported_at" DESC
+            LIMIT 1
         ),
         0
      ) AS "donation_count_fm",
     COALESCE(
         (
-            SELECT "_r"."donation_count"
-            FROM "records" AS "_r"
-                JOIN "batches" AS "_b"
-                    ON "_r"."batch" = "_b"."id"
-                JOIN "donation_center" AS "_dc"
-                    ON "_b"."donation_center" = "_dc"."id"
-            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-                AND "_b"."id" = "records"."batch"
-                AND "_dc"."slug" = 'fm_bubenik'
+            SELECT "records"."donation_count"
+            FROM "records"
+                 JOIN "batches"
+                      ON "batches"."id" = "records"."batch"
+                 JOIN "donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center"
+            WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                AND "donation_center"."slug" = 'fm_bubenik'
+            ORDER BY "batches"."imported_at" DESC
+            LIMIT 1
         ),
         0
     ) AS "donation_count_fm_bubenik",
     COALESCE(
         (
-            SELECT "_r"."donation_count"
-            FROM "records" AS "_r"
-                JOIN "batches" AS "_b"
-                    ON "_r"."batch" = "_b"."id"
-                JOIN "donation_center" AS "_dc"
-                    ON "_b"."donation_center" = "_dc"."id"
-            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-                AND "_b"."id" = "records"."batch"
-                AND "_dc"."slug" = 'trinec'
+            SELECT "records"."donation_count"
+            FROM "records"
+                 JOIN "batches"
+                      ON "batches"."id" = "records"."batch"
+                 JOIN "donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center"
+            WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                AND "donation_center"."slug" = 'trinec'
+            ORDER BY "batches"."imported_at" DESC
+            LIMIT 1
         ),
         0
     ) AS "donation_count_trinec",
     COALESCE(
         (
-            SELECT "_r"."donation_count"
-            FROM "records" AS "_r"
-                JOIN "batches" AS "_b"
-                    ON "_r"."batch" = "_b"."id"
-                JOIN "donation_center" AS "_dc"
-                    ON "_b"."donation_center" = "_dc"."id"
-            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-                AND "_b"."id" = "records"."batch"
-                AND "_b"."donation_center" IS NULL
+            SELECT "records"."donation_count"
+            FROM "records"
+                 JOIN "batches"
+                      ON "batches"."id" = "records"."batch"
+            WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                AND "batches"."donation_center" IS NULL
+            ORDER BY "batches"."imported_at" DESC
+            LIMIT 1
         ),
         0
     ) AS "donation_count_manual",
@@ -212,51 +214,51 @@ SELECT
     ) AS "donation_count_total",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'br'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'br'
     ) AS "awarded_medal_br",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'st'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'st'
     ) AS "awarded_medal_st",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'zl'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'zl'
     ) AS "awarded_medal_zl",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'kr3'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'kr3'
     ) AS "awarded_medal_kr3",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'kr2'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'kr2'
     ) AS "awarded_medal_kr2",
     EXISTS(
         SELECT 1
-        FROM "awarded_medals" AS "_am"
-            JOIN "medals" AS "_m"
-                ON "_m"."id" = "_am"."medal"
-        WHERE "_am"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_m"."slug" = 'kr1'
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'kr1'
     ) AS "awarded_medal_kr1"
 FROM (
     SELECT
