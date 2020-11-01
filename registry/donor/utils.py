@@ -1,8 +1,3 @@
-from registry.extensions import db
-
-from .models import DonorsOverview
-
-
 def get_part_of_line(line, delimiter=";"):
     try:
         del_index = line.index(delimiter)
