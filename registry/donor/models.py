@@ -78,6 +78,26 @@ class DonorsOverview(db.Model):
     def refresh_overview(cls):
         cls.query.delete()
         db.session.execute("""INSERT INTO "donors_overview"
+    (
+        "rodne_cislo",
+        "first_name",
+        "last_name",
+        "address",
+        "city",
+        "postal_code",
+        "kod_pojistovny",
+        "donation_count_fm",
+        "donation_count_fm_bubenik",
+        "donation_count_trinec",
+        "donation_count_manual",
+        "donation_count_total",
+        "awarded_medal_br",
+        "awarded_medal_st",
+        "awarded_medal_zl",
+        "awarded_medal_kr3",
+        "awarded_medal_kr2",
+        "awarded_medal_kr1"
+    )
 SELECT
     -- "rodne_cislo" uniquely identifies a person.
     "records"."rodne_cislo",
@@ -272,3 +292,4 @@ FROM (
     JOIN "records"
         ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
             AND "records"."batch" = "recent_records"."batch";""")
+        db.session.commit()
