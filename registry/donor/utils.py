@@ -122,78 +122,93 @@ SELECT
     "records"."city",
     "records"."postal_code",
     "records"."kod_pojistovny",
-    (
-        SELECT "_r"."donation_count"
-        FROM "records" AS "_r"
-            JOIN "batches" AS "_b"
-                ON "_r"."batch" = "_b"."id"
-            JOIN "donation_center" AS "_dc"
-                ON "_b"."donation_center" = "_dc"."id"
-        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_b"."id" = "records"."batch"
-            AND "_dc"."slug" = 'fm'
-    ) AS "donation_count_fm",
-    (
-        SELECT "_r"."donation_count"
-        FROM "records" AS "_r"
-            JOIN "batches" AS "_b"
-                ON "_r"."batch" = "_b"."id"
-            JOIN "donation_center" AS "_dc"
-                ON "_b"."donation_center" = "_dc"."id"
-        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_b"."id" = "records"."batch"
-            AND "_dc"."slug" = 'fm_bubenik'
+    COALESCE(
+        (
+            SELECT "_r"."donation_count"
+            FROM "records" AS "_r"
+                JOIN "batches" AS "_b"
+                    ON "_r"."batch" = "_b"."id"
+                JOIN "donation_center" AS "_dc"
+                    ON "_b"."donation_center" = "_dc"."id"
+            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+                AND "_b"."id" = "records"."batch"
+                AND "_dc"."slug" = 'fm'
+        ),
+        0
+     ) AS "donation_count_fm",
+    COALESCE(
+        (
+            SELECT COALESCE("_r"."donation_count", 0)
+            FROM "records" AS "_r"
+                JOIN "batches" AS "_b"
+                    ON "_r"."batch" = "_b"."id"
+                JOIN "donation_center" AS "_dc"
+                    ON "_b"."donation_center" = "_dc"."id"
+            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+                AND "_b"."id" = "records"."batch"
+                AND "_dc"."slug" = 'fm_bubenik'
+        ),
+        0
     ) AS "donation_count_fm_bubenik",
-    (
-        SELECT "_r"."donation_count"
-        FROM "records" AS "_r"
-            JOIN "batches" AS "_b"
-                ON "_r"."batch" = "_b"."id"
-            JOIN "donation_center" AS "_dc"
-                ON "_b"."donation_center" = "_dc"."id"
-        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_b"."id" = "records"."batch"
-            AND "_dc"."slug" = 'trinec'
+    COALESCE(
+        (
+            SELECT COALESCE("_r"."donation_count", 0)
+            FROM "records" AS "_r"
+                JOIN "batches" AS "_b"
+                    ON "_r"."batch" = "_b"."id"
+                JOIN "donation_center" AS "_dc"
+                    ON "_b"."donation_center" = "_dc"."id"
+            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+                AND "_b"."id" = "records"."batch"
+                AND "_dc"."slug" = 'trinec'
+        ),
+        0
     ) AS "donation_count_trinec",
-    (
-        SELECT "_r"."donation_count"
-        FROM "records" AS "_r"
-            JOIN "batches" AS "_b"
-                ON "_r"."batch" = "_b"."id"
-            JOIN "donation_center" AS "_dc"
-                ON "_b"."donation_center" = "_dc"."id"
-        WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
-            AND "_b"."id" = "records"."batch"
-            AND "_b"."donation_center" IS NULL
+    COALESCE(
+        (
+            SELECT COALESCE("_r"."donation_count", 0)
+            FROM "records" AS "_r"
+                JOIN "batches" AS "_b"
+                    ON "_r"."batch" = "_b"."id"
+                JOIN "donation_center" AS "_dc"
+                    ON "_b"."donation_center" = "_dc"."id"
+            WHERE "_r"."rodne_cislo" = "records"."rodne_cislo"
+                AND "_b"."id" = "records"."batch"
+                AND "_b"."donation_center" IS NULL
+        ),
+        0
     ) AS "donation_count_manual",
-    (
-        SELECT SUM("donation_count"."donation_count")
-        FROM (
-            SELECT (
-                SELECT "records"."batch"
-                FROM "records"
-                    JOIN "batches"
-                        ON "batches"."id" = "records"."batch"
-                WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                    AND (
-                        "batches"."donation_center" =
-                            "donation_center_null"."donation_center"
-                        OR (
-                            "batches"."donation_center" IS NULL AND
-                            "donation_center_null"."donation_center" IS NULL
-                        )
-                    )
-                ORDER BY "batches"."imported_at" DESC
-                LIMIT 1
-            ) AS "donation_count"
+    COALESCE(
+        (
+            SELECT SUM("donation_count"."donation_count")
             FROM (
-                SELECT "donation_center"."id" AS "donation_center"
-                FROM "donation_center"
-                UNION
-                SELECT NULL AS "donation_center"
-            ) AS "donation_center_null"
-         WHERE "donation_count" IS NOT NULL
-        ) AS "donation_count"
+                SELECT (
+                    SELECT "records"."batch"
+                    FROM "records"
+                        JOIN "batches"
+                            ON "batches"."id" = "records"."batch"
+                    WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                        AND (
+                            "batches"."donation_center" =
+                                "donation_center_null"."donation_center"
+                            OR (
+                                "batches"."donation_center" IS NULL AND
+                                "donation_center_null"."donation_center" IS NULL
+                            )
+                        )
+                    ORDER BY "batches"."imported_at" DESC
+                    LIMIT 1
+                ) AS "donation_count"
+                FROM (
+                    SELECT "donation_center"."id" AS "donation_center"
+                    FROM "donation_center"
+                    UNION
+                    SELECT NULL AS "donation_center"
+                ) AS "donation_center_null"
+             WHERE "donation_count" IS NOT NULL
+            ) AS "donation_count"
+        ),
+        0
     ) AS "donation_count_total",
     EXISTS(
         SELECT 1
