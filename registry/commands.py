@@ -2,10 +2,9 @@
 import click
 from flask import Flask
 
-from registry.donor.models import DonorsOverview
+from registry.donor.utils import refresh_overview as db_refresh_overview
 from registry.extensions import db
 from registry.user.models import User
-from registry.donor.utils import refresh_overview as db_refresh_overview
 from tests.utils import test_data_medals, test_data_records
 
 app = Flask(__name__)

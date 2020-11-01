@@ -2,6 +2,7 @@ from registry.extensions import db
 
 from .models import DonorsOverview
 
+
 def get_part_of_line(line, delimiter=";"):
     try:
         del_index = line.index(delimiter)
@@ -175,7 +176,8 @@ SELECT
                         ON "batches"."id" = "records"."batch"
                 WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                     AND (
-                        "batches"."donation_center" = "donation_center_null"."donation_center"
+                        "batches"."donation_center" =
+                            "donation_center_null"."donation_center"
                         OR (
                             "batches"."donation_center" IS NULL AND
                             "donation_center_null"."donation_center" IS NULL
