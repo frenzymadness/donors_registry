@@ -41,13 +41,13 @@ def test_data_records(db, limit=None):
             if limit is not None and index > limit:
                 break
 
-            if donation_center != "jinde" and donation_center not in donation_centers:
+            if donation_center != "manual" and donation_center not in donation_centers:
                 # This should not happen, all donation centers should
                 # already be in the database
                 raise RuntimeError(
                     "Donation center from test data is not present in DB."
                 )
-            elif donation_center == "jinde":
+            elif donation_center == "manual":
                 donation_center_id = None
             else:
                 donation_center_id = str(donation_centers[donation_center].id)
