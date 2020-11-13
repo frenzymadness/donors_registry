@@ -4,6 +4,7 @@
 import logging
 import os
 from pathlib import Path
+from random import sample
 
 from flask_migrate import Migrate, upgrade
 from pytest import fixture
@@ -14,7 +15,9 @@ from registry.donor.models import DonorsOverview
 from registry.extensions import db as _db
 from registry.user.models import User
 
-from .utils import test_data_medals, test_data_records
+from .utils import get_test_data_df, test_data_medals, test_data_records
+
+TEST_RECORDS = 1000  # Number of test imports to use in test database
 
 
 @fixture(scope="session")
@@ -45,7 +48,7 @@ def db(app):
         migrate.init_app(app, _db)
         upgrade()
 
-    test_data_records(_db, limit=1000)
+    test_data_records(_db, limit=TEST_RECORDS)
     test_data_medals(_db)
 
     DonorsOverview.refresh_overview()
@@ -67,3 +70,15 @@ def user(db):
     db.session.add(user)
     db.session.commit()
     return user
+
+
+@fixture(scope="session")
+def test_data_df():
+    """The same data we have in test database but in form of Pandas DataFrame"""
+    return get_test_data_df(TEST_RECORDS)
+
+
+def sample_of_rc(amount=100):
+    """Yields random sample of RC from test data"""
+    for rc in sample(list(get_test_data_df(TEST_RECORDS).RC.unique()), amount):
+        yield rc
