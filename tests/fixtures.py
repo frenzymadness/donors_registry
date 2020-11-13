@@ -10,6 +10,7 @@ from pytest import fixture
 from webtest import TestApp
 
 from registry.app import create_app
+from registry.donor.models import DonorsOverview
 from registry.extensions import db as _db
 from registry.user.models import User
 
@@ -44,8 +45,10 @@ def db(app):
         migrate.init_app(app, _db)
         upgrade()
 
-    test_data_records(_db, limit=100)
+    test_data_records(_db, limit=1000)
     test_data_medals(_db)
+
+    DonorsOverview.refresh_overview()
 
     yield _db
 
