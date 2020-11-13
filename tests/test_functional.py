@@ -5,10 +5,13 @@ See: http://webtest.readthedocs.org/
 """
 from pathlib import Path
 
+import pytest
 from flask import url_for
 
-from registry.donor.models import Batch, Record
+from registry.donor.models import Batch, DonorsOverview, Record
+from registry.list.models import DonationCenter
 
+from .fixtures import sample_of_rc
 from .helpers import login
 
 
@@ -120,3 +123,46 @@ class TestImport:
             assert "Import proběhl úspěšně" not in res
         assert Record.query.count() == existing_records
         assert Batch.query.count() == existing_batches
+
+
+class TestDonorsOverview:
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
+    def test_refresh_overview(self, rodne_cislo, test_data_df):
+        # Check of the total amount of donations
+        donor_overview = DonorsOverview.query.filter_by(rodne_cislo=rodne_cislo).first()
+        last_imports = (
+            test_data_df[test_data_df.RC == rodne_cislo]
+            .sort_values(by="DATUM_IMPORTU")
+            .drop_duplicates(["MISTO_ODBERU"], keep="last")
+        )
+        total_donations = last_imports.POCET_ODBERU.sum()
+
+        assert donor_overview.donation_count_total == total_donations
+
+        # Check of the partial amounts of donations for each donation center
+        donation_centers = DonationCenter.query.all()
+
+        for donation_center_slug in [dc.slug for dc in donation_centers] + ["manual"]:
+            try:
+                dc_last_count = last_imports.loc[
+                    last_imports.MISTO_ODBERU == donation_center_slug, "POCET_ODBERU"
+                ].values[0]
+            except IndexError:
+                dc_last_count = 0
+            do_last_count = getattr(
+                donor_overview, f"donation_count_{donation_center_slug}"
+            )
+            assert dc_last_count == do_last_count
+
+        # Check of all other attributes
+        last_import = last_imports.tail(1)
+
+        for csv_column, attr in (
+            ("JMENO", "first_name"),
+            ("PRIJMENI", "last_name"),
+            ("ULICE", "address"),
+            ("MESTO", "city"),
+            ("PSC", "postal_code"),
+            ("POJISTOVNA", "kod_pojistovny"),
+        ):
+            assert last_import[csv_column].values[0] == getattr(donor_overview, attr)

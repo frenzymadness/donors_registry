@@ -1,6 +1,9 @@
 import csv
 from datetime import datetime
+from functools import lru_cache
 from random import uniform
+
+import pandas
 
 from registry.donor.models import AwardedMedals, Batch, Record
 from registry.list.models import DonationCenter, Medals
@@ -124,3 +127,11 @@ def test_data_medals(db):
         award_medal_if(db, rodne_cislo, medals["kr1"].id, 0.01, random_number)
 
     db.session.commit()
+
+
+@lru_cache()
+def get_test_data_df(lines):
+    """Returns test data from imports.csv as Pandas DataFrame"""
+    return pandas.read_csv(
+        "tests/data/imports.csv", dtype={"RC": str, "PSC": str, "POJISTOVNA": str}
+    ).head(lines)
