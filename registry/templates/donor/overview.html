@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Přehled dárců</h1>
+
+<table id="overview">
+    <thead>
+        <tr>
+            {% for column_class, column_name in column_names.items() %}
+            <th class="{{ column_class }}">{{ column_name }}</th>
+            {% endfor %}
+            <th class="donations">Darování</th>
+        </tr>
+    </thead>
+    <tbody>
+
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    function create_tooltip(row) {
+        const title = `Nemocnice FM: ${row.donation_count_fm}
+Krevní centrum: ${row.donation_count_fm_bubenik}
+Třinec: ${row.donation_count_trinec}
+Jinde: ${row.donation_count_manual}`;
+console.log(title);
+        return `<span title="${title}">❓</span>`;
+    }
+
+    $(document).ready( function () {
+        $('#overview').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
+            },
+            "processing": true,
+            "serverSide": true,
+            "ajax": "{{ url_for('donor.overview_data') }}",
+            "columns": [
+                {% for column_class in column_names.keys() -%}
+                    {"data": "{{ column_class}}"},
+                {%- endfor %}
+                null, // cakculated column donations
+            ],
+            "columnDefs": [{
+                "targets": "donations",
+                "render": function ( data, type, row, meta ) {
+                  return row.donation_count_total + create_tooltip(row);}
+            },{
+                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1"],
+                "visible": false
+            }]
+        });
+    } );
+</script>
+{% endblock %}
