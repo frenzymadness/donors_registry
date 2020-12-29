@@ -5,7 +5,8 @@ from registry.list.models import DonationCenter, Medals
 class Batch(db.Model):
     __tablename__ = "batches"
     id = db.Column(db.Integer, primary_key=True)
-    donation_center = db.Column(db.ForeignKey(DonationCenter.id))
+    donation_center_id = db.Column(db.ForeignKey(DonationCenter.id))
+    donation_center = db.relationship("DonationCenter")
     imported_at = db.Column(db.DateTime, nullable=False)
 
     def __repr__(self):
@@ -15,7 +16,8 @@ class Batch(db.Model):
 class Record(db.Model):
     __tablename__ = "records"
     id = db.Column(db.Integer, primary_key=True)
-    batch = db.Column(db.ForeignKey(Batch.id), nullable=False)
+    batch_id = db.Column(db.ForeignKey(Batch.id))
+    batch = db.relationship("Batch")
     rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
     first_name = db.Column(db.String, nullable=False)
     last_name = db.Column(db.String, nullable=False)
@@ -31,7 +33,7 @@ class Record(db.Model):
     @classmethod
     def from_list(cls, list):
         return cls(
-            batch=list[0],
+            batch_id=list[0],
             rodne_cislo=list[1],
             first_name=list[2],
             last_name=list[3],
@@ -46,8 +48,9 @@ class Record(db.Model):
 class AwardedMedals(db.Model):
     __tablename__ = "awarded_medals"
     rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
-    medal = db.Column(db.ForeignKey(Medals.id))
-    __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal),)
+    medal_id = db.Column(db.ForeignKey(Medals.id))
+    medal = db.relationship("Medals")
+    __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal_id),)
 
 
 class DonorsOverview(db.Model):
@@ -118,9 +121,9 @@ SELECT
             SELECT "records"."donation_count"
             FROM "records"
                  JOIN "batches"
-                      ON "batches"."id" = "records"."batch"
+                      ON "batches"."id" = "records"."batch_id"
                  JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'fm'
             ORDER BY "batches"."imported_at" DESC
@@ -133,9 +136,9 @@ SELECT
             SELECT "records"."donation_count"
             FROM "records"
                  JOIN "batches"
-                      ON "batches"."id" = "records"."batch"
+                      ON "batches"."id" = "records"."batch_id"
                  JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'fm_bubenik'
             ORDER BY "batches"."imported_at" DESC
@@ -148,9 +151,9 @@ SELECT
             SELECT "records"."donation_count"
             FROM "records"
                  JOIN "batches"
-                      ON "batches"."id" = "records"."batch"
+                      ON "batches"."id" = "records"."batch_id"
                  JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center"
+                      ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'trinec'
             ORDER BY "batches"."imported_at" DESC
@@ -163,9 +166,9 @@ SELECT
             SELECT "records"."donation_count"
             FROM "records"
                  JOIN "batches"
-                      ON "batches"."id" = "records"."batch"
+                      ON "batches"."id" = "records"."batch_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                AND "batches"."donation_center" IS NULL
+                AND "batches"."donation_center_id" IS NULL
             ORDER BY "batches"."imported_at" DESC
             LIMIT 1
         ),
@@ -187,16 +190,16 @@ SELECT
                 SELECT "records"."donation_count"
                 FROM "records"
                     JOIN "batches"
-                        ON "batches"."id" = "records"."batch"
+                        ON "batches"."id" = "records"."batch_id"
                 WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                     AND (
                         -- NULL values represent manual entries and
                         -- cannot be compared by =.
-                        "batches"."donation_center" =
-                            "donation_center_null"."donation_center"
+                        "batches"."donation_center_id" =
+                            "donation_center_null"."donation_center_id"
                         OR (
-                            "batches"."donation_center" IS NULL AND
-                            "donation_center_null"."donation_center" IS NULL
+                            "batches"."donation_center_id" IS NULL AND
+                            "donation_center_null"."donation_center_id" IS NULL
                         )
                     )
                 ORDER BY "batches"."imported_at" DESC
@@ -205,7 +208,7 @@ SELECT
             FROM (
                 -- All possible donation centers including NULL
                 -- for manual entries.
-                SELECT "donation_center"."id" AS "donation_center"
+                SELECT "donation_center"."id" AS "donation_center_id"
                 FROM "donation_center"
                 UNION
                 SELECT NULL AS "donation_center"
@@ -222,7 +225,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'br'
     ) AS "awarded_medal_br",
@@ -230,7 +233,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'st'
     ) AS "awarded_medal_st",
@@ -238,7 +241,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'zl'
     ) AS "awarded_medal_zl",
@@ -246,7 +249,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'kr3'
     ) AS "awarded_medal_kr3",
@@ -254,7 +257,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'kr2'
     ) AS "awarded_medal_kr2",
@@ -262,7 +265,7 @@ SELECT
         SELECT 1
         FROM "awarded_medals"
             JOIN "medals"
-                ON "medals"."id" = "awarded_medals"."medal"
+                ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'kr1'
     ) AS "awarded_medal_kr1"
@@ -274,14 +277,14 @@ FROM (
             -- person, regardless of the donation center. This is used
             -- only to link the most recent personal data as the
             -- combination of "rodne_cislo" and "batch" is unique.
-            SELECT "records"."batch"
+            SELECT "records"."batch_id"
             FROM "records"
                  JOIN "batches"
-                    ON "batches"."id" = "records"."batch"
+                    ON "batches"."id" = "records"."batch_id"
             WHERE "records"."rodne_cislo" = "rodna_cisla"."rodne_cislo"
             ORDER BY "batches"."imported_at" DESC
             LIMIT 1
-        ) AS "batch"
+        ) AS "batch_id"
     FROM (
         -- The ultimate core. We need all people, not records or
         -- batches. People are uniquely identified by their
@@ -292,6 +295,6 @@ FROM (
 ) AS "recent_records"
     JOIN "records"
         ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-            AND "records"."batch" = "recent_records"."batch";"""
+            AND "records"."batch_id" = "recent_records"."batch_id";"""
         )
         db.session.commit()

@@ -27,15 +27,15 @@ def upgrade():
     op.create_table(
         "batches",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("donation_center", sa.Integer(), nullable=True),
+        sa.Column("donation_center_id", sa.Integer(), nullable=True),
         sa.Column("imported_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["donation_center"], ["donation_center.id"]),
+        sa.ForeignKeyConstraint(["donation_center_id"], ["donation_center.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
         "records",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column("batch", sa.Integer(), nullable=False),
+        sa.Column("batch_id", sa.Integer(), nullable=False),
         sa.Column("rodne_cislo", sa.String(length=10), nullable=False),
         sa.Column("first_name", sa.String(), nullable=False),
         sa.Column("last_name", sa.String(), nullable=False),
@@ -44,7 +44,7 @@ def upgrade():
         sa.Column("postal_code", sa.String(length=5), nullable=False),
         sa.Column("kod_pojistovny", sa.String(length=3), nullable=False),
         sa.Column("donation_count", sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(["batch"], ["batches.id"]),
+        sa.ForeignKeyConstraint(["batch_id"], ["batches.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index(
