@@ -54,14 +54,14 @@ def test_data_records(db, limit=None):
 
             if import_date not in batches:
                 batches[import_date] = Batch(
-                    donation_center=donation_center_id,
+                    donation_center_id=donation_center_id,
                     imported_at=datetime.strptime(import_date, "%Y-%m-%d %H:%M:%S"),
                 )
                 db.session.add(batches[import_date])
                 db.session.commit()
 
             record = Record(
-                batch=batches[import_date].id,
+                batch_id=batches[import_date].id,
                 rodne_cislo=rodne_cislo,
                 first_name=first_name,
                 last_name=last_name,
@@ -82,7 +82,7 @@ def test_data_records(db, limit=None):
 
 
 def award_medal(db, rodne_cislo, medal_id):
-    awarded_medal = AwardedMedals(rodne_cislo=rodne_cislo, medal=medal_id)
+    awarded_medal = AwardedMedals(rodne_cislo=rodne_cislo, medal_id=medal_id)
     db.session.add(awarded_medal)
 
 
