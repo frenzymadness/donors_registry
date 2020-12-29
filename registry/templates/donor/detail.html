@@ -34,7 +34,7 @@
 
 <h2>Historie importů</h2>
 
-<table>
+<table id="records">
     <thead>
         <th>Dávka</th>
         <th>Importováno</th>
@@ -67,4 +67,16 @@
     </tbody>
 </table>
 
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#records').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
+            },
+        });
+    });
+</script>
 {% endblock %}
