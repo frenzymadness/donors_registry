@@ -2,7 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import SelectField, TextAreaField
 from wtforms.validators import DataRequired
 
-from .models import DonationCenter
+from registry.list.models import DonationCenter
+
 from .utils import validate_import_data
 
 
