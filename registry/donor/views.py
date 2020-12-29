@@ -13,10 +13,11 @@ from flask import (
 from flask_login import login_required
 
 from registry.extensions import db
+from registry.list.models import DonationCenter
 from registry.utils import flash_errors
 
 from .forms import ImportForm
-from .models import Batch, DonorsOverview, Record
+from .models import AwardedMedals, Batch, DonorsOverview, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
@@ -91,3 +92,19 @@ def overview_data():
     params = request.args.to_dict()
     row_table = DataTables(params, query, columns)
     return jsonify(row_table.output_result())
+
+
+@blueprint.route("/detail/<rc>", methods=("GET",))
+@login_required
+def detail(rc):
+    overview = DonorsOverview.query.get(rc)
+    records = Record.query.filter(Record.rodne_cislo == rc).all()
+    donation_centers = DonationCenter.query.all()
+    awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
+    return render_template(
+        "donor/detail.html",
+        overview=overview,
+        donation_centers=donation_centers,
+        records=records,
+        awarded_medals=awarded_medals,
+    )
