@@ -67,7 +67,7 @@ def import_data_post():
             record = Record.from_list([batch.id] + line.split(";"))
             db.session.add(record)
         db.session.commit()
-        flash("Import proběhl úspěšně")
+        flash("Import proběhl úspěšně", "success")
         return redirect(url_for("public.home"))
     else:
         flash_errors(import_form)
