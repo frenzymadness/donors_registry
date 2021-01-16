@@ -2,36 +2,40 @@
 {% block content %}
 
 <h1>Detail dárce</h1>
+<div class="row">
+    <div class="col">
+        <h2>Aktuální informace</h2>
 
-<h2>Aktuální informace</h2>
+        <ul>
+            <li>Rodné číslo: {{ overview.rodne_cislo }}</li>
+            <li>Jméno: {{ overview.first_name }}</li>
+            <li>Příjmení: {{ overview.last_name }}</li>
+            <li>Adresa: {{ overview.address }}</li>
+            <li>Město: {{ overview.city }}</li>
+            <li>PSČ: {{ overview.postal_code }}</li>
+            <li>Pojišťovna: {{ overview.kod_pojistovny }}</li>
+        </ul>
+    </div>
+    <div class="col">
+        <h2>Počty darování</h2>
 
-<ul>
-    <li>Rodné číslo: {{ overview.rodne_cislo }}</li>
-    <li>Jméno: {{ overview.first_name }}</li>
-    <li>Příjmení: {{ overview.last_name }}</li>
-    <li>Adresa: {{ overview.address }}</li>
-    <li>Město: {{ overview.city }}</li>
-    <li>PSČ: {{ overview.postal_code }}</li>
-    <li>Pojišťovna: {{ overview.kod_pojistovny }}</li>
-</ul>
+        <ul>
+            {% for donation_center in donation_centers %}
+                <li>{{ donation_center.title }}: {{ overview["donation_count_" + donation_center.slug] }}</li>
+            {% endfor %}
+            <li><b>Celkem: {{ overview.donation_count_total }}</b></li>
+        </ul>
+    </div>
+    <div class="col">
+        <h2>Získaná ocenění</h2>
 
-<h2>Počty darování</h2>
-
-<ul>
-    {% for donation_center in donation_centers %}
-        <li>{{ donation_center.title }}: {{ overview["donation_count_" + donation_center.slug] }}</li>
-    {% endfor %}
-    <li><b>Celkem: {{ overview.donation_count_total }}</b></li>
-</ul>
-
-<h2>Získaná ocenění</h2>
-
-<ul>
-    {% for awarded_medal in awarded_medals %}
-        <li>{{ awarded_medal.medal.title }}</li>
-    {% endfor %}
-</ul>
-
+        <ul>
+            {% for awarded_medal in awarded_medals %}
+                <li>{{ awarded_medal.medal.title }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
 <h2>Historie importů</h2>
 
 <table id="records">
