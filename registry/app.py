@@ -13,6 +13,7 @@ from registry.extensions import (
     login_manager,
     migrate,
 )
+from registry.utils import template_globals
 
 
 def create_app(config_object="registry.settings"):
@@ -23,6 +24,7 @@ def create_app(config_object="registry.settings"):
     """
     app = Flask(__name__.split(".")[0])
     app.config.from_object(config_object)
+    app.context_processor(template_globals)
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
