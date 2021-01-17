@@ -18,7 +18,7 @@ from .helpers import login
 class TestPublicInterface:
     """Test the stuff visible for annonymous users."""
 
-    def test_home_page(self, testapp):
+    def test_home_page(self, testapp, db):
         """Login form appears on home page."""
         # Goes to homepage
         res = testapp.get("/")
@@ -26,8 +26,11 @@ class TestPublicInterface:
         assert "Evidence dárců ČČK Frýdek-Místek" in res
         assert res.status_code == 200
 
-    def test_import_page_401(self, testapp):
+    def test_pages_401(self, testapp, db):
+        """Test pages which requires login."""
         testapp.get(url_for("donor.import_data"), status=401)
+        testapp.get(url_for("donor.overview"), status=401)
+        testapp.get(url_for("donor.award_prep", medal_slug="br"), status=401)
 
 
 class TestLoggingIn:
