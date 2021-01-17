@@ -18,9 +18,9 @@
         Oceňování dárců
       </a>
       <div class="dropdown-menu">
-        <a class="dropdown-item" href="#">Bronzová medaile</a>
-        <a class="dropdown-item" href="#">Stříbrná medaile</a>
-        <a class="dropdown-item" href="#">Zlátá medaile</a>
+        {% for medal in all_medals %}
+          <a class="dropdown-item" href="{{ url_for('donor.award_prep', medal_slug=medal.slug)}}">{{ medal.title }}</a>
+        {% endfor %}
       </div>
     </li>
     {% endif %}
