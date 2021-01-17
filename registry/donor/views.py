@@ -67,6 +67,8 @@ def import_data_post():
             record = Record.from_list([batch.id] + line.split(";"))
             db.session.add(record)
         db.session.commit()
+        # After successfull import, refresh overview table
+        DonorsOverview.refresh_overview()
         flash("Import proběhl úspěšně", "success")
         return redirect(url_for("public.home"))
     else:
