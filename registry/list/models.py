@@ -16,6 +16,7 @@ class Medals(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String, unique=True, nullable=False)
     title = db.Column(db.String, nullable=False)
+    minimum_donations = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return f"<Medals({self.slug!r})>"
