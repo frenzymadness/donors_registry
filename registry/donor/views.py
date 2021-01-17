@@ -11,9 +11,10 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from sqlalchemy import and_
 
 from registry.extensions import db
-from registry.list.models import DonationCenter
+from registry.list.models import DonationCenter, Medals
 from registry.utils import flash_errors
 
 from .forms import ImportForm
@@ -110,3 +111,16 @@ def detail(rc):
         records=records,
         awarded_medals=awarded_medals,
     )
+
+
+@blueprint.route("/award_prep/<medal_slug>", methods=("GET",))
+@login_required
+def award_prep(medal_slug):
+    medal = Medals.query.filter(Medals.slug == medal_slug).first()
+    donors = DonorsOverview.query.filter(
+        and_(
+            DonorsOverview.donation_count_total >= medal.minimum_donations,
+            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+        )
+    ).all()
+    return render_template("donor/award_prep.html", medal=medal, donors=donors)
