@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, TextAreaField
+from wtforms import HiddenField, SelectField, TextAreaField
 from wtforms.validators import DataRequired
 
+from registry.donor.models import AwardedMedals
 from registry.list.models import DonationCenter
 
 from .utils import validate_import_data
@@ -64,3 +65,14 @@ class ImportForm(FlaskForm):
             return False
 
         return True
+
+
+class RemoveMedalForm(FlaskForm):
+    rodne_cislo = HiddenField(validators=[DataRequired()])
+    medal_id = HiddenField(validators=[DataRequired()])
+
+    def validate(self):
+        self.awarded_medal = AwardedMedals.query.get(
+            (self.rodne_cislo.data, self.medal_id.data)
+        )
+        return self.awarded_medal is not None
