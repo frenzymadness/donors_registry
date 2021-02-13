@@ -8,8 +8,8 @@ from pathlib import Path
 import pytest
 from flask import url_for
 
-from registry.donor.models import Batch, DonorsOverview, Record
-from registry.list.models import DonationCenter
+from registry.donor.models import AwardedMedals, Batch, DonorsOverview, Record
+from registry.list.models import DonationCenter, Medals
 
 from .fixtures import sample_of_rc
 from .helpers import login
@@ -169,3 +169,33 @@ class TestDonorsOverview:
             ("POJISTOVNA", "kod_pojistovny"),
         ):
             assert last_import[csv_column].values[0] == getattr(donor_overview, attr)
+
+
+class TestMedals:
+    # TODO: Find a better way to parametrize this
+    @pytest.mark.parametrize("medal_id", range(1, 7))
+    def test_remove_medal(self, user, testapp, medal_id):
+        medal = Medals.query.get(medal_id)
+        do = DonorsOverview.query.filter(
+            getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
+        ).first()
+        login(user, testapp)
+        detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
+        # Medal is there
+        nav_end = detail.text.find("</nav>")  # to search text after navigation bar only
+        assert detail.status_code == 200
+        assert detail.text.find(medal.title, nav_end) != -1
+        # Find the right form to remove it
+        for index, form in detail.forms.items():
+            if form.fields["medal_id"][0].value == str(medal.id):
+                break
+        else:
+            assert False, "Cannot find the right form for the medal"
+        detail = form.submit().follow()
+        # Medal is not there anymore
+        assert detail.status_code == 200
+        assert "Medaile byla úspěšně odebrána" in detail
+        assert detail.text.find(medal.title, nav_end) == -1
+        do = DonorsOverview.query.get(do.rodne_cislo)
+        assert getattr(do, "awarded_medal_" + medal.slug) is False
+        assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is None
