@@ -17,7 +17,7 @@ from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 from registry.utils import flash_errors
 
-from .forms import ImportForm
+from .forms import ImportForm, RemoveMedalForm
 from .models import AwardedMedals, Batch, DonorsOverview, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
@@ -100,6 +100,7 @@ def overview_data():
 @blueprint.route("/detail/<rc>", methods=("GET",))
 @login_required
 def detail(rc):
+    remove_medal_form = RemoveMedalForm()
     overview = DonorsOverview.query.get(rc)
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
@@ -110,7 +111,24 @@ def detail(rc):
         donation_centers=donation_centers,
         records=records,
         awarded_medals=awarded_medals,
+        remove_medal_form=remove_medal_form,
     )
+
+
+@blueprint.route("/remove_medal", methods=("POST",))
+@login_required
+def remove_medal():
+    remove_medal_form = RemoveMedalForm()
+    if remove_medal_form.validate_on_submit():
+        db.session.delete(remove_medal_form.awarded_medal)
+        do = DonorsOverview.query.get(remove_medal_form.rodne_cislo.data)
+        slug = remove_medal_form.awarded_medal.medal.slug
+        setattr(do, "awarded_medal_" + slug, False)
+        db.session.commit()
+        flash("Medaile byla úspěšně odebrána.", "success")
+    else:
+        flash("Při odebrání medaile došlo k chybě.", "danger")
+    return redirect(url_for("donor.detail", rc=remove_medal_form.rodne_cislo.data))
 
 
 @blueprint.route("/award_prep/<medal_slug>", methods=("GET",))

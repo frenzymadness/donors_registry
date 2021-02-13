@@ -31,7 +31,20 @@
 
         <ul>
             {% for awarded_medal in awarded_medals %}
-                <li>{{ awarded_medal.medal.title }}</li>
+            <li>
+                {% with form=remove_medal_form %}
+                <form id="removeMedalForm" action="{{ url_for('donor.remove_medal') }}" method="POST"
+                    class="form-inline" role="form">
+                    <div class="form-group">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        {{ form.rodne_cislo(value=overview.rodne_cislo) }}
+                        {{ form.medal_id(value=awarded_medal.medal_id) }}
+                        <input type="submit" class="btn btn-sm btn-danger" value="🗑">
+                        &nbsp;{{ awarded_medal.medal.title }}
+                    </div>
+                </form>
+                {% endwith %}
+            </li>
             {% endfor %}
         </ul>
     </div>
