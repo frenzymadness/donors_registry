@@ -5,7 +5,7 @@
 
 {% with form=form %}
 <form id="importForm" action="{{ url_for('donor.import_data_post') }}" method="POST">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    {{ form.csrf_token }}
     <div class="form-group">
         <label for="donation_center_id">Odběrné místo:</label>
         {{ form.donation_center_id(class_="form-control") }}

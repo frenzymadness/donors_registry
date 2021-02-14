@@ -37,7 +37,7 @@
     {% else %}
       {% with form=form %}
       <form class="form-inline" id="loginForm" method="POST" action="/" role="login">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          {{ form.csrf_token }}
           <div>
             {{ form.email(placeholder="E-mail", class_="form-control mr-sm-2 my-auto") }} {{ form.password(placeholder="Heslo",
             class_="form-control mr-sm-2 my-auto") }}
