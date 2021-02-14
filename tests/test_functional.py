@@ -174,6 +174,47 @@ class TestDonorsOverview:
 class TestMedals:
     # TODO: Find a better way to parametrize this
     @pytest.mark.parametrize("medal_id", range(1, 7))
+    def test_award_medal(self, user, testapp, medal_id):
+        medal = Medals.query.get(medal_id)
+        awarded = AwardedMedals.query.count()
+        awarded_do = DonorsOverview.query.filter(
+            getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
+        ).count()
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        try:
+            checkboxes = len(page.form.fields["rodne_cislo"])
+        except KeyError:
+            pytest.skip("No medals to award.")
+        uncheck = checkboxes // 4
+        # Uncheck some checkboxes
+        for i in range(uncheck):
+            page.form.fields["rodne_cislo"][i].checked = False
+        # Award first batch of medals
+        page = page.form.submit().follow()
+        awarded_new = AwardedMedals.query.count()
+        awarded_do_new = DonorsOverview.query.filter(
+            getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
+        ).count()
+        assert (
+            checkboxes - uncheck == awarded_new - awarded == awarded_do_new - awarded_do
+        )
+        try:
+            assert len(page.form.fields["rodne_cislo"]) == uncheck
+        except KeyError:
+            return  # No more checkboxes, no reason to continue
+        # Award the remaining medals
+        page = page.form.submit().follow()
+        # No checkboxes left
+        assert page.form.fields.get("rodne_cislo", None) is None
+        awarded_new = AwardedMedals.query.count()
+        awarded_do_new = DonorsOverview.query.filter(
+            getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
+        ).count()
+        assert checkboxes == awarded_new - awarded == awarded_do_new - awarded_do
+
+    # TODO: Find a better way to parametrize this
+    @pytest.mark.parametrize("medal_id", range(1, 7))
     def test_remove_medal(self, user, testapp, medal_id):
         medal = Medals.query.get(medal_id)
         do = DonorsOverview.query.filter(
