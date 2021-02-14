@@ -3,6 +3,13 @@
 
 <h1>Přehled dárců k ocenění: {{ medal.title }}</h1>
 
+{% with form=award_medal_form %}
+
+<form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST" class="form-inline" role="form">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+{{ form.medal_id(value=medal.id) }}
+<input type="submit" class="btn btn btn-success" value="Udělit medaili označeným dárcům">
+
 <table id="overview" class="table table-striped table-hovered table-hover">
     <thead class="thead-dark">
         <tr>
@@ -15,6 +22,7 @@
             <th>Pojišťovna</th>
             <th>Darování</th>
             <th>Podpis</th>
+            <th>Vybrat</th>
         </tr>
     </thead>
     <tbody>
@@ -29,10 +37,15 @@
             <td>{{ donor.kod_pojistovny }}</td>
             <td>{{ donor.donation_count_total }}</td>
             <td>&nbsp;</td>
+            <td>{{ form["rodne_cislo_" + donor.rodne_cislo](value=donor.rodne_cislo) }}</td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
+<input type="submit" class="btn btn btn-success" value="Udělit medaili označeným dárcům">
+</form>
+{% endwith %}
 
 {% endblock %}
 
