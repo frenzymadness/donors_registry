@@ -17,7 +17,7 @@ from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 from registry.utils import flash_errors
 
-from .forms import ImportForm, RemoveMedalForm
+from .forms import AwardMedalForm, ImportForm, RemoveMedalForm
 from .models import AwardedMedals, Batch, DonorsOverview, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
@@ -141,4 +141,38 @@ def award_prep(medal_slug):
             getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
         )
     ).all()
-    return render_template("donor/award_prep.html", medal=medal, donors=donors)
+    award_medal_form = AwardMedalForm()
+    award_medal_form.add_checkboxes([d.rodne_cislo for d in donors])
+    return render_template(
+        "donor/award_prep.html",
+        medal=medal,
+        donors=donors,
+        award_medal_form=award_medal_form,
+    )
+
+
+@blueprint.route("/award_medal", methods=("POST",))
+@login_required
+def award_medal():
+    award_medal_form = AwardMedalForm()
+    if award_medal_form.validate_on_submit():
+        # TODO: Find a way how to validate dynamic form the standard way
+        medal = Medals.query.get(request.form["medal_id"])
+
+        if medal is None:
+            flash("Odeslána nevalidní data.", "danger")
+            return redirect(url_for("donor.overview"))
+
+        for rodne_cislo in request.form.getlist("rodne_cislo"):
+            do = DonorsOverview.query.get(rodne_cislo)
+            if do is None:
+                flash("Odeslána nevalidní data.", "danger")
+                return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
+
+            am = AwardedMedals(rodne_cislo=rodne_cislo, medal_id=medal.id)
+            db.session.add(am)
+            setattr(do, "awarded_medal_" + medal.slug, True)
+
+        db.session.commit()
+        flash("Medaile uděleny.", "success")
+        return redirect(url_for("donor.award_prep", medal_slug=medal.slug))

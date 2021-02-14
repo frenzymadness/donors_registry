@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import HiddenField, SelectField, TextAreaField
+from wtforms import BooleanField, HiddenField, SelectField, TextAreaField
 from wtforms.validators import DataRequired
 
 from registry.donor.models import AwardedMedals
@@ -76,3 +76,14 @@ class RemoveMedalForm(FlaskForm):
             (self.rodne_cislo.data, self.medal_id.data)
         )
         return self.awarded_medal is not None
+
+
+class AwardMedalForm(FlaskForm):
+    medal_id = HiddenField(validators=[DataRequired()])
+
+    def add_checkboxes(self, rodna_cisla):
+        for rodne_cislo in rodna_cisla:
+            name = "rodne_cislo_" + rodne_cislo
+            checkbox = BooleanField(_form=self, _name="rodne_cislo", default="checked")
+            checkbox.data = rodne_cislo
+            setattr(self, name, checkbox)
