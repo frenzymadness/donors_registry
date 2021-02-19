@@ -10,6 +10,7 @@
 {{ form.medal_id(value=medal.id) }}
 <input type="submit" class="btn btn btn-success" value="Udělit medaili označeným dárcům">
 
+<!-- Updating the table? Don't forget to check the print (pre)view. -->
 <table id="overview" class="table table-striped table-hovered table-hover">
     <thead class="thead-dark">
         <tr>
@@ -21,7 +22,7 @@
             <th>PSČ</th>
             <th>Pojišťovna</th>
             <th>Darování</th>
-            <th>Podpis</th>
+            <th class="sign">Podpis</th>
             <th>Vybrat</th>
         </tr>
     </thead>
@@ -60,12 +61,18 @@
                 extend: 'print',
                 text: 'Tisk prezenční listiny',
                 title: '',
+                exportOptions: {
+                    columns: [...Array(9).keys()]
+                }
             }],
             dom: "Blfrtip",
             columnDefs: [{
                 "targets": "rodne_cislo",
                 "render": function ( data, type, row, meta ) {
                   return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row[0]) + "'>" + row[0] + "</a>";}
+            },{
+                "targets": "sign",
+                "visible": false
             }]
         });
     } );
