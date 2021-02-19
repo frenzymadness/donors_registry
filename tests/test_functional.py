@@ -154,6 +154,21 @@ class TestImport:
             == existing_batches + 1
         )
 
+    def test_invalid_donation_center(self, user, testapp):
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.count()
+
+        login(user, testapp)
+        res = testapp.get(url_for("donor.import_data"))
+        form = res.form
+        form.fields["donation_center_id"][0].options.append(("666", False, "malicious"))
+        form.fields["donation_center_id"][0].select(666)
+        res = form.submit()
+        assert "Odběrné místo - Not a valid choice" in res
+
+        assert Record.query.count() == existing_records
+        assert Batch.query.count() == existing_batches
+
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
