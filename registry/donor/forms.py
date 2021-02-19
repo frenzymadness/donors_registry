@@ -22,7 +22,7 @@ class ImportForm(FlaskForm):
         super(ImportForm, self).__init__(*args, **kwargs)
         self.donation_center_id.choices = [
             (dc.id, dc.title) for dc in DonationCenter.query.all()
-        ]
+        ] + [(-1, "Manuální import nebo data odjinud")]
         self.reset_validator()
 
     def reset_validator(self):
@@ -37,7 +37,7 @@ class ImportForm(FlaskForm):
         self.reset_validator()
 
         self.donation_center = DonationCenter.query.get(self.donation_center_id.data)
-        if not self.donation_center:
+        if not self.donation_center and int(self.donation_center_id.data) != -1:
             self.donation_center_id.errors.append("Odběrné místo neexistuje")
             return False
 
