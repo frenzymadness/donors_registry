@@ -127,6 +127,33 @@ class TestImport:
         assert Record.query.count() == existing_records
         assert Batch.query.count() == existing_batches
 
+    def test_valid_manual_input(self, user, testapp):
+        input_data = Path("tests/data/valid_import.txt").read_text()
+        new_records = len(input_data.strip().splitlines())
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.filter(
+            Batch.donation_center_id.is_(None)
+        ).count()
+
+        login(user, testapp)
+        res = testapp.get(url_for("donor.import_data"))
+        form = res.form
+        form["input_data"] = input_data
+        form.fields["donation_center_id"][0].select(-1)
+        assert (
+            form.fields["donation_center_id"][0].selectedIndex
+            == len(form.fields["donation_center_id"][0].options) - 1
+        )
+        res = form.submit().follow()
+        assert "Import proběhl úspěšně" in res
+        assert res.status_code == 200
+
+        assert Record.query.count() == existing_records + new_records
+        assert (
+            Batch.query.filter(Batch.donation_center_id.is_(None)).count()
+            == existing_batches + 1
+        )
+
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
