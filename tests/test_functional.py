@@ -8,7 +8,13 @@ from pathlib import Path
 import pytest
 from flask import url_for
 
-from registry.donor.models import AwardedMedals, Batch, DonorsOverview, Record
+from registry.donor.models import (
+    AwardedMedals,
+    Batch,
+    DonorsOverview,
+    Note,
+    Record,
+)
 from registry.list.models import DonationCenter, Medals
 
 from .fixtures import sample_of_rc
@@ -291,3 +297,36 @@ class TestMedals:
         do = DonorsOverview.query.get(do.rodne_cislo)
         assert getattr(do, "awarded_medal_" + medal.slug) is False
         assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is None
+
+
+class TestDetail:
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    def test_detail(self, user, testapp, rodne_cislo):
+        """Just a simple test that the detail page loads for some random donors"""
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        assert res.status_code == 200
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_save_update_note(self, user, testapp, rodne_cislo):
+        existing_notes = Note.query.count()
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        # New note
+        form = res.forms["noteForm"]
+        assert form.fields["note"][0].value == ""
+        form.fields["note"][0].value = "Lorem ipsum"
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        assert "Lorem ipsum</textarea>" in res.text
+        assert Note.query.count() == existing_notes + 1
+        # Update existing
+        form = res.forms["noteForm"]
+        assert form.fields["note"][0].value == "Lorem ipsum"
+        form.fields["note"][0].value += " dolor sit amet,"
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
+        assert Note.query.count() == existing_notes + 1

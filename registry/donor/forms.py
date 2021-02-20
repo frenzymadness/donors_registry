@@ -87,3 +87,8 @@ class AwardMedalForm(FlaskForm):
             checkbox = BooleanField(_form=self, _name="rodne_cislo", default="checked")
             checkbox.data = rodne_cislo
             setattr(self, name, checkbox)
+
+
+class NoteForm(FlaskForm):
+    rodne_cislo = HiddenField(validators=[DataRequired()])
+    note = TextAreaField("Poznámka k dárci")
