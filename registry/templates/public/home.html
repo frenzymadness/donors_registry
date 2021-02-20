@@ -1,5 +1,28 @@
 {% extends "layout.html" %}
 {% block content %}
 
-
+{% if current_user and current_user.is_authenticated %}
+<p>Evidence aktuálně obsahuje <b>{{ donors }}</b> dárců se <b>{{ records }}</b> záznamy v <b>{{ batches }}</b> dávkách a <b>{{ awarded_medals }}</b> udělených medailí.</p>
+<table class="table table-striped table-hovered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Medaile</th>
+            <th>Dárců čekajících na ocenění</th>
+            <th>Medailí uděleno</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for medal in medals %}
+        <tr>
+            <td>{{ medal.title }}</td>
+            <td>{{ awaiting[medal.slug] }}</td>
+            <td>{{ awarded[medal.slug] }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Tato aplikace slouží jen pro přihlášené správce dárců krve a krevní plazmy.</p>
+<p>Pro více informací o činnosti ČČK Frýdek-Místek navštivte <a href="https://www.cckfm.cz/">cckfm.cz</a>.</p>
+{% endif %}
 {% endblock %}
