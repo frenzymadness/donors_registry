@@ -50,6 +50,15 @@ class TestLoggingIn:
         res.status_code == 200
 
 
+class TestHomePage:
+    def test_home_page(self, user, testapp):
+        login(user, testapp)
+        res = testapp.get("/")
+        # Make sure there are no missing numbers on the homepage
+        assert "<b></b>" not in res
+        assert "<td></td>" not in res
+
+
 class TestImport:
     """Test of imports"""
 
