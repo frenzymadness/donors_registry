@@ -17,8 +17,8 @@ from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 from registry.utils import flash_errors
 
-from .forms import AwardMedalForm, ImportForm, RemoveMedalForm
-from .models import AwardedMedals, Batch, DonorsOverview, Record
+from .forms import AwardMedalForm, ImportForm, NoteForm, RemoveMedalForm
+from .models import AwardedMedals, Batch, DonorsOverview, Note, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
@@ -107,6 +107,9 @@ def detail(rc):
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
+    note_form = NoteForm()
+    if overview.note:
+        note_form.note.data = overview.note.note
     return render_template(
         "donor/detail.html",
         overview=overview,
@@ -114,6 +117,7 @@ def detail(rc):
         records=records,
         awarded_medals=awarded_medals,
         remove_medal_form=remove_medal_form,
+        note_form=note_form,
     )
 
 
@@ -178,3 +182,18 @@ def award_medal():
         db.session.commit()
         flash("Medaile uděleny.", "success")
         return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
+
+
+@blueprint.route("/note/save", methods=("POST",))
+@login_required
+def save_note():
+    note_form = NoteForm()
+    note = Note.query.get(note_form.rodne_cislo.data)
+    if note:
+        note.note = note_form.note.data
+    else:
+        note = Note(rodne_cislo=note_form.rodne_cislo.data, note=note_form.note.data)
+    db.session.add(note)
+    db.session.commit()
+    flash("Poznámka uložena.", "success")
+    return redirect(url_for("donor.detail", rc=note_form.rodne_cislo.data))

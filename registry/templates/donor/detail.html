@@ -48,6 +48,17 @@
             {% endfor %}
         </ul>
     </div>
+    <div class="col">
+        <h2>Poznámky</h2>
+        {% with form=note_form %}
+        <form id="noteForm" action="{{ url_for('donor.save_note') }}" method="POST" role="form">
+            {{ form.csrf_token }}
+            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
+            {{ form.note(rows=7, class_="form-control") }}
+            <button class="btn btn-success" type="submit">Uložit</button>
+        </form>
+        {% endwith %}
+    </div>
 </div>
 <h2>Historie importů</h2>
 

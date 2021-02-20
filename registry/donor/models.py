@@ -73,6 +73,11 @@ class DonorsOverview(db.Model):
     awarded_medal_kr3 = db.Column(db.Boolean, nullable=False)
     awarded_medal_kr2 = db.Column(db.Boolean, nullable=False)
     awarded_medal_kr1 = db.Column(db.Boolean, nullable=False)
+    note = db.relationship(
+        "Note",
+        uselist=False,
+        primaryjoin="foreign(DonorsOverview.rodne_cislo) == Note.rodne_cislo",
+    )
 
     def __repr__(self):
         return f"<DonorsOverview ({self.rodne_cislo})>"
@@ -298,3 +303,9 @@ FROM (
             AND "records"."batch_id" = "recent_records"."batch_id";"""
         )
         db.session.commit()
+
+
+class Note(db.Model):
+    __tablename__ = "notes"
+    rodne_cislo = db.Column(db.String(10), primary_key=True)
+    note = db.Column(db.Text)
