@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from flask import url_for
+from sqlalchemy.exc import IntegrityError
 
 from registry.donor.models import (
     AwardedMedals,
@@ -330,3 +331,18 @@ class TestDetail:
         assert "Poznámka uložena." in res
         assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
         assert Note.query.count() == existing_notes + 1
+
+
+class TestDatabase:
+    def test_foreign_key_check(self, db):
+        """
+        Test that foreign keys works as expected.
+        This is mainly needed for SQLite where foreing keys are not checked by default
+        """
+        record = Record.query.get(1)
+        batch = Batch.query.get(record.batch_id)
+        # Deleting a batch with associated record should not be possible
+        db.session.delete(batch)
+        with pytest.raises(IntegrityError):
+            db.session.commit()
+        db.session.rollback()
