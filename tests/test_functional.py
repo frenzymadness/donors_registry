@@ -178,6 +178,33 @@ class TestImport:
         assert Record.query.count() == existing_records
         assert Batch.query.count() == existing_batches
 
+    @pytest.mark.parametrize(
+        "input_file",
+        (
+            "tests/data/valid_import_multiple_rc.txt",
+            "tests/data/valid_import_multiple_rc_dups.txt",
+        ),
+    )
+    def test_valid_import_with_multiple_rc(self, input_file, user, testapp):
+        input_data = Path(input_file).read_text()
+        new_records = len(input_data.strip().splitlines())
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.count()
+
+        login(user, testapp)
+        res = testapp.get(url_for("donor.import_data"))
+        form = res.form
+        form["input_data"] = input_data
+        res = form.submit().follow()
+        assert "Import proběhl úspěšně" in res
+        assert res.status_code == 200
+
+        assert Record.query.count() == existing_records + new_records
+        assert Batch.query.count() == existing_batches + 1
+
+        DonorsOverview.query.get("205225299").donation_count_total == 70
+        DonorsOverview.query.get("1860231599").donation_count_total == 6
+
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
