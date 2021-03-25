@@ -126,7 +126,8 @@ SELECT
                       ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'fm'
-            ORDER BY "batches"."imported_at" DESC
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
             LIMIT 1
         ),
         0
@@ -141,7 +142,8 @@ SELECT
                       ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'fm_bubenik'
-            ORDER BY "batches"."imported_at" DESC
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
             LIMIT 1
         ),
         0
@@ -156,7 +158,8 @@ SELECT
                       ON "donation_center"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "donation_center"."slug" = 'trinec'
-            ORDER BY "batches"."imported_at" DESC
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
             LIMIT 1
         ),
         0
@@ -169,7 +172,8 @@ SELECT
                       ON "batches"."id" = "records"."batch_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
                 AND "batches"."donation_center_id" IS NULL
-            ORDER BY "batches"."imported_at" DESC
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
             LIMIT 1
         ),
         0
@@ -202,7 +206,8 @@ SELECT
                             "donation_center_null"."donation_center_id" IS NULL
                         )
                     )
-                ORDER BY "batches"."imported_at" DESC
+                ORDER BY "batches"."imported_at" DESC,
+                    "records"."donation_count" DESC
                 LIMIT 1
             ) AS "donation_count"
             FROM (
@@ -277,14 +282,15 @@ FROM (
             -- person, regardless of the donation center. This is used
             -- only to link the most recent personal data as the
             -- combination of "rodne_cislo" and "batch" is unique.
-            SELECT "records"."batch_id"
+            SELECT "records"."id"
             FROM "records"
-                 JOIN "batches"
+                JOIN "batches"
                     ON "batches"."id" = "records"."batch_id"
             WHERE "records"."rodne_cislo" = "rodna_cisla"."rodne_cislo"
-            ORDER BY "batches"."imported_at" DESC
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
             LIMIT 1
-        ) AS "batch_id"
+        ) AS "record_id"
     FROM (
         -- The ultimate core. We need all people, not records or
         -- batches. People are uniquely identified by their
@@ -294,7 +300,6 @@ FROM (
     ) AS "rodna_cisla"
 ) AS "recent_records"
     JOIN "records"
-        ON "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-            AND "records"."batch_id" = "recent_records"."batch_id";"""
+        ON "records"."id" = "recent_records"."record_id";"""
         )
         db.session.commit()
