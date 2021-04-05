@@ -23,7 +23,7 @@
             <th>Pojišťovna</th>
             <th>Darování</th>
             <th class="sign">Podpis</th>
-            <th>Vybrat vše <input type="checkbox" onClick="toggle(this)"></th>
+            <th class="chosen">Vybrat vše <input type="checkbox" onClick="toggle(this)" checked=true></th>
         </tr>
     </thead>
     <tbody>
@@ -46,7 +46,6 @@
 
 <input type="submit" class="btn btn btn-success" value="Udělit medaili označeným dárcům">
 </form>
-<input type="checkbox" onClick="toggle(this)"> Vybrat vše
 {% endwith %}
 
 {% endblock %}
@@ -74,14 +73,17 @@
             },{
                 "targets": "sign",
                 "visible": false
+            },{
+                "targets": "chosen",
+                "orderable": false
             }]
         });
     } );
 
     function toggle(source) {
         checkboxes = document.getElementsByName('rodne_cislo');
-        for(var i=0, n=checkboxes.length;i<n;i++) {
-            checkboxes[i].checked = source.checked;
+        for(var checkbox of checkboxes) {
+            checkbox.checked = source.checked;
         }
     }
 </script>
