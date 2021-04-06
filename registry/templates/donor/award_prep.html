@@ -23,7 +23,7 @@
             <th>Pojišťovna</th>
             <th>Darování</th>
             <th class="sign">Podpis</th>
-            <th>Vybrat</th>
+            <th class="chosen">Vybrat vše <input type="checkbox" onClick="toggle(this)" checked=true></th>
         </tr>
     </thead>
     <tbody>
@@ -73,8 +73,18 @@
             },{
                 "targets": "sign",
                 "visible": false
+            },{
+                "targets": "chosen",
+                "orderable": false
             }]
         });
     } );
+
+    function toggle(source) {
+        checkboxes = document.getElementsByName('rodne_cislo');
+        for(var checkbox of checkboxes) {
+            checkbox.checked = source.checked;
+        }
+    }
 </script>
 {% endblock %}
