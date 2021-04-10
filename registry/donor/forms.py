@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, SelectField, TextAreaField
 from wtforms.validators import DataRequired
 
-from registry.donor.models import AwardedMedals
+from registry.donor.models import AwardedMedals, Batch
 from registry.list.models import DonationCenter
 
 from .utils import validate_import_data
@@ -92,3 +92,11 @@ class AwardMedalForm(FlaskForm):
 class NoteForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
     note = TextAreaField("Poznámka k dárci")
+
+
+class DeleteBatchForm(FlaskForm):
+    batch_id = HiddenField(validators=[DataRequired()])
+
+    def validate(self):
+        self.batch = Batch.query.get(self.batch_id.data)
+        return self.batch is not None

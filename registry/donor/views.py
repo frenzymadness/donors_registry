@@ -17,7 +17,13 @@ from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 from registry.utils import flash_errors
 
-from .forms import AwardMedalForm, ImportForm, NoteForm, RemoveMedalForm
+from .forms import (
+    AwardMedalForm,
+    DeleteBatchForm,
+    ImportForm,
+    NoteForm,
+    RemoveMedalForm,
+)
 from .models import AwardedMedals, Batch, DonorsOverview, Note, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
@@ -197,3 +203,30 @@ def save_note():
     db.session.commit()
     flash("Poznámka uložena.", "success")
     return redirect(url_for("donor.detail", rc=note_form.rodne_cislo.data))
+
+
+@blueprint.route("/batch_list", methods=("GET",))
+@login_required
+def batch_list():
+    batches = Batch.query.all()
+    delete_batch_form = DeleteBatchForm()
+    return render_template(
+        "donor/batch_list.html", batches=batches, delete_batch_form=delete_batch_form
+    )
+
+
+@blueprint.route("/delete_batch", methods=("POST",))
+@login_required
+def delete_batch():
+    delete_batch_form = DeleteBatchForm()
+    if delete_batch_form.validate_on_submit():
+        records = Record.query.filter(Record.batch_id == delete_batch_form.batch.id)
+        for record in records:
+            db.session.delete(record)
+        db.session.delete(delete_batch_form.batch)
+        db.session.commit()
+        DonorsOverview.refresh_overview()
+        flash("Dávka smazáno.", "success")
+    else:
+        flash("Při odebrání dávky došlo k chybě.", "danger")
+    return redirect(url_for("donor.batch_list"))
