@@ -52,8 +52,23 @@ def load_text_backups(path):
         load_text_file(filename, batch)
 
 
+def detect_encoding(filename):
+    # The order is based on outputs from enca, file and chardetect tools
+    for encoding in "cp1250", "iso-8859-2", "utf-8", "ascii":
+        try:
+            f = open(filename, encoding=encoding)
+            f.read()
+            return encoding
+        except Exception:
+            continue
+        finally:
+            f.close()
+    raise RuntimeError(f"Cannot detect encoding for {filename}")
+
+
 def load_text_file(filename, batch):  # noqa: C901
-    with open(filename, encoding="iso8859-2") as csv_file:
+    encoding = detect_encoding(filename)
+    with open(filename, encoding=encoding) as csv_file:
         reader = csv.reader(csv_file, delimiter=";")
         for index, row in enumerate(reader):
             if not row or len(row) == 1:
