@@ -56,11 +56,14 @@ def refresh_overview():
 def install_production_data(path_to_backup, step=None):
     # Turn off SQLAlchemy logging (produces thousands of SQL queries)
     current_app.config["SQLALCHEMY_ECHO"] = False
+    csv_errors = []
     if step is None or step == "1":
         load_text_backups(path_to_backup)
     if step is None or step == "2":
-        load_database(path_to_backup)
+        csv_errors += load_database(path_to_backup)
     if step is None or step == "3":
         DonorsOverview.refresh_overview()
     if step is None or step == "4":
-        check_results(path_to_backup)
+        csv_errors += check_results(path_to_backup)
+
+    print("\n".join(csv_errors))

@@ -126,6 +126,7 @@ def load_text_file(filename, batch):  # noqa: C901
 def load_database(path):
     data = DBF(os.path.join(path, "cck.DBF"), load=True, encoding="iso8859-2")
     medals = Medals.query.all()
+    csv_errors = []
     for row in tqdm(data.records):
         rodne_cislo = str(row["RC"])
 
@@ -136,6 +137,9 @@ def load_database(path):
 
         if record is None:
             print("Row not in DB, skipping", row)
+            csv_errors.append(
+                f"{rodne_cislo},není v historických záznamech ale je v databázi starého programu"
+            )
             continue
 
         # TODO: Check numbers in Donors overview
@@ -153,10 +157,13 @@ def load_database(path):
                         f"{medal.id} for {record.rodne_cislo}"
                     )
 
+    return csv_errors
+
 
 def check_results(path):
     data = DBF(os.path.join(path, "cck.DBF"), load=True, encoding="iso8859-2")
     errors = defaultdict(int)
+    csv_errors = []
     for row in tqdm(data.records):
         rodne_cislo = str(row["RC"])
         overview = DonorsOverview.query.get(rodne_cislo)
@@ -167,6 +174,9 @@ def check_results(path):
         if overview is None:
             print("ERROR: RC not in overview", row)
             errors["not found"] += 1
+            csv_errors.append(
+                f"{rodne_cislo},není v historických záznamech ale je v databázi starého programu"
+            )
             continue
 
         old_total = 0
@@ -187,6 +197,9 @@ def check_results(path):
                     f"ERROR: Count from {new_name} is not the same for "
                     f"{rodne_cislo}: {old_count} vs {new_count}"
                 )
+                csv_errors.append(
+                    f"{rodne_cislo},{new_name},pocet darovani nesedi stara: {old_count} nova: {new_count}"
+                )
 
         if old_total != overview.donation_count_total:
             errors["total"] += 1
@@ -196,3 +209,5 @@ def check_results(path):
             )
 
     print("ERRORS:", errors)
+
+    return csv_errors
