@@ -258,7 +258,7 @@ class TestDonorsOverview:
 
 class TestMedals:
     # TODO: Find a better way to parametrize this
-    @pytest.mark.parametrize("medal_id", range(1, 7))
+    @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_award_medal(self, user, testapp, medal_id):
         medal = Medals.query.get(medal_id)
         awarded = AwardedMedals.query.count()
@@ -299,7 +299,7 @@ class TestMedals:
         assert checkboxes == awarded_new - awarded == awarded_do_new - awarded_do
 
     # TODO: Find a better way to parametrize this
-    @pytest.mark.parametrize("medal_id", range(1, 7))
+    @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_remove_medal(self, user, testapp, medal_id):
         medal = Medals.query.get(medal_id)
         do = DonorsOverview.query.filter(

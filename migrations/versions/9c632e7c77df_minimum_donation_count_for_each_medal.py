@@ -23,6 +23,7 @@ def upgrade():
     op.execute("UPDATE medals SET minimum_donations = 80  WHERE slug = 'kr3';")
     op.execute("UPDATE medals SET minimum_donations = 120 WHERE slug = 'kr2';")
     op.execute("UPDATE medals SET minimum_donations = 160 WHERE slug = 'kr1';")
+    op.execute("UPDATE medals SET minimum_donations = 250 WHERE slug = 'plk';")
 
 
 def downgrade():

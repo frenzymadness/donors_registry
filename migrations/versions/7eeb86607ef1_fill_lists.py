@@ -45,6 +45,7 @@ def upgrade():
                 {medals.c.slug: "kr3", medals.c.title: "Zlatý kříž 3. třídy"},
                 {medals.c.slug: "kr2", medals.c.title: "Zlatý kříž 2. třídy"},
                 {medals.c.slug: "kr1", medals.c.title: "Zlatý kříž 1. třídy"},
+                {medals.c.slug: "plk", medals.c.title: "Plaketa ČČK"},
             )
         )
     )

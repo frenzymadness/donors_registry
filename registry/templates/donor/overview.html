@@ -31,8 +31,8 @@ Jinde: ${row.donation_count_manual}`;
     }
 
     function last_award_name(row) {
-        const awards = ["awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1"].reverse();
-        const names =  ["Bronzová medaile", "Stříbrná medaile", "Zlatá medaile", "Kříž III", "Kříž II", "Kříž I"].reverse();
+        const awards = ["awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"].reverse();
+        const names =  ["Bronzová medaile", "Stříbrná medaile", "Zlatá medaile", "Kříž III", "Kříž II", "Kříž I", "Plaketa ČČK"].reverse();
         for (let index = 0; index < awards.length; index++) {
             const element = awards[index];
             if (row[element] == true) {
@@ -70,7 +70,7 @@ Jinde: ${row.donation_count_manual}`;
                 "render": function ( data, type, row, meta ) {
                   return last_award_name(row);}
             },{
-                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1"],
+                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
                 "visible": false
             }]
         });

@@ -42,6 +42,7 @@ COLUMN_NAMES = {
     "awarded_medal_kr3": "Medaile - Kříž III",
     "awarded_medal_kr2": "Medaile - Kříž II",
     "awarded_medal_kr1": "Medaile - Kříž I",
+    "awarded_medal_plk": "Plaketa ČČK",
 }
 
 

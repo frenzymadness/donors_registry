@@ -36,6 +36,7 @@ def upgrade():
         sa.Column("awarded_medal_kr3", sa.Boolean(), nullable=False),
         sa.Column("awarded_medal_kr2", sa.Boolean(), nullable=False),
         sa.Column("awarded_medal_kr1", sa.Boolean(), nullable=False),
+        sa.Column("awarded_medal_plk", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("rodne_cislo"),
     )
 

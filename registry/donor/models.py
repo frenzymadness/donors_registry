@@ -73,6 +73,7 @@ class DonorsOverview(db.Model):
     awarded_medal_kr3 = db.Column(db.Boolean, nullable=False)
     awarded_medal_kr2 = db.Column(db.Boolean, nullable=False)
     awarded_medal_kr1 = db.Column(db.Boolean, nullable=False)
+    awarded_medal_plk = db.Column(db.Boolean, nullable=False)
     note = db.relationship(
         "Note",
         uselist=False,
@@ -105,7 +106,8 @@ class DonorsOverview(db.Model):
         "awarded_medal_zl",
         "awarded_medal_kr3",
         "awarded_medal_kr2",
-        "awarded_medal_kr1"
+        "awarded_medal_kr1",
+        "awarded_medal_plk"
     )
 SELECT
     -- "rodne_cislo" uniquely identifies a person.
@@ -278,7 +280,15 @@ SELECT
                 ON "medals"."id" = "awarded_medals"."medal_id"
         WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
             AND "medals"."slug" = 'kr1'
-    ) AS "awarded_medal_kr1"
+    ) AS "awarded_medal_kr1",
+    EXISTS(
+        SELECT 1
+        FROM "awarded_medals"
+            JOIN "medals"
+                ON "medals"."id" = "awarded_medals"."medal_id"
+        WHERE "awarded_medals"."rodne_cislo" = "records"."rodne_cislo"
+            AND "medals"."slug" = 'plk'
+    ) AS "awarded_medal_plk"
 FROM (
     SELECT
         "rodna_cisla"."rodne_cislo",

@@ -125,6 +125,8 @@ def test_data_medals(db):
         award_medal_if(db, rodne_cislo, medals["kr2"].id, 0.03, random_number)
         # Cross level 1 has ~1 % of donors
         award_medal_if(db, rodne_cislo, medals["kr1"].id, 0.01, random_number)
+        # Cross level 1 has ~0,5 % of donors
+        award_medal_if(db, rodne_cislo, medals["plk"].id, 0.005, random_number)
 
     db.session.commit()
 
