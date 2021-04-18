@@ -127,10 +127,10 @@ SELECT
             FROM "records"
                  JOIN "batches"
                       ON "batches"."id" = "records"."batch_id"
-                 JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center_id"
+                 JOIN "donation_centers"
+                      ON "donation_centers"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                AND "donation_center"."slug" = 'fm'
+                AND "donation_centers"."slug" = 'fm'
             ORDER BY "batches"."imported_at" DESC,
                 "records"."donation_count" DESC
             LIMIT 1
@@ -143,10 +143,10 @@ SELECT
             FROM "records"
                  JOIN "batches"
                       ON "batches"."id" = "records"."batch_id"
-                 JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center_id"
+                 JOIN "donation_centers"
+                      ON "donation_centers"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                AND "donation_center"."slug" = 'fm_bubenik'
+                AND "donation_centers"."slug" = 'fm_bubenik'
             ORDER BY "batches"."imported_at" DESC,
                 "records"."donation_count" DESC
             LIMIT 1
@@ -159,10 +159,10 @@ SELECT
             FROM "records"
                  JOIN "batches"
                       ON "batches"."id" = "records"."batch_id"
-                 JOIN "donation_center"
-                      ON "donation_center"."id" = "batches"."donation_center_id"
+                 JOIN "donation_centers"
+                      ON "donation_centers"."id" = "batches"."donation_center_id"
             WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
-                AND "donation_center"."slug" = 'trinec'
+                AND "donation_centers"."slug" = 'trinec'
             ORDER BY "batches"."imported_at" DESC,
                 "records"."donation_count" DESC
             LIMIT 1
@@ -218,10 +218,10 @@ SELECT
             FROM (
                 -- All possible donation centers including NULL
                 -- for manual entries.
-                SELECT "donation_center"."id" AS "donation_center_id"
-                FROM "donation_center"
+                SELECT "donation_centers"."id" AS "donation_center_id"
+                FROM "donation_centers"
                 UNION
-                SELECT NULL AS "donation_center"
+                SELECT NULL AS "donation_centers"
             ) AS "donation_center_null"
             -- Removes donation centers from which the person does
             -- not have any records. This removes the need for
