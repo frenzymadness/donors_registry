@@ -3,8 +3,6 @@ from datetime import datetime
 from functools import lru_cache
 from random import uniform
 
-import pandas
-
 from registry.donor.models import AwardedMedals, Batch, Record
 from registry.list.models import DonationCenter, Medals
 
@@ -134,6 +132,8 @@ def test_data_medals(db):
 @lru_cache()
 def get_test_data_df(lines):
     """Returns test data from imports.csv as Pandas DataFrame"""
+    import pandas  # noqa
+
     return pandas.read_csv(
         "tests/data/imports.csv", dtype={"RC": str, "PSC": str, "POJISTOVNA": str}
     ).head(lines)
