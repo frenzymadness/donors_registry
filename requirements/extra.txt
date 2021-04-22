@@ -2,7 +2,7 @@
 -r dev.txt
 
 # Debugging
-ipdb==0.13.4
+ipdb==0.13.7
 
 # Progress bar
-tqdm==4.50.2
+tqdm==4.60.0
