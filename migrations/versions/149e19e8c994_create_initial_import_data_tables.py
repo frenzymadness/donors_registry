@@ -17,7 +17,7 @@ depends_on = None
 
 def upgrade():
     op.create_table(
-        "donation_center",
+        "donation_centers",
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("slug", sa.String(), nullable=False),
         sa.Column("title", sa.String(), nullable=False),
@@ -29,7 +29,7 @@ def upgrade():
         sa.Column("id", sa.Integer(), nullable=False),
         sa.Column("donation_center_id", sa.Integer(), nullable=True),
         sa.Column("imported_at", sa.DateTime(), nullable=False),
-        sa.ForeignKeyConstraint(["donation_center_id"], ["donation_center.id"]),
+        sa.ForeignKeyConstraint(["donation_center_id"], ["donation_centers.id"]),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_table(
@@ -55,4 +55,4 @@ def upgrade():
 def downgrade():
     op.drop_table("records")
     op.drop_table("batches")
-    op.drop_table("donation_center")
+    op.drop_table("donation_centers")

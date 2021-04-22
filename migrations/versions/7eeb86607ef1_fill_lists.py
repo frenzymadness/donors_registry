@@ -14,25 +14,25 @@ down_revision = "9d51ae0ab1e0"
 branch_labels = None
 depends_on = None
 
-donation_center = sa.table(
-    "donation_center", sa.column("slug", sa.String), sa.column("title", sa.String)
+donation_centers = sa.table(
+    "donation_centers", sa.column("slug", sa.String), sa.column("title", sa.String)
 )
 medals = sa.table("medals", sa.column("slug", sa.String), sa.column("title", sa.String))
 
 
 def upgrade():
     op.execute(
-        donation_center.insert().values(
+        donation_centers.insert().values(
             (
                 {
-                    donation_center.c.slug: "fm",
-                    donation_center.c.title: "Frýdek-Místek",
+                    donation_centers.c.slug: "fm",
+                    donation_centers.c.title: "Frýdek-Místek",
                 },
                 {
-                    donation_center.c.slug: "fm_bubenik",
-                    donation_center.c.title: "Frýdek-Místek, Krevní centrum",
+                    donation_centers.c.slug: "fm_bubenik",
+                    donation_centers.c.title: "Frýdek-Místek, Krevní centrum",
                 },
-                {donation_center.c.slug: "trinec", donation_center.c.title: "Třinec"},
+                {donation_centers.c.slug: "trinec", donation_centers.c.title: "Třinec"},
             )
         )
     )
@@ -52,8 +52,8 @@ def upgrade():
 
 def downgrade():
     op.execute(
-        donation_center.delete().where(
-            donation_center.c.slug.in_(("fm", "fm_bubenik", "trinec"))
+        donation_centers.delete().where(
+            donation_centers.c.slug.in_(("fm", "fm_bubenik", "trinec"))
         )
     )
     op.execute(

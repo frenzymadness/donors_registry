@@ -2,7 +2,7 @@ from registry.extensions import db
 
 
 class DonationCenter(db.Model):
-    __tablename__ = "donation_center"
+    __tablename__ = "donation_centers"
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String, unique=True, nullable=False)
     title = db.Column(db.String, nullable=False)
