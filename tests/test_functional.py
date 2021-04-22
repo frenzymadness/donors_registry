@@ -4,6 +4,7 @@
 See: http://webtest.readthedocs.org/
 """
 from pathlib import Path
+from random import choice
 
 import pytest
 from flask import url_for
@@ -38,6 +39,7 @@ class TestPublicInterface:
         testapp.get(url_for("donor.import_data"), status=401)
         testapp.get(url_for("donor.overview"), status=401)
         testapp.get(url_for("donor.award_prep", medal_slug="br"), status=401)
+        testapp.get(url_for("donor.batch_list"), status=401)
 
 
 class TestLoggingIn:
@@ -373,3 +375,27 @@ class TestDatabase:
         with pytest.raises(IntegrityError):
             db.session.commit()
         db.session.rollback()
+
+
+class TestBatch:
+    @pytest.mark.parametrize("batch_id", range(1, 11))
+    def test_batch_list(self, user, testapp, batch_id):
+        """Just a simple test that the detail page loads for some random donors"""
+        login(user, testapp)
+        res = testapp.get(url_for("donor.batch_list"))
+        assert res.status_code == 200
+        batch = Batch.query.get(batch_id)
+        assert f"<td>{batch.id}</td>" in res
+        assert f"<td>{batch.imported_at}</td>" in res
+
+    @pytest.mark.parametrize("unused", range(1, 6))
+    def test_delete_batch(self, user, testapp, unused):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.batch_list"))
+        # Take and submit random form
+        form = choice(res.forms)
+        batch_id = form.fields["batch_id"][0].value
+        res = form.submit().follow()
+        assert "Dávka smazáno." in res
+        assert Batch.query.get(batch_id) is None
+        assert Record.query.filter(Record.batch_id == batch_id).count() == 0

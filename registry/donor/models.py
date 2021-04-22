@@ -16,7 +16,7 @@ class Batch(db.Model):
 class Record(db.Model):
     __tablename__ = "records"
     id = db.Column(db.Integer, primary_key=True)
-    batch_id = db.Column(db.ForeignKey(Batch.id), nullable=False)
+    batch_id = db.Column(db.ForeignKey(Batch.id, ondelete="CASCADE"), nullable=False)
     batch = db.relationship("Batch")
     rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
     first_name = db.Column(db.String, nullable=False)
