@@ -231,3 +231,17 @@ def delete_batch():
     else:
         flash("Při odebrání dávky došlo k chybě.", "danger")
     return redirect(url_for("donor.batch_list"))
+
+
+@blueprint.route("/batch_detail/<id>", methods=("GET",))
+@login_required
+def batch_detail(id):
+    batch = Batch.query.get(id)
+    records = Record.query.filter(Record.batch_id == batch.id)
+    delete_batch_form = DeleteBatchForm()
+    return render_template(
+        "donor/batch_detail.html",
+        batch=batch,
+        records=records,
+        delete_batch_form=delete_batch_form,
+    )
