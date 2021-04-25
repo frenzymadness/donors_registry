@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Detail dávky číslo {{batch.id}}</h1>
+    {% if batch.donation_center %}
+        <p>Dávka z {{batch.donation_center.title}} importována {{batch.imported_at}}</p>
+    {% else %}
+        <p>Manuální dávka importována {{batch.imported_at}}</p>
+    {% endif %}
+
+{% with form=delete_batch_form %}
+<form id="deleteBatchForm" action="{{ url_for('donor.delete_batch') }}" method="POST"
+    class="form-inline" role="form">
+    <div class="form-group">
+        {{ form.csrf_token }}
+        {{ form.batch_id(value=batch.id) }}
+        <input type="submit" class="btn btn-sm btn-danger" value="Smazat tuto dávku">
+    </div>
+</form>
+{% endwith %}
+
+<table id="record_list" class="table table-striped table-hovered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>Rodné číslo</th>
+            <th>Jméno</th>
+            <th>Příjmení</th>
+            <th>Adresa</th>
+            <th>Město</th>
+            <th>PSČ</th>
+            <th>Pojišťovna</th>
+            <th>Darování</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in records %}
+            <tr>
+                <td><a href="{{ url_for('donor.detail', rc=record.rodne_cislo) }}">{{record.rodne_cislo}}</a></td>
+                <td>{{record.first_name}}</td>
+                <td>{{record.last_name}}</td>
+                <td>{{record.address}}</td>
+                <td>{{record.city}}</td>
+                <td>{{record.postal_code}}</td>
+                <td>{{record.kod_pojistovny}}</td>
+                <td>{{record.donation_count}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        $('#record_list').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
+            },
+        });
+    } );
+</script>
+{% endblock %}
