@@ -55,6 +55,7 @@ def register_commands(app):
     """Register Click commands."""
     app.cli.add_command(commands.create_user)
     app.cli.add_command(commands.install_test_data)
+    app.cli.add_command(commands.install_production_data)
 
 
 def configure_logger(app):
