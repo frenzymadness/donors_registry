@@ -3,6 +3,7 @@
 
 See: http://webtest.readthedocs.org/
 """
+import re
 from pathlib import Path
 from random import choice
 
@@ -331,12 +332,18 @@ class TestMedals:
 
 
 class TestDetail:
-    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(50))
     def test_detail(self, user, testapp, rodne_cislo):
         """Just a simple test that the detail page loads for some random donors"""
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         assert res.status_code == 200
+        assert "<td></td>" not in res
+        # Check that the sum of the donations is eqal to the total count
+        donations_list = re.search(r"<h2>Počty darování</h2>(.*?)</ul>", res.text, re.S)
+        numbers = re.findall(r">.*?: (\d+)</", donations_list.group())
+        numbers = list(map(int, numbers))
+        assert sum(numbers[:-1]) == numbers[-1]
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_save_update_note(self, user, testapp, rodne_cislo):
@@ -388,6 +395,7 @@ class TestBatch:
         batch = Batch.query.get(batch_id)
         assert f">{batch.id}</a></td>" in res
         assert f"<td>{batch.imported_at}</td>" in res
+        assert "<td></td>" not in res
 
     @pytest.mark.parametrize("unused", range(1, 6))
     def test_delete_batch(self, user, testapp, unused):

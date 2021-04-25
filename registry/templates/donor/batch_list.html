@@ -17,7 +17,7 @@
             <tr>
                 <td><a href="{{ url_for('donor.batch_detail', id=batch.id) }}">{{ batch.id}}</a></td>
                 <td>{{ batch.imported_at}}</td>
-                <td>{{ batch.donation_center.title}}</td>
+                <td>{{ batch.donation_center.title or "Jinde"}}</td>
                 <td>
                     {% with form=delete_batch_form %}
                     <form id="deleteBatchForm" action="{{ url_for('donor.delete_batch') }}" method="POST"
