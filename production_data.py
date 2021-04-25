@@ -125,7 +125,7 @@ def load_text_file(filename, batch):  # noqa: C901
 
 def load_database(path):
     data = DBF(os.path.join(path, "cck.DBF"), load=True, encoding="iso8859-2")
-    medals = Medals.query.all()
+    medals = Medals.query.filter(Medals.slug != "plk").all()
     csv_errors = []
     for row in tqdm(data.records):
         rodne_cislo = str(row["RC"])
