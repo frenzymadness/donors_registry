@@ -42,6 +42,11 @@ def testapp(app):
 @fixture(scope="session")
 def db(app):
     """Create database for the tests."""
+    # If a test fails, it might leave the test database there.
+    # Make sure we create a fresh one everytime.
+    if Path("registry/test.sqlite").exists():
+        os.unlink(Path("registry/test.sqlite"))
+
     _db.app = app
     with app.app_context():
         migrate = Migrate()
