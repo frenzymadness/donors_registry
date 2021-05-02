@@ -3,13 +3,13 @@ from datetime import datetime
 from datatables import ColumnDT, DataTables
 from flask import (
     Blueprint,
+    abort,
     flash,
     jsonify,
     redirect,
     render_template,
     request,
     url_for,
-    abort,
 )
 from flask_login import login_required
 from sqlalchemy import and_
