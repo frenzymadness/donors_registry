@@ -2,7 +2,7 @@
 import logging
 import sys
 
-from flask import Flask
+from flask import Flask, render_template
 
 from registry import commands, donor, public, user
 from registry.extensions import (
@@ -29,6 +29,11 @@ def create_app(config_object="registry.settings"):
     register_blueprints(app)
     register_commands(app)
     configure_logger(app)
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template("404.html"), 404
+
     return app
 
 
