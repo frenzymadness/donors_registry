@@ -2,7 +2,7 @@
 
 # Flask
 Flask==2.0.0rc1
-Werkzeug==1.0.1
+Werkzeug==2.0.0rc4
 
 # Database
 Flask-SQLAlchemy==2.5.1
@@ -27,7 +27,7 @@ Flask-DebugToolbar==0.11.0
 environs==9.3.2
 
 # CLI interface
-click==7.1.2
+click8==8.0.1
 
 # DataTables Python backend
 sqlalchemy-datatables==2.0.1
