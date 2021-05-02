@@ -9,6 +9,7 @@ from flask import (
     render_template,
     request,
     url_for,
+    abort,
 )
 from flask_login import login_required
 from sqlalchemy import and_
@@ -112,7 +113,7 @@ def detail(rc):
     remove_medal_form = RemoveMedalForm()
     overview = DonorsOverview.query.get(rc)
     if overview is None:
-        return render_template('404.html'), 404
+        abort(404)
 
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
