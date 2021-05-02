@@ -111,6 +111,9 @@ def overview_data():
 def detail(rc):
     remove_medal_form = RemoveMedalForm()
     overview = DonorsOverview.query.get(rc)
+    if overview is None:
+        return render_template('404.html'), 404
+
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
