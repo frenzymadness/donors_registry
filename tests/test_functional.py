@@ -396,6 +396,6 @@ class TestBatch:
         form = choice(res.forms)
         batch_id = form.fields["batch_id"][0].value
         res = form.submit().follow()
-        assert "Dávka smazáno." in res
+        assert "Dávka smazána." in res
         assert Batch.query.get(batch_id) is None
         assert Record.query.filter(Record.batch_id == batch_id).count() == 0

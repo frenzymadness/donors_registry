@@ -227,7 +227,7 @@ def delete_batch():
         db.session.delete(delete_batch_form.batch)
         db.session.commit()
         DonorsOverview.refresh_overview()
-        flash("Dávka smazáno.", "success")
+        flash("Dávka smazána.", "success")
     else:
         flash("Při odebrání dávky došlo k chybě.", "danger")
     return redirect(url_for("donor.batch_list"))
