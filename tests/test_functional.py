@@ -365,11 +365,6 @@ class TestDetail:
     def test_non_exist_rc(self, user, testapp, rodne_cislo):
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=404)
-        test_text = (
-            "<h1>404 Stránka nenalezena</h1>\n"
-            + "  <p>Stránka, kterou hledáte neexistuje</p>\n"
-            + '  <p><a href="/">Domů</a></p>\n'
-        )
 
         assert res.status_code == 404
         assert "404 Stránka nenalezena" in res.text
