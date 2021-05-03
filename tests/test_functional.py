@@ -380,7 +380,7 @@ class TestDetail:
         )
 
         assert res.status_code == 404
-        assert test_text in res.text
+        assert "404 Stránka nenalezena" in res.text
 
 
 class TestDatabase:
