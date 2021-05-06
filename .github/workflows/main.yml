@@ -21,7 +21,7 @@ jobs:
         dnf_install: pkgconfig(libffi)
     strategy:
       matrix:
-        tox_env: [py36, py37, py38, py39, lint]
+        tox_env: [py36, py37, py38, py39, py310, lint]
 
     # Use GitHub's Linux Docker host
     runs-on: ubuntu-latest
