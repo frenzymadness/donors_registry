@@ -28,6 +28,7 @@ def upgrade():
         sa.Column("donation_count_fm", sa.Integer(), nullable=False),
         sa.Column("donation_count_fm_bubenik", sa.Integer(), nullable=False),
         sa.Column("donation_count_trinec", sa.Integer(), nullable=False),
+        sa.Column("donation_count_mp", sa.Integer(), nullable=False),
         sa.Column("donation_count_total", sa.Integer(), nullable=False),
         sa.Column("donation_count_manual", sa.Integer(), nullable=False),
         sa.Column("awarded_medal_br", sa.Boolean(), nullable=False),
