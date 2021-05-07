@@ -26,6 +26,7 @@
         const title = `Nemocnice FM: ${row.donation_count_fm}
 Krevní centrum: ${row.donation_count_fm_bubenik}
 Třinec: ${row.donation_count_trinec}
+Moje Plazma: ${row.donation_count_mp}
 Jinde: ${row.donation_count_manual}`;
         return `<span title="${title}">❓</span>`;
     }
@@ -70,7 +71,7 @@ Jinde: ${row.donation_count_manual}`;
                 "render": function ( data, type, row, meta ) {
                   return last_award_name(row);}
             },{
-                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
+                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_mp", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
                 "visible": false
             }]
         });

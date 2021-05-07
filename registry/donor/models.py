@@ -65,6 +65,7 @@ class DonorsOverview(db.Model):
     donation_count_fm = db.Column(db.Integer, nullable=False)
     donation_count_fm_bubenik = db.Column(db.Integer, nullable=False)
     donation_count_trinec = db.Column(db.Integer, nullable=False)
+    donation_count_mp = db.Column(db.Integer, nullable=False)
     donation_count_manual = db.Column(db.Integer, nullable=False)
     donation_count_total = db.Column(db.Integer, nullable=False)
     awarded_medal_br = db.Column(db.Boolean, nullable=False)
@@ -99,6 +100,7 @@ class DonorsOverview(db.Model):
         "donation_count_fm",
         "donation_count_fm_bubenik",
         "donation_count_trinec",
+        "donation_count_mp",
         "donation_count_manual",
         "donation_count_total",
         "awarded_medal_br",
@@ -171,6 +173,22 @@ SELECT
         ),
         0
     ) AS "donation_count_trinec",
+    COALESCE(
+        (
+            SELECT "records"."donation_count"
+            FROM "records"
+                 JOIN "batches"
+                      ON "batches"."id" = "records"."batch_id"
+                 JOIN "donation_centers"
+                      ON "donation_centers"."id" = "batches"."donation_center_id"
+            WHERE "records"."rodne_cislo" = "recent_records"."rodne_cislo"
+                AND "donation_centers"."slug" = 'mp'
+            ORDER BY "batches"."imported_at" DESC,
+                "records"."donation_count" DESC
+            LIMIT 1
+        ),
+        0
+    ) AS "donation_count_mp",
     COALESCE(
         (
             SELECT "records"."donation_count"

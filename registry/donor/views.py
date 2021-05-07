@@ -40,6 +40,7 @@ COLUMN_NAMES = {
     "donation_count_fm": "Darování - Nemocnice FM",
     "donation_count_fm_bubenik": "Darování - Krevní centrum",
     "donation_count_trinec": "Darování - Nemocnice Třinec",
+    "donation_count_mp": "Darování - Moje Plazma",
     "donation_count_manual": "Darování - Jinde",
     "donation_count_total": "Darování Celkem",
     "awarded_medal_br": "Medaile - Bronz",

@@ -33,6 +33,10 @@ def upgrade():
                     donation_centers.c.title: "Frýdek-Místek, Krevní centrum",
                 },
                 {donation_centers.c.slug: "trinec", donation_centers.c.title: "Třinec"},
+                {
+                    donation_centers.c.slug: "mp",
+                    donation_centers.c.title: "Moje Plazma",
+                },
             )
         )
     )
@@ -54,7 +58,7 @@ def upgrade():
 def downgrade():
     op.execute(
         donation_centers.delete().where(
-            donation_centers.c.slug.in_(("fm", "fm_bubenik", "trinec"))
+            donation_centers.c.slug.in_(("fm", "fm_bubenik", "trinec", "mp"))
         )
     )
     op.execute(
