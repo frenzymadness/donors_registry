@@ -8,9 +8,10 @@ def get_part_of_line(line, delimiter=";"):
 
 def is_line_valid(line):
     parts = line.split(";")
-    if not parts[-1]:
+    if not parts[-1] or parts[-1] == "0":
         # If the last part of the line is empty we can skip the line entirely.
         # Line ending  with semicolon means that the donor has 0 dotations.
+        # The same applies for explicitly mentioned 0 donations.
         return None
 
     if len(parts) == 8 and all(parts):
