@@ -26,13 +26,17 @@ def repair_two_semicolons(line):
     return repaired_line
 
 
-def repair_line_part_by_part(line):
+def repair_line_part_by_part(line):  # noqa: C901 FIXME
     errors = []
     rodne_cislo, rest = get_part_of_line(line)
     if not rodne_cislo:
         errors.append("chybí rodné číslo")
     elif not rodne_cislo.isnumeric():
         errors.append("rodné číslo není číselné")
+    elif len(rodne_cislo) > 10:
+        errors.append("rodné číslo je příliš dlouhé")
+    elif len(rodne_cislo) < 9:
+        errors.append("rodné číslo je příliš krátké")
 
     first_name, rest = get_part_of_line(rest)
     if not first_name:
@@ -84,10 +88,7 @@ def validate_import_data(text_input):
     valid_lines = []  # List of valid lines (strings)
     invalid_lines = []  # List of tuples (line, list of comments)
     for line in text_input.splitlines():
-        if is_line_valid(line):
-            valid_lines.append(line)
-            continue
-        elif is_line_valid(line) is None:
+        if is_line_valid(line) is None:
             # None means we should skip the line because the donations count
             # is not present at the end of the line
             continue
@@ -101,6 +102,9 @@ def validate_import_data(text_input):
                 continue
 
         repaired_line, errors = repair_line_part_by_part(line)
-        invalid_lines.append((repaired_line, errors))
+        if errors or not is_line_valid(line):
+            invalid_lines.append((repaired_line, errors))
+        else:
+            valid_lines.append(line)
 
     return valid_lines, invalid_lines

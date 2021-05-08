@@ -147,6 +147,30 @@ class TestImport:
         assert Record.query.count() == existing_records
         assert Batch.query.count() == existing_batches
 
+    def test_invalid_input_invalid_rcs(self, user, testapp):
+        input_data = Path("tests/data/invalid_rc.txt").read_text()
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.count()
+        login(user, testapp)
+        res = testapp.get(url_for("donor.import_data"))
+        form = res.form
+        form["input_data"] = input_data
+        res = form.submit()
+        assert res.status_code == 200
+        form = res.form
+        assert len(form["valid_lines"].value.splitlines()) == 0
+        assert len(form["invalid_lines"].value.splitlines()) == 5
+        assert len(form["invalid_lines_errors"].value.splitlines()) == len(
+            form["invalid_lines"].value.splitlines()
+        )
+        assert "příliš dlouhé" in form["invalid_lines_errors"].value
+        assert "příliš krátké" in form["invalid_lines_errors"].value
+        assert "chybí" in form["invalid_lines_errors"].value
+        assert "není číselné" in form["invalid_lines_errors"].value
+        assert "Import proběhl úspěšně" not in res
+        assert Record.query.count() == existing_records
+        assert Batch.query.count() == existing_batches
+
     def test_valid_manual_input(self, user, testapp):
         input_data = Path("tests/data/valid_import.txt").read_text()
         new_records = len(input_data.strip().splitlines())
