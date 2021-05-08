@@ -44,6 +44,21 @@ class Record(db.Model):
             donation_count=list[8],
         )
 
+    def as_original(self):
+        fields = [
+            "rodne_cislo",
+            "first_name",
+            "last_name",
+            "address",
+            "city",
+            "postal_code",
+            "kod_pojistovny",
+            "donation_count",
+        ]
+        line = ";".join([str(getattr(self, field)) for field in fields])
+        line += "\n"
+        return line
+
 
 class AwardedMedals(db.Model):
     __tablename__ = "awarded_medals"
