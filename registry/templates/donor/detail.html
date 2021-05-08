@@ -31,20 +31,35 @@
         <h2>Získaná ocenění</h2>
 
         <ul>
-            {% for awarded_medal in awarded_medals %}
+            {% for medal in all_medals %}
             <li>
-                {% with form=remove_medal_form %}
-                <form id="removeMedalForm" action="{{ url_for('donor.remove_medal') }}" method="POST"
-                    class="form-inline" role="form">
-                    <div class="form-group">
-                        {{ form.csrf_token }}
-                        {{ form.rodne_cislo(value=overview.rodne_cislo) }}
-                        {{ form.medal_id(value=awarded_medal.medal_id) }}
-                        <input type="submit" class="btn btn-sm btn-danger" value="🗑">
-                        &nbsp;{{ awarded_medal.medal.title }}
-                    </div>
-                </form>
-                {% endwith %}
+                {% if medal in awarded_medals %}
+                    {% with form=remove_medal_form %}
+                    <form id="removeMedalForm" action="{{ url_for('donor.remove_medal') }}" method="POST"
+                        class="form-inline" role="form">
+                        <div class="form-group">
+                            {{ form.csrf_token }}
+                            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
+                            {{ form.medal_id(value=medal.id) }}
+                            <input type="submit" class="btn btn-sm btn-danger" value="🗑" title="Odebrat medaili">
+                            &nbsp;{{ medal.title }}
+                        </div>
+                    </form>
+                    {% endwith %}
+                {% else %}
+                    {% with form=award_medal_form %}
+                    <form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST"
+                        class="form-inline" role="form">
+                        <div class="form-group">
+                            {{ form.csrf_token }}
+                            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
+                            {{ form.medal_id(value=medal.id) }}
+                            <input type="submit" class="btn btn-sm btn-success" value="✔" title="Udělit medaili">
+                            &nbsp;{{ medal.title }}
+                        </div>
+                    </form>
+                    {% endwith %}
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
