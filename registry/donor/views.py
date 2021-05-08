@@ -110,10 +110,14 @@ def overview_data():
 @login_required
 def detail(rc):
     remove_medal_form = RemoveMedalForm()
+    award_medal_form = AwardMedalForm()
+    award_medal_form.add_one_rodne_cislo(rc)
     overview = DonorsOverview.query.get(rc)
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
+    awarded_medals = [medal.medal for medal in awarded_medals]
+    all_medals = Medals.query.all()
     note_form = NoteForm()
     if overview.note:
         note_form.note.data = overview.note.note
@@ -123,7 +127,9 @@ def detail(rc):
         donation_centers=donation_centers,
         records=records,
         awarded_medals=awarded_medals,
+        all_medals=all_medals,
         remove_medal_form=remove_medal_form,
+        award_medal_form=award_medal_form,
         note_form=note_form,
     )
 
@@ -176,7 +182,8 @@ def award_medal():
             flash("Odeslána nevalidní data.", "danger")
             return redirect(url_for("donor.overview"))
 
-        for rodne_cislo in request.form.getlist("rodne_cislo"):
+        rodna_cisla = request.form.getlist("rodne_cislo")
+        for rodne_cislo in rodna_cisla:
             do = DonorsOverview.query.get(rodne_cislo)
             if do is None:
                 flash("Odeslána nevalidní data.", "danger")
@@ -187,8 +194,11 @@ def award_medal():
             setattr(do, "awarded_medal_" + medal.slug, True)
 
         db.session.commit()
-        flash("Medaile uděleny.", "success")
-        return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
+        if len(rodna_cisla) == 1:
+            flash("Medaile udělena.", "success")
+        else:
+            flash("Medaile uděleny.", "success")
+        return redirect(request.referrer)
 
 
 @blueprint.route("/note/save", methods=("POST",))

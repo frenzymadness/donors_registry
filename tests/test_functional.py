@@ -312,11 +312,11 @@ class TestMedals:
         login(user, testapp)
         detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
         # Medal is there
-        nav_end = detail.text.find("</nav>")  # to search text after navigation bar only
         assert detail.status_code == 200
-        assert detail.text.find(medal.title, nav_end) != -1
         # Find the right form to remove it
         for index, form in detail.forms.items():
+            if form.id == "awardMedalForm":
+                continue
             if form.fields["medal_id"][0].value == str(medal.id):
                 break
         else:
@@ -325,10 +325,36 @@ class TestMedals:
         # Medal is not there anymore
         assert detail.status_code == 200
         assert "Medaile byla úspěšně odebrána" in detail
-        assert detail.text.find(medal.title, nav_end) == -1
         do = DonorsOverview.query.get(do.rodne_cislo)
         assert getattr(do, "awarded_medal_" + medal.slug) is False
         assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is None
+
+    # TODO: Find a better way to parametrize this
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_award_one_medal(self, user, testapp, medal_id):
+        medal = Medals.query.get(medal_id)
+        do = DonorsOverview.query.filter(
+            getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 0
+        ).first()
+        login(user, testapp)
+        detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
+        # Medal is there
+        assert detail.status_code == 200
+        # Find the right form to award it
+        for index, form in detail.forms.items():
+            if form.id == "removeMedalForm":
+                continue
+            if form.fields["medal_id"][0].value == str(medal.id):
+                break
+        else:
+            assert False, "Cannot find the right form for the medal"
+        detail = form.submit().follow()
+        # Medal is awarded
+        assert detail.status_code == 200
+        assert "Medaile udělena." in detail
+        do = DonorsOverview.query.get(do.rodne_cislo)
+        assert getattr(do, "awarded_medal_" + medal.slug) is True
+        assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is not None
 
 
 class TestDetail:

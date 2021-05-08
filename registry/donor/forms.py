@@ -88,6 +88,13 @@ class AwardMedalForm(FlaskForm):
             checkbox.data = rodne_cislo
             setattr(self, name, checkbox)
 
+    def add_one_rodne_cislo(self, rodne_cislo):
+        rodne_cislo_input = HiddenField(
+            _form=self, _name="rodne_cislo", validators=[DataRequired()]
+        )
+        rodne_cislo_input.data = rodne_cislo
+        setattr(self, "rodne_cislo", rodne_cislo_input)
+
 
 class NoteForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
