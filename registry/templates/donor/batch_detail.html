@@ -19,6 +19,8 @@
 </form>
 {% endwith %}
 
+<a href="{{ url_for('donor.download_batch', id=batch.id) }}"><button class="btn btn-sm btn-primary">Stáhnout soubor s dávkou</button></a>
+
 <table id="record_list" class="table table-striped table-hovered table-hover">
     <thead class="thead-dark">
         <tr>

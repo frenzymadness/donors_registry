@@ -42,6 +42,7 @@ class TestPublicInterface:
         testapp.get(url_for("donor.award_prep", medal_slug="br"), status=401)
         testapp.get(url_for("donor.batch_list"), status=401)
         testapp.get(url_for("donor.batch_detail", id=1), status=401)
+        testapp.get(url_for("donor.download_batch", id=1), status=401)
 
 
 class TestLoggingIn:
@@ -421,3 +422,14 @@ class TestBatch:
         else:
             assert "Manuální dávka importována" in res
         assert res.text.count("<td>") == records_count * res.text.count("<th>")
+
+    @pytest.mark.parametrize("unused", range(1, 11))
+    def test_download_batch(self, user, testapp, unused):
+        login(user, testapp)
+        batch_id = choice([b.id for b in Batch.query.all()])
+        res = testapp.get(url_for("donor.batch_detail", id=batch_id))
+        records_count = Record.query.filter(Record.batch_id == batch_id).count()
+        batch_file = res.click(description="Stáhnout soubor s dávkou")
+        assert records_count == len(batch_file.text.splitlines())
+        assert ";;" not in batch_file.text
+        assert ";\n" not in batch_file.text

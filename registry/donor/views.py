@@ -1,4 +1,5 @@
 from datetime import datetime
+from io import StringIO
 
 from datatables import ColumnDT, DataTables
 from flask import (
@@ -12,6 +13,8 @@ from flask import (
 )
 from flask_login import login_required
 from sqlalchemy import and_
+from werkzeug.datastructures import Headers
+from werkzeug.wrappers import Response
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -245,3 +248,18 @@ def batch_detail(id):
         records=records,
         delete_batch_form=delete_batch_form,
     )
+
+
+@blueprint.route("/download_batch/<id>", methods=("GET",))
+@login_required
+def download_batch(id):
+    content = StringIO()
+    for record in Record.query.filter(Record.batch_id == id):
+        content.write(record.as_original())
+
+    content.seek(0)
+
+    headers = Headers()
+    headers.set("Content-Disposition", "attachment", filename="data.txt")
+
+    return Response(content, mimetype="text/plain", headers=headers)
