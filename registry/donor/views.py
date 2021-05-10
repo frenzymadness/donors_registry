@@ -147,7 +147,7 @@ def remove_medal():
 @blueprint.route("/award_prep/<medal_slug>", methods=("GET",))
 @login_required
 def award_prep(medal_slug):
-    medal = Medals.query.filter(Medals.slug == medal_slug).first()
+    medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
     donors = DonorsOverview.query.filter(
         and_(
             DonorsOverview.donation_count_total >= medal.minimum_donations,
