@@ -111,10 +111,7 @@ def overview_data():
 @login_required
 def detail(rc):
     remove_medal_form = RemoveMedalForm()
-    overview = DonorsOverview.query.get(rc)
-    if overview is None:
-        abort(404)
-
+    overview = DonorsOverview.query.get_or_404(rc)
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
@@ -240,7 +237,7 @@ def delete_batch():
 @blueprint.route("/batch_detail/<id>", methods=("GET",))
 @login_required
 def batch_detail(id):
-    batch = Batch.query.get(id)
+    batch = Batch.query.get_or_404(id)
     records = Record.query.filter(Record.batch_id == batch.id)
     delete_batch_form = DeleteBatchForm()
     return render_template(
