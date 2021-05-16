@@ -29,3 +29,9 @@ def install_test_data():
     test_data_records(db)
     test_data_medals(db)
     DonorsOverview.refresh_overview()
+
+
+@click.command("refresh-overview")
+@with_appcontext
+def refresh_overview():
+    DonorsOverview.refresh_overview()
