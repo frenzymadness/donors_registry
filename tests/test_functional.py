@@ -520,3 +520,10 @@ class TestBatch:
         assert records_count == len(batch_file.text.splitlines())
         assert ";;" not in batch_file.text
         assert ";\n" not in batch_file.text
+
+    def test_download_batch_compare_file(self, user, testapp):
+        login(user, testapp)
+        res = testapp.get(url_for("batch.batch_detail", id=7))
+        batch_file = res.click(description="Stáhnout soubor s dávkou")
+        file_to_compare = Path("tests/data/batch7_downloaded.txt").read_text()
+        assert batch_file.text == file_to_compare
