@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from flask import Blueprint, render_template, flash, redirect, url_for, request
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
 
+from registry.donor.models import Batch, DonorsOverview, Record
 from registry.extensions import db
 from registry.utils import flash_errors
-from registry.donor.models import Batch, Record, DonorsOverview
 
 from .forms import DeleteBatchForm, ImportForm
 
