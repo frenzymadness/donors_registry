@@ -4,7 +4,7 @@ import sys
 
 from flask import Flask, render_template
 
-from registry import commands, donor, public, user
+from registry import commands, donor, public, user, batch
 from registry.extensions import (
     bcrypt,
     csrf_protect,
@@ -53,6 +53,7 @@ def register_blueprints(app):
     app.register_blueprint(public.views.blueprint)
     app.register_blueprint(user.views.blueprint)
     app.register_blueprint(donor.views.blueprint)
+    app.register_blueprint(batch.views.blueprint)
     return None
 
 

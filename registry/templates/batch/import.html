@@ -4,7 +4,7 @@
 <h1>Import záznamů</h1>
 
 {% with form=form %}
-<form id="importForm" action="{{ url_for('donor.import_data_post') }}" method="POST">
+<form id="importForm" action="{{ url_for('batch.import_data_post') }}" method="POST">
     {{ form.csrf_token }}
     <div class="form-group">
         <label for="donation_center_id">Odběrné místo:</label>
