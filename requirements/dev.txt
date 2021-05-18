@@ -2,14 +2,16 @@
 -r prod.txt
 
 # Testing
-tox==3.23.0
-pytest==6.2.3
+tox==3.23.1
+pytest==6.2.4
 WebTest==2.0.35
-pandas==1.1.5  # Used to compare calculations we do in SQL with a different approach
+# Used to compare calculations we do in SQL with a different approach
+# Using older version because of Python 3.6 support, which pandas > 1.2 doesn't have
+pandas==1.1.5
 
 # Lint and code style
-black==20.8b1
-flake8==3.9.1
+black==21.5b1
+flake8==3.9.2
 flake8-blind-except==0.2.0
 flake8-debugger==4.0.0
 flake8-isort==4.0.0
