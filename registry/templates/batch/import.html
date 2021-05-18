@@ -4,7 +4,7 @@
 <h1>Import záznamů</h1>
 
 {% with form=form %}
-<form id="importForm" action="{{ url_for('donor.import_data_post') }}" method="POST">
+<form id="importForm" action="{{ url_for('batch.import_data_post') }}" method="POST">
     {{ form.csrf_token }}
     <div class="form-group">
         <label for="donation_center_id">Odběrné místo:</label>
@@ -41,12 +41,12 @@
 
 {% block js %}
 <script type="text/javascript">
-    $(document).ready( function () {
+    $(document).ready(function () {
         // Synchonizes schrolling of the two textareas with errors
         // https://stackoverflow.com/a/43653003
         $('.sync_scrolling').attr("data-scrolling", "false");
-        $('.sync_scrolling').scroll(function(){
-            if($(this).attr("data-scrolling") == "false"){
+        $('.sync_scrolling').scroll(function () {
+            if ($(this).attr("data-scrolling") == "false") {
                 $('.sync_scrolling').not(this).attr("data-scrolling", "true");
                 $('.sync_scrolling').not(this).scrollTop($(this).scrollTop());
             }

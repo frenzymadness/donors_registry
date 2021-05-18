@@ -2,15 +2,14 @@
 {% block content %}
 
 <h1>Detail dávky číslo {{batch.id}}</h1>
-    {% if batch.donation_center %}
-        <p>Dávka z {{batch.donation_center.title}} importována {{batch.imported_at}}</p>
-    {% else %}
-        <p>Manuální dávka importována {{batch.imported_at}}</p>
-    {% endif %}
+{% if batch.donation_center %}
+<p>Dávka z {{batch.donation_center.title}} importována {{batch.imported_at}}</p>
+{% else %}
+<p>Manuální dávka importována {{batch.imported_at}}</p>
+{% endif %}
 
 {% with form=delete_batch_form %}
-<form id="deleteBatchForm" action="{{ url_for('donor.delete_batch') }}" method="POST"
-    class="form-inline" role="form">
+<form id="deleteBatchForm" action="{{ url_for('batch.delete_batch') }}" method="POST" class="form-inline" role="form">
     <div class="form-group">
         {{ form.csrf_token }}
         {{ form.batch_id(value=batch.id) }}
@@ -34,16 +33,16 @@
     </thead>
     <tbody>
         {% for record in records %}
-            <tr>
-                <td><a href="{{ url_for('donor.detail', rc=record.rodne_cislo) }}">{{record.rodne_cislo}}</a></td>
-                <td>{{record.first_name}}</td>
-                <td>{{record.last_name}}</td>
-                <td>{{record.address}}</td>
-                <td>{{record.city}}</td>
-                <td>{{record.postal_code}}</td>
-                <td>{{record.kod_pojistovny}}</td>
-                <td>{{record.donation_count}}</td>
-            </tr>
+        <tr>
+            <td><a href="{{ url_for('donor.detail', rc=record.rodne_cislo) }}">{{record.rodne_cislo}}</a></td>
+            <td>{{record.first_name}}</td>
+            <td>{{record.last_name}}</td>
+            <td>{{record.address}}</td>
+            <td>{{record.city}}</td>
+            <td>{{record.postal_code}}</td>
+            <td>{{record.kod_pojistovny}}</td>
+            <td>{{record.donation_count}}</td>
+        </tr>
         {% endfor %}
     </tbody>
 </table>
@@ -52,12 +51,12 @@
 
 {% block js %}
 <script type="text/javascript">
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#record_list').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
             },
         });
-    } );
+    });
 </script>
 {% endblock %}

@@ -21,7 +21,7 @@
 
         <ul>
             {% for donation_center in donation_centers %}
-                <li>{{ donation_center.title }}: {{ overview["donation_count_" + donation_center.slug] }}</li>
+            <li>{{ donation_center.title }}: {{ overview["donation_count_" + donation_center.slug] }}</li>
             {% endfor %}
             <li>Jinde: {{ overview["donation_count_manual"] }}</li>
             <li><b>Celkem: {{ overview.donation_count_total }}</b></li>
@@ -95,7 +95,7 @@
     <tbody>
         {% for record in records %}
         <tr>
-            <td><a href="{{ url_for('donor.batch_detail', id=record.batch.id) }}">{{ record.batch_id }}</a></td>
+            <td><a href="{{ url_for('batch.batch_detail', id=record.batch.id) }}">{{ record.batch_id }}</a></td>
             <td>{{ record.batch.imported_at }}</td>
             <td>{{ record.batch.donation_center.title or "Jinde" }}</td>
             <td>{{ record.rodne_cislo }}</td>
@@ -115,7 +115,7 @@
 
 {% block js %}
 <script type="text/javascript">
-    $(document).ready( function () {
+    $(document).ready(function () {
         $('#records').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
