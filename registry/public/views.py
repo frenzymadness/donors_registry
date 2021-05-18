@@ -19,7 +19,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
-@blueprint.route("/", methods=("GET",))
+@blueprint.get("/")
 def home():
     """Home page."""
     if not current_user.is_authenticated:
@@ -57,7 +57,7 @@ def home():
         )
 
 
-@blueprint.route("/", methods=("POST",))
+@blueprint.post("/")
 def home_post():
     """Home page."""
     form = LoginForm(request.form)

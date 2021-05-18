@@ -52,14 +52,14 @@ COLUMN_NAMES = {
 }
 
 
-@blueprint.route("/import/", methods=("GET",))
+@blueprint.get("/import/")
 @login_required
 def import_data():
     import_form = ImportForm()
     return render_template("donor/import.html", form=import_form)
 
 
-@blueprint.route("/import/", methods=("POST",))
+@blueprint.post("/import/")
 @login_required
 def import_data_post():
     import_form = ImportForm(request.form)
@@ -86,13 +86,13 @@ def import_data_post():
         return render_template("donor/import.html", form=import_form)
 
 
-@blueprint.route("/overview/", methods=("GET",))
+@blueprint.get("/overview/")
 @login_required
 def overview():
     return render_template("donor/overview.html", column_names=COLUMN_NAMES)
 
 
-@blueprint.route("/overview/data", methods=("GET",))
+@blueprint.get("/overview/data")
 @login_required
 def overview_data():
     """JSON end point for JS Datatable"""
@@ -106,7 +106,7 @@ def overview_data():
     return jsonify(row_table.output_result())
 
 
-@blueprint.route("/detail/<rc>", methods=("GET",))
+@blueprint.get("/detail/<rc>")
 @login_required
 def detail(rc):
     remove_medal_form = RemoveMedalForm()
@@ -134,7 +134,7 @@ def detail(rc):
     )
 
 
-@blueprint.route("/remove_medal", methods=("POST",))
+@blueprint.post("/remove_medal")
 @login_required
 def remove_medal():
     remove_medal_form = RemoveMedalForm()
@@ -150,7 +150,7 @@ def remove_medal():
     return redirect(url_for("donor.detail", rc=remove_medal_form.rodne_cislo.data))
 
 
-@blueprint.route("/award_prep/<medal_slug>", methods=("GET",))
+@blueprint.get("/award_prep/<medal_slug>")
 @login_required
 def award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
@@ -170,7 +170,7 @@ def award_prep(medal_slug):
     )
 
 
-@blueprint.route("/award_medal", methods=("POST",))
+@blueprint.post("/award_medal")
 @login_required
 def award_medal():
     award_medal_form = AwardMedalForm()
@@ -201,7 +201,7 @@ def award_medal():
         return redirect(request.referrer)
 
 
-@blueprint.route("/note/save", methods=("POST",))
+@blueprint.post("/note/save")
 @login_required
 def save_note():
     note_form = NoteForm()
@@ -216,7 +216,7 @@ def save_note():
     return redirect(url_for("donor.detail", rc=note_form.rodne_cislo.data))
 
 
-@blueprint.route("/batch_list", methods=("GET",))
+@blueprint.get("/batch_list")
 @login_required
 def batch_list():
     batches = Batch.query.all()
@@ -226,7 +226,7 @@ def batch_list():
     )
 
 
-@blueprint.route("/delete_batch", methods=("POST",))
+@blueprint.post("/delete_batch")
 @login_required
 def delete_batch():
     delete_batch_form = DeleteBatchForm()
@@ -243,7 +243,7 @@ def delete_batch():
     return redirect(url_for("donor.batch_list"))
 
 
-@blueprint.route("/batch_detail/<id>", methods=("GET",))
+@blueprint.get("/batch_detail/<id>")
 @login_required
 def batch_detail(id):
     batch = Batch.query.get_or_404(id)
