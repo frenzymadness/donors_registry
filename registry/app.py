@@ -4,7 +4,7 @@ import sys
 
 from flask import Flask, render_template
 
-from registry import commands, donor, public, user, batch
+from registry import batch, commands, donor, public, user
 from registry.extensions import (
     bcrypt,
     csrf_protect,
