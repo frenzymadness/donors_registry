@@ -37,11 +37,11 @@ class TestPublicInterface:
 
     def test_pages_401(self, testapp, db):
         """Test pages which requires login."""
-        testapp.get(url_for("donor.import_data"), status=401)
+        testapp.get(url_for("batch.import_data"), status=401)
         testapp.get(url_for("donor.overview"), status=401)
         testapp.get(url_for("donor.award_prep", medal_slug="br"), status=401)
-        testapp.get(url_for("donor.batch_list"), status=401)
-        testapp.get(url_for("donor.batch_detail", id=1), status=401)
+        testapp.get(url_for("batch.batch_list"), status=401)
+        testapp.get(url_for("batch.batch_detail", id=1), status=401)
 
 
 class TestLoggingIn:
@@ -80,7 +80,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -99,7 +99,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         res = form.submit()
@@ -127,7 +127,7 @@ class TestImport:
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         # No matter how many times we submit the form because it contains
@@ -156,7 +156,7 @@ class TestImport:
         ).count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         form.fields["donation_center_id"][0].select(-1)
@@ -179,7 +179,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form.fields["donation_center_id"][0].options.append(("666", False, "malicious"))
         form.fields["donation_center_id"][0].select(666)
@@ -203,7 +203,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -226,7 +226,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         login(user, testapp)
-        res = testapp.get(url_for("donor.import_data"))
+        res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -452,7 +452,7 @@ class TestBatch:
     def test_batch_list(self, user, testapp, batch_id):
         """Just a simple test that the detail page loads for some random donors"""
         login(user, testapp)
-        res = testapp.get(url_for("donor.batch_list"))
+        res = testapp.get(url_for("batch.batch_list"))
         assert res.status_code == 200
         batch = Batch.query.get(batch_id)
         assert f">{batch.id}</a></td>" in res
@@ -462,7 +462,7 @@ class TestBatch:
     @pytest.mark.parametrize("unused", range(1, 6))
     def test_delete_batch(self, user, testapp, unused):
         login(user, testapp)
-        res = testapp.get(url_for("donor.batch_list"))
+        res = testapp.get(url_for("batch.batch_list"))
         # Take and submit random form
         form = choice(res.forms)
         batch_id = form.fields["batch_id"][0].value
@@ -475,7 +475,7 @@ class TestBatch:
     def test_batch_detail(self, user, testapp, unused):
         login(user, testapp)
         batch_id = choice([b.id for b in Batch.query.all()])
-        res = testapp.get(url_for("donor.batch_detail", id=batch_id))
+        res = testapp.get(url_for("batch.batch_detail", id=batch_id))
         batch = Batch.query.get(batch_id)
         records_count = Record.query.filter(Record.batch_id == batch_id).count()
         if batch.donation_center:

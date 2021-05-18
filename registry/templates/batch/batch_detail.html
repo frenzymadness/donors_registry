@@ -9,7 +9,7 @@
     {% endif %}
 
 {% with form=delete_batch_form %}
-<form id="deleteBatchForm" action="{{ url_for('donor.delete_batch') }}" method="POST"
+<form id="deleteBatchForm" action="{{ url_for('batch.delete_batch') }}" method="POST" 
     class="form-inline" role="form">
     <div class="form-group">
         {{ form.csrf_token }}
