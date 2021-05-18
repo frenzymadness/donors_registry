@@ -14,11 +14,7 @@ from sqlalchemy import and_
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 
-from .forms import (
-    AwardMedalForm,
-    NoteForm,
-    RemoveMedalForm,
-)
+from .forms import AwardMedalForm, NoteForm, RemoveMedalForm
 from .models import AwardedMedals, DonorsOverview, Note, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
