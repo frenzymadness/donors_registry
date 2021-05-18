@@ -1,15 +1,15 @@
 # Everything needed in production
 
 # Flask
-Flask==1.1.2
-Werkzeug==1.0.1
+Flask==2.0.0
+Werkzeug==2.0.1
 
 # Database
 Flask-SQLAlchemy==2.5.1
 SQLAlchemy==1.4.11
 
 # Migrations
-Flask-Migrate==2.7.0
+Flask-Migrate==3.0.0
 
 # Forms
 email-validator==1.1.2
@@ -27,7 +27,7 @@ Flask-DebugToolbar==0.11.0
 environs==9.3.2
 
 # CLI interface
-click==7.1.2
+click==8.0.0
 
 # DataTables Python backend
 sqlalchemy-datatables==2.0.1
