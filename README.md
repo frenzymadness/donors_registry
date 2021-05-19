@@ -33,3 +33,11 @@ Our plan is to switch to a more robust database system when switching to product
 ## Testing
 
 Tests use pytest and are configured via tox. To run all of them, simply install and execute `tox`.
+
+If you want to prevent tests failing because of linter issues,
+you can use pre-commit which automatically runs linters before every commit
+(this doesn't work on Windows)
+1. To activate it install `pre-commit` using `pip install pre-commit` or you
+can install all extra requirements via `pip install -r requirements/extra.txt`.
+1. Then run `pre-commit install`
+1. After that linters should run before every commit.
