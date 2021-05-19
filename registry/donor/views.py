@@ -88,7 +88,7 @@ def detail(rc):
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
-    awarded_medals = [medal.medal for medal in awarded_medals]
+    awarded_medals = {medal.medal.id: medal for medal in awarded_medals}
     all_medals = Medals.query.all()
     note_form = NoteForm()
     if overview.note:
@@ -161,7 +161,9 @@ def award_medal():
                 flash("Odeslána nevalidní data.", "danger")
                 return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
 
-            am = AwardedMedals(rodne_cislo=rodne_cislo, medal_id=medal.id)
+            am = AwardedMedals(
+                rodne_cislo=rodne_cislo, medal_id=medal.id, awarded_at=datetime.now()
+            )
             db.session.add(am)
             setattr(do, "awarded_medal_" + medal.slug, True)
 
