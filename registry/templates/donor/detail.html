@@ -33,7 +33,7 @@
         <ul>
             {% for medal in all_medals %}
             <li>
-                {% if medal in awarded_medals %}
+                {% if medal.id in awarded_medals.keys() %}
                     {% with form=remove_medal_form %}
                     <form id="removeMedalForm" action="{{ url_for('donor.remove_medal') }}" method="POST"
                         class="form-inline" role="form">
@@ -43,6 +43,13 @@
                             {{ form.medal_id(value=medal.id) }}
                             <input type="submit" class="btn btn-sm btn-danger" value="🗑" title="Odebrat medaili">
                             &nbsp;{{ medal.title }}
+                            &nbsp;<div data-toggle="modal" data-target="#titleModal" title="
+                                {%- if awarded_medals[medal.id].awarded_at is not none -%}
+Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
+                                {%- else -%}
+Medaile udělena ve starém systému
+                                {%- endif -%}
+                            ">📅</div>
                         </div>
                     </form>
                     {% endwith %}
@@ -127,4 +134,5 @@
         });
     });
 </script>
+{% include "title_popup.html" %}
 {% endblock %}

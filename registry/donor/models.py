@@ -72,6 +72,8 @@ class AwardedMedals(db.Model):
     rodne_cislo = db.Column(db.String(10), index=True, nullable=False)
     medal_id = db.Column(db.ForeignKey(Medals.id))
     medal = db.relationship("Medals")
+    # NULL means unknown data - imported from the old system
+    awarded_at = db.Column(db.DateTime, nullable=True)
     __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal_id),)
 
 

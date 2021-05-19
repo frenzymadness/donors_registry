@@ -28,6 +28,7 @@ def upgrade():
         "awarded_medals",
         sa.Column("rodne_cislo", sa.String(length=10), nullable=False),
         sa.Column("medal_id", sa.Integer(), nullable=False),
+        sa.Column("awarded_at", sa.DateTime(), nullable=True),
         sa.ForeignKeyConstraint(
             ["medal_id"],
             ["medals.id"],

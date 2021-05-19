@@ -79,15 +79,17 @@ def test_data_records(db, limit=None):
     print(f"Imported {records_count} records in {batches_count} batches")
 
 
-def award_medal(db, rodne_cislo, medal_id):
-    awarded_medal = AwardedMedals(rodne_cislo=rodne_cislo, medal_id=medal_id)
+def award_medal(db, rodne_cislo, medal_id, date):
+    awarded_medal = AwardedMedals(
+        rodne_cislo=rodne_cislo, medal_id=medal_id, awarded_at=date
+    )
     db.session.add(awarded_medal)
 
 
-def award_medal_if(db, rodne_cislo, medal_id, limit, random_number):
+def award_medal_if(db, rodne_cislo, medal_id, limit, random_number, date):
     """Helper function for awarding medals"""
     if random_number < limit:
-        award_medal(db, rodne_cislo, medal_id)
+        award_medal(db, rodne_cislo, medal_id, date)
 
 
 def test_data_medals(db):
@@ -96,35 +98,52 @@ def test_data_medals(db):
     for medal in Medals.query.all():
         medals[medal.slug] = medal
 
+    records = Record.query.with_entities(Record.rodne_cislo).distinct()
+
+    # To simulate the production database, half of the test data has
+    # NULL in awarded_at column because medals imported from the old system
+    # don't have that information.
+    records_count = records.count()
+    null_date_count = records_count // 2
+
     # Add test data for Awarded medals
     for index, record in tqdm(
-        enumerate(Record.query.with_entities(Record.rodne_cislo).distinct()),
+        enumerate(records),
         desc="Medals for records",
     ):
         rodne_cislo = record[0]
 
+        if index < null_date_count:
+            date = None
+        else:
+            date = datetime.now()
+
         # Make sure we have at least one person with all medals awarded
         if index == 0:
             for medal in medals.values():
-                award_medal(db, rodne_cislo, medal.id)
+                award_medal(db, rodne_cislo, medal.id, date)
+            continue
+
+        # Also, make sure that we have at least one person with no medals awarded
+        if index == records_count + 1:
             continue
 
         random_number = uniform(0, 1)
 
         # Bronze medal has ~50 % of donors
-        award_medal_if(db, rodne_cislo, medals["br"].id, 0.5, random_number)
+        award_medal_if(db, rodne_cislo, medals["br"].id, 0.5, random_number, date)
         # Silver medal has ~33 % of donors
-        award_medal_if(db, rodne_cislo, medals["st"].id, 0.33, random_number)
+        award_medal_if(db, rodne_cislo, medals["st"].id, 0.33, random_number, date)
         # Gold medal has ~19 % of donors
-        award_medal_if(db, rodne_cislo, medals["zl"].id, 0.19, random_number)
+        award_medal_if(db, rodne_cislo, medals["zl"].id, 0.19, random_number, date)
         # Cross level 3 has ~7 % of donors
-        award_medal_if(db, rodne_cislo, medals["kr3"].id, 0.07, random_number)
+        award_medal_if(db, rodne_cislo, medals["kr3"].id, 0.07, random_number, date)
         # Cross level 2 has ~3 % of donors
-        award_medal_if(db, rodne_cislo, medals["kr2"].id, 0.03, random_number)
+        award_medal_if(db, rodne_cislo, medals["kr2"].id, 0.03, random_number, date)
         # Cross level 1 has ~1 % of donors
-        award_medal_if(db, rodne_cislo, medals["kr1"].id, 0.01, random_number)
+        award_medal_if(db, rodne_cislo, medals["kr1"].id, 0.01, random_number, date)
         # Cross level 1 has ~0,5 % of donors
-        award_medal_if(db, rodne_cislo, medals["plk"].id, 0.005, random_number)
+        award_medal_if(db, rodne_cislo, medals["plk"].id, 0.005, random_number, date)
 
     db.session.commit()
 
