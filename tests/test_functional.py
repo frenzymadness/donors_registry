@@ -4,6 +4,7 @@
 See: http://webtest.readthedocs.org/
 """
 import re
+from datetime import datetime
 from pathlib import Path
 from random import choice, randint
 
@@ -411,6 +412,13 @@ class TestMedals:
         assert (
             checkboxes - uncheck == awarded_new - awarded == awarded_do_new - awarded_do
         )
+
+        awarded_medals = AwardedMedals.query.order_by(
+            AwardedMedals.awarded_at.desc()
+        ).limit(checkboxes - uncheck)
+        for awarded_medal in awarded_medals:
+            assert awarded_medal.awarded_at.date() == datetime.now().date()
+
         try:
             assert len(page.form.fields["rodne_cislo"]) == uncheck
         except KeyError:
@@ -424,6 +432,12 @@ class TestMedals:
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
         ).count()
         assert checkboxes == awarded_new - awarded == awarded_do_new - awarded_do
+
+        awarded_medals = AwardedMedals.query.order_by(
+            AwardedMedals.awarded_at.desc()
+        ).limit(checkboxes - uncheck)
+        for awarded_medal in awarded_medals:
+            assert awarded_medal.awarded_at.date() == datetime.now().date()
 
     # TODO: Find a better way to parametrize this
     @pytest.mark.parametrize("medal_id", range(1, 8))
@@ -477,7 +491,9 @@ class TestMedals:
         assert "Medaile udělena." in detail
         do = DonorsOverview.query.get(do.rodne_cislo)
         assert getattr(do, "awarded_medal_" + medal.slug) is True
-        assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is not None
+        awarded_medal = AwardedMedals.query.get((do.rodne_cislo, medal.id))
+        assert awarded_medal is not None
+        assert awarded_medal.awarded_at.date() == datetime.now().date()
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_amount(self, user, testapp, rodne_cislo):
