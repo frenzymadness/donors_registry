@@ -8,11 +8,11 @@ Registry of blood donors for Czech Red Cross in Frýdek-Místek.
 1. Install all development dependencies via `pip install -r requirements/dev.txt`
 1. Create a config file `registry/.env` with the following content:
 
-```
-FLASK_ENV=development
-DATABASE_URL=sqlite:///database.sqlite
-SECRET_KEY=<some_random_string_here>
-```
+    ```
+    FLASK_ENV=development
+    DATABASE_URL=sqlite:///database.sqlite
+    SECRET_KEY=<some_random_string_here>
+    ```
 
 1. Prepare a new database and apply all existing migrations via `flask db upgrade`
 
