@@ -6,3 +6,6 @@ ipdb==0.13.7
 
 # Progress bar
 tqdm==4.60.0
+
+# Pre-commit lint
+pre-commit==2.12.1
