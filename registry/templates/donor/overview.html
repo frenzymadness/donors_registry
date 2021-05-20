@@ -60,7 +60,7 @@ Jinde: ${row.donation_count_manual}`;
             "columnDefs": [{
                 "targets": "rodne_cislo",
                 "render": function ( data, type, row, meta ) {
-                  return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
+                  return "<a"+(row.note && ' style="color: red"')+" href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
             },{
                 "targets": "donations",
                 "render": function ( data, type, row, meta ) {
@@ -70,7 +70,7 @@ Jinde: ${row.donation_count_manual}`;
                 "render": function ( data, type, row, meta ) {
                   return last_award_name(row);}
             },{
-                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
+                "targets": ["note", "donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
                 "visible": false
             }]
         });
