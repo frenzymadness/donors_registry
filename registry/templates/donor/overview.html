@@ -60,7 +60,7 @@ Jinde: ${row.donation_count_manual}`;
             "columnDefs": [{
                 "targets": "rodne_cislo",
                 "render": function ( data, type, row, meta ) {
-                  return "<a"+(row.note && ' style="color: red"')+" href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
+                  return "<a"+(row.note ?" style=\"color: red\"":"")+" href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
             },{
                 "targets": "donations",
                 "render": function ( data, type, row, meta ) {
