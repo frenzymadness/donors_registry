@@ -5,7 +5,7 @@
     {% if batch.donation_center %}
         <p>Dávka z {{batch.donation_center.title}} importována {{batch.imported_at|format_time}}</p>
     {% else %}
-        <p>Manuální dávka importována {{batch.imported_at}}</p>
+        <p>Manuální dávka importována {{batch.imported_at|format_time}}</p>
     {% endif %}
 
 {% with form=delete_batch_form %}
