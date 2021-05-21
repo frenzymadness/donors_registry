@@ -27,6 +27,7 @@ class ImportForm(FlaskForm):
 
     def reset_validator(self):
         self.valid_lines_content, self.invalid_lines_content = None, None
+        self.invalid_lines_errors.data = ""
 
     def validate(self):
         """Validate the form."""
@@ -72,6 +73,12 @@ class ImportForm(FlaskForm):
             and not self.invalid_lines.data
         ) or (not repeated_import and not self.input_data.data):
             self.input_data.errors.append("Chybí vstupní data")
+            return False
+
+        if not self.valid_lines_content and not self.invalid_lines_content:
+            self.input_data.errors.append(
+                "Ze vstupních dat není po filtraci co importovat"
+            )
             return False
 
         return True

@@ -266,6 +266,49 @@ class TestImport:
         assert "Vstupní data z odběrného místa - Chybí vstupní data" in res
         assert Batch.query.count() == existing_batches
 
+    def test_all_zero_donations(self, user, testapp):
+        """
+        Tests if the system displays a warning for an input with all of the
+        donations set to 0
+        """
+        login(user, testapp)
+        expected_msg = (
+            "Vstupní data z odběrného místa - Ze vstupních dat není po filtraci"
+            + " co importovat"
+        )
+
+        # Test a correct but empty input
+        existing_batches = Batch.query.count()
+
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["input_data"] = "1;a;b;c;d;00000;000;\n2;a;b;c;d;00000;000;0"
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert expected_msg in res
+        assert Batch.query.count() == existing_batches
+        # We don't want the data repair form to show up
+        assert "Řádky s chybami" not in res
+
+        # Test an input with an invalid line which is then set to 0
+        existing_batches = Batch.query.count()
+
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["input_data"] = "1;a;b;c;d;00000;000;\ninvalid"
+        res = form.submit()
+
+        form = res.form
+        form["invalid_lines"] = "1;a;b;c;d;00000;000;"
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert expected_msg in res
+        assert Batch.query.count() == existing_batches
+        # We don't want the data repair form to show up
+        assert "Řádky s chybami" not in res
+
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
