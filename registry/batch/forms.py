@@ -41,6 +41,7 @@ class ImportForm(FlaskForm):
             self.donation_center_id.errors.append("Odběrné místo neexistuje")
             return False
 
+        repeated_import = False
         if self.valid_lines.data or self.invalid_lines.data:
             # repeated import with hopefully fixed errors
             # we have to cobine valid and invalid/fixed lines and check them again
@@ -48,6 +49,7 @@ class ImportForm(FlaskForm):
             self.valid_lines_content, self.invalid_lines_content = validate_import_data(
                 input_data
             )
+            repeated_import = True
         elif self.input_data.data:
             # First import, we have to process input data
             self.valid_lines_content, self.invalid_lines_content = validate_import_data(
@@ -61,6 +63,15 @@ class ImportForm(FlaskForm):
             for line, errors in self.invalid_lines_content:
                 self.invalid_lines.data += line + "\n"
                 self.invalid_lines_errors.data += ", ".join(errors) + "\n"
+            return False
+
+        # Empty input would cause errors
+        if (
+            repeated_import
+            and not self.valid_lines.data
+            and not self.invalid_lines.data
+        ) or (not repeated_import and not self.input_data.data):
+            self.input_data.errors.append("Chybí vstupní data")
             return False
 
         return True
