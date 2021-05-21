@@ -174,7 +174,7 @@ class TestImport:
         assert Batch.query.count() == existing_batches
 
     def test_valid_manual_input(self, user, testapp):
-        input_data = Path("tests/data/valid_import.txt").read_text(encoding="UTF-8")
+        input_data = Path("tests/data/valid_import.txt").read_text(encoding="utf-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.filter(
