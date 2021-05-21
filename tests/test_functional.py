@@ -223,7 +223,7 @@ class TestImport:
         ),
     )
     def test_valid_import_with_multiple_rc(self, input_file, user, testapp):
-        input_data = Path(input_file).read_text(encoding="UTF-8")
+        input_data = Path(input_file).read_text(encoding="utf-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
