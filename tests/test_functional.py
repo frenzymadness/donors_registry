@@ -125,7 +125,7 @@ class TestImport:
 
     def test_invalid_input(self, user, testapp):
         """Tests an invalid import the app cannot fix automaticaly"""
-        input_data = Path("tests/data/invalid_import.txt").read_text(encoding="UTF-8")
+        input_data = Path("tests/data/invalid_import.txt").read_text(encoding="utf-8")
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
