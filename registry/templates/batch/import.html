@@ -10,7 +10,7 @@
         <label for="donation_center_id">Odběrné místo:</label>
         {{ form.donation_center_id(class_="form-control") }}
     </div>
-    {% if form.valid_lines_content is not none %}
+    {% if form.invalid_lines_errors.data %}
     <div class="form-group">
         <label for="valid_lines">Validní řádky (není třeba nijak měnit)</label>
         {{ form.valid_lines(rows=10, class_="form-control") }}
