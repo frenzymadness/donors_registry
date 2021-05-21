@@ -247,7 +247,7 @@ class TestImport:
         # be automatically ommited from the import
         ends_with_zero = 3
         input_data = Path("tests/data/valid_import_zeroes.txt").read_text(
-            encoding="UTF-8"
+            encoding="utf-8"
         )
         new_records = len(input_data.strip().splitlines()) - ends_with_zero
         existing_records = Record.query.count()
