@@ -54,7 +54,11 @@
                             {{ form.csrf_token }}
                             {{ form.rodne_cislo(value=overview.rodne_cislo) }}
                             {{ form.medal_id(value=medal.id) }}
-                            <input type="submit" class="btn btn-sm btn-success" value="✔" title="Udělit medaili">
+                            {% if medal.minimum_donations > overview.donation_count_total %}
+                                <input type="submit" class="btn btn-sm btn-warning" value="✔" title="Udělit medaili (Nemá nárok)">
+                            {% else %}
+                                <input type="submit" class="btn btn-sm btn-success" value="✔" title="Udělit medaili">
+                            {% endif %}
                             &nbsp;{{ medal.title }}
                         </div>
                     </form>
