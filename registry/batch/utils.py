@@ -29,6 +29,19 @@ def repair_two_semicolons(line):
 
 def repair_line_part_by_part(line):  # noqa: C901 FIXME
     errors = []
+
+    # In the case when the count of fields is not
+    # correct, there is no reason to continue.
+    # This function would ignore the additional fields
+    # which is not the correct way to fix a line.
+    parts_count = len(line.split(";"))
+    if parts_count < 8:
+        errors.append("nedostatek polí")
+        return line, errors
+    elif parts_count > 8:
+        errors.append("nadbytek polí")
+        return line, errors
+
     rodne_cislo, rest = get_part_of_line(line)
     if not rodne_cislo:
         errors.append("chybí rodné číslo")
