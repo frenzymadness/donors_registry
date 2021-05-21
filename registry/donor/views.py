@@ -60,6 +60,13 @@ def overview_data():
     ]
     query = db.session.query().select_from(DonorsOverview)
     params = request.args.to_dict()
+
+    if params["search[value]"] != "":
+        query = query.filter(DonorsOverview.search(params["search[value]"]))
+        # Reset the search string to stop DataTables from searching with its own
+        # algorithm
+        params["search[value]"] = ""
+
     row_table = DataTables(params, query, columns)
     return jsonify(row_table.output_result())
 

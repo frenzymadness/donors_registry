@@ -84,6 +84,26 @@ class DonorsOverview(db.Model):
     def __repr__(self):
         return f"<DonorsOverview ({self.rodne_cislo})>"
 
+    @staticmethod
+    def search(search_str):
+        """Returns a filter to pass to `query.filter()` for a given search string"""
+        conditions_all = [
+            [
+                DonorsOverview.rodne_cislo.like(f"%{part}%"),
+                DonorsOverview.first_name.like(f"%{part}%"),
+                DonorsOverview.last_name.like(f"%{part}%"),
+                DonorsOverview.address.like(f"%{part}%"),
+                DonorsOverview.city.like(f"%{part}%"),
+                DonorsOverview.postal_code.like(f"%{part}%"),
+                DonorsOverview.kod_pojistovny.like(f"%{part}%"),
+            ]
+            for part in search_str.split(" ")
+        ]
+
+        # We want an OR between columns (jmeno = Jan OR prijmeni = Jan) and an AND
+        # between parts of the search string ((jmeno = Jan ...) AND (jmeno = Novak ...))
+        return db.and_(*[db.or_(*conditions) for conditions in conditions_all])
+
     @classmethod
     def refresh_overview(cls):
         cls.query.delete()
