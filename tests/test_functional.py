@@ -74,7 +74,7 @@ class TestImport:
     """Test of imports"""
 
     def test_valid_input(self, user, testapp):
-        input_data = Path("tests/data/valid_import.txt").read_text()
+        input_data = Path("tests/data/valid_import.txt").read_text(encoding="UTF-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
@@ -93,7 +93,9 @@ class TestImport:
     def test_repairable_input(self, user, testapp):
         """Tests an input file the import machinery should be able
         repair automatically without any manual assistance from user"""
-        input_data = Path("tests/data/repairable_import.txt").read_text()
+        input_data = Path("tests/data/repairable_import.txt").read_text(
+            encoding="UTF-8"
+        )
         new_records = 12  # 15 lines in file - 2 empty lines - 1 without free donations
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
@@ -123,7 +125,7 @@ class TestImport:
 
     def test_invalid_input(self, user, testapp):
         """Tests an invalid import the app cannot fix automaticaly"""
-        input_data = Path("tests/data/invalid_import.txt").read_text()
+        input_data = Path("tests/data/invalid_import.txt").read_text(encoding="UTF-8")
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
@@ -148,7 +150,7 @@ class TestImport:
         assert Batch.query.count() == existing_batches
 
     def test_invalid_input_invalid_rcs(self, user, testapp):
-        input_data = Path("tests/data/invalid_rc.txt").read_text()
+        input_data = Path("tests/data/invalid_rc.txt").read_text(encoding="UTF-8")
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
@@ -172,7 +174,7 @@ class TestImport:
         assert Batch.query.count() == existing_batches
 
     def test_valid_manual_input(self, user, testapp):
-        input_data = Path("tests/data/valid_import.txt").read_text()
+        input_data = Path("tests/data/valid_import.txt").read_text(encoding="UTF-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.filter(
@@ -221,7 +223,7 @@ class TestImport:
         ),
     )
     def test_valid_import_with_multiple_rc(self, input_file, user, testapp):
-        input_data = Path(input_file).read_text()
+        input_data = Path(input_file).read_text(encoding="UTF-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
@@ -244,7 +246,9 @@ class TestImport:
         # three lines in the input file end with zero and should
         # be automatically ommited from the import
         ends_with_zero = 3
-        input_data = Path("tests/data/valid_import_zeroes.txt").read_text()
+        input_data = Path("tests/data/valid_import_zeroes.txt").read_text(
+            encoding="UTF-8"
+        )
         new_records = len(input_data.strip().splitlines()) - ends_with_zero
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
