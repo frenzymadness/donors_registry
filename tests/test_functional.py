@@ -453,10 +453,11 @@ class TestBatch:
         """Just a simple test that the detail page loads for some random donors"""
         login(user, testapp)
         res = testapp.get(url_for("batch.batch_list"))
+        format_time = testapp.app.jinja_env.filters["format_time"]
         assert res.status_code == 200
         batch = Batch.query.get(batch_id)
         assert f">{batch.id}</a></td>" in res
-        assert f"<td>{batch.imported_at}</td>" in res
+        assert f"<td>{format_time(batch.imported_at)}</td>" in res
         assert "<td></td>" not in res
 
     @pytest.mark.parametrize("unused", range(1, 6))

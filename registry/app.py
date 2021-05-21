@@ -34,6 +34,10 @@ def create_app(config_object="registry.settings"):
     def page_not_found(e):
         return render_template("404.html"), 404
 
+    @app.template_filter("format_time")
+    def format_time(date, format="%d.%m.%Y %H:%M:%S"):
+        return date.strftime(format)
+
     return app
 
 
