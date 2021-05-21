@@ -478,6 +478,43 @@ class TestMedals:
         assert getattr(do, "awarded_medal_" + medal.slug) is True
         assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is not None
 
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    def test_medal_amount(self, user, testapp, rodne_cislo):
+        do = DonorsOverview.query.get(rodne_cislo)
+        medals = Medals.query.all()
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+
+        medal_amount = 0
+        for medal_slug in [medal.slug for medal in medals]:
+            if getattr(do, "awarded_medal_" + medal_slug):
+                medal_amount += 1
+
+        assert medal_amount == len(re.findall('title="Odebrat medaili"', res.text))
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    def test_medal_eligibility(self, user, testapp, db, rodne_cislo):
+        do = DonorsOverview.query.get(rodne_cislo)
+        medals = Medals.query.all()
+        awarded_medals = AwardedMedals.query.filter(
+            AwardedMedals.rodne_cislo == rodne_cislo
+        ).all()
+        for awarded_medal in awarded_medals:
+            db.session.delete(awarded_medal)
+        db.session.commit()
+        DonorsOverview.refresh_overview()
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        el_medal_amount = 0
+        unel_medal_amount = 0
+        for medal in medals:
+            if do.donation_count_total >= medal.minimum_donations:
+                el_medal_amount += 1
+            else:
+                unel_medal_amount += 1
+        assert el_medal_amount == len(re.findall('title="Udělit medaili"', res.text))
+        assert unel_medal_amount == len(re.findall("(Nemá nárok)", res.text))
+
 
 class TestDetail:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(50))
