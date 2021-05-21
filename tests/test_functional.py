@@ -150,7 +150,7 @@ class TestImport:
         assert Batch.query.count() == existing_batches
 
     def test_invalid_input_invalid_rcs(self, user, testapp):
-        input_data = Path("tests/data/invalid_rc.txt").read_text(encoding="UTF-8")
+        input_data = Path("tests/data/invalid_rc.txt").read_text(encoding="utf-8")
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
         login(user, testapp)
