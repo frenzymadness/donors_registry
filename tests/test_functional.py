@@ -94,7 +94,7 @@ class TestImport:
         """Tests an input file the import machinery should be able
         repair automatically without any manual assistance from user"""
         input_data = Path("tests/data/repairable_import.txt").read_text(
-            encoding="UTF-8"
+            encoding="utf-8"
         )
         new_records = 12  # 15 lines in file - 2 empty lines - 1 without free donations
         existing_records = Record.query.count()
