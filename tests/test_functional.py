@@ -236,6 +236,36 @@ class TestImport:
         assert Record.query.count() == existing_records + new_records
         assert Batch.query.count() == existing_batches + 1
 
+    def test_empty_input(self, user, testapp):
+        """Regression test for issue #118"""
+        existing_batches = Batch.query.count()
+
+        # Test regular empty input
+        login(user, testapp)
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["input_data"] = ""
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert "Vstupní data z odběrného místa - Chybí vstupní data" in res
+        assert Batch.query.count() == existing_batches
+
+        # Test empty input for data repair form
+        existing_batches = Batch.query.count()
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["input_data"] = "invalid"
+        res = form.submit()
+
+        form = res.form
+        form["invalid_lines"] = ""
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert "Vstupní data z odběrného místa - Chybí vstupní data" in res
+        assert Batch.query.count() == existing_batches
+
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
