@@ -35,15 +35,55 @@ class TestPublicInterface:
         assert "Evidence dárců ČČK Frýdek-Místek" in res
         assert res.status_code == 200
 
-    def test_pages_401(self, testapp, db):
+
+class TestErrorInterface:
+    """Test 404 and 401 pages"""
+
+    values_404 = [
+        5005165649,
+        5055172826,
+        0,
+        "hello",
+        "aa",
+    ]
+
+    endpoints_keys_404 = (
+        ("donor.detail", "rc"),
+        ("donor.award_prep", "medal_slug"),
+        ("batch.batch_detail", "id"),
+    )
+
+    testcases_404 = {}
+    for endpoint, key in endpoints_keys_404:
+        for value in values_404:
+            testname = f"{endpoint}-{value}"
+            testcases_404[testname] = {
+                "endpoint": endpoint,
+                "kwargs": {key: value},
+            }
+
+    @pytest.mark.parametrize("case_name", testcases_404)
+    def test_dynamic_urls_404(self, user, testapp, case_name):
+        login(user, testapp)
+        case = self.testcases_404[case_name]
+        res = testapp.get(url_for(case["endpoint"], **case["kwargs"]), status=404)
+
+        assert res.status_code == 404
+        assert "404 Stránka nenalezena" in res.text
+
+    testcases_401 = [
+        ("batch.import_data", {}),
+        ("batch.batch_list", {}),
+        ("batch.batch_detail", {"id": 1}),
+        ("batch.download_batch", {"id": 1}),
+        ("donor.overview", {}),
+        ("donor.award_prep", {"medal_slug": "br"}),
+    ]
+
+    @pytest.mark.parametrize(("endpoint, kwargs"), testcases_401)
+    def test_pages_401(self, testapp, endpoint, kwargs):
         """Test pages which requires login."""
-        testapp.get(url_for("batch.import_data"), status=401)
-        testapp.get(url_for("donor.overview"), status=401)
-        testapp.get(url_for("donor.award_prep", medal_slug="br"), status=401)
-        testapp.get(url_for("batch.batch_list"), status=401)
-        testapp.get(url_for("batch.batch_detail", id=1), status=401)
-        testapp.get(url_for("batch.download_batch", id=1), status=401)
-        testapp.get(url_for("donor.show_ignored"), status=401)
+        testapp.get(url_for(endpoint, **kwargs), status=401)
 
 
 class TestLoggingIn:
@@ -546,22 +586,6 @@ class TestDetail:
         assert "Poznámka uložena." in res
         assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
         assert Note.query.count() == existing_notes + 1
-
-    @pytest.mark.parametrize(
-        "rodne_cislo",
-        [
-            "5005165649",
-            "5055172826",
-            "ahoj",
-            444,
-        ],
-    )
-    def test_non_exist_rc(self, user, testapp, rodne_cislo):
-        login(user, testapp)
-        res = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=404)
-
-        assert res.status_code == 404
-        assert "404 Stránka nenalezena" in res.text
 
 
 class TestIgnore:
