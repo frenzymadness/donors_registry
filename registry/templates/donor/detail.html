@@ -1,4 +1,42 @@
 {% extends "layout.html" %}
+{% block css %}
+<style>
+    #donorsOverrideForm {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    #donorsOverrideForm div {
+        background-color: #0000000d;
+        flex-grow: 1;
+        margin-top: 12px;
+    }
+
+    #donorsOverrideForm label {
+        color: white;
+        background-color: #343a40;
+        font-weight: bold;
+        width: 100%;
+        margin: 0;
+        padding: 12px;
+    }
+
+    #donorsOverrideForm input {
+        margin: 6px;
+        width: calc(100% - 12px);
+    }
+
+    #donorsOverrideForm .btn_container {
+        flex-grow: unset;
+    }
+    #donorsOverrideForm .btn_container label {
+        padding: 12px 0;
+    }
+    #donorsOverrideForm .btn_container button {
+        margin: 6px 0;
+    }
+</style>
+{% endblock %}
 {% block content %}
 
 
@@ -149,6 +187,51 @@
     </div>
 
 </div>
+
+<h2>Přepsání údajů</h2>
+{% with form=donors_override_form %}
+<form id="donorsOverrideForm" action="/override/" method="POST">
+    {{ form.csrf_token }}
+    <div style="flex-grow: 8;">
+        <label for="rodne_cislo">Rodné číslo</label>
+        {{ form.rodne_cislo(readonly=True, size=8, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 8;">
+        <label for="first_name">Jméno</label>
+        {{ form.first_name(size=8, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 8;">
+        <label for="last_name">Příjmení</label>
+        {{ form.last_name(size=8, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 10;">
+        <label for="address">Adresa</label>
+        {{ form.address(size=10, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 8;">
+        <label for="city">Město</label>
+        {{ form.city(size=8, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 3;">
+        <label for="postal_code">PSČ</label>
+        {{ form.postal_code(size=3, class_="form-control") }}
+    </div>
+    <div style="flex-grow: 3;">
+        <label for="kod_pojistovny">Pojišťovna</label>
+        {{ form.kod_pojistovny(size=3, class_="form-control") }}
+    </div>
+
+    <div class="btn_container">
+        <label>&nbsp;</label>
+        <button class="btn btn-success" type="submit" name="save_btn" title="Uložit výjimku">✔</button>
+    </div>
+
+    <div class="btn_container">
+        <label>&nbsp;</label>
+        <button class="btn btn-danger" type="submit" name="delete_btn" title="Smazat výjimku">🗑</button>
+    </div>
+</form>
+{% endwith %}
 
 
 <h2>Historie importů</h2>

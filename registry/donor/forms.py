@@ -2,7 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
-from registry.donor.models import AwardedMedals
+from registry.donor.models import AwardedMedals, DonorsOverride
+from registry.utils import NumericValidator
 
 
 class RemoveMedalForm(FlaskForm):
@@ -46,3 +47,41 @@ class IgnoreDonorForm(FlaskForm):
 
 class RemoveFromIgnoredForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
+
+
+class DonorsOverrideForm(FlaskForm):
+    rodne_cislo = StringField("Rodné číslo", validators=[DataRequired()])
+    first_name = StringField("Jméno")
+    last_name = StringField("Příjmení")
+    address = StringField("Adresa")
+    city = StringField("Město")
+    postal_code = StringField("PSČ", validators=[NumericValidator(5)])
+    kod_pojistovny = StringField("Pojišťovna", validators=[NumericValidator(3)])
+
+    _fields_ = [
+        "rodne_cislo",
+        "first_name",
+        "last_name",
+        "address",
+        "city",
+        "postal_code",
+        "kod_pojistovny",
+    ]
+
+    def init_fields(self, rodne_cislo):
+        override = DonorsOverride.query.get(rodne_cislo)
+
+        if override is not None:
+            for field in self._fields_:
+                data = getattr(override, field)
+                if data is not None:
+                    getattr(self, field).data = data
+
+        self.rodne_cislo.data = rodne_cislo
+
+    def get_field_data(self):
+        field_data = {}
+        for field in self._fields_:
+            field_data[field] = getattr(self, field).data or None
+
+        return field_data

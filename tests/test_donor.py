@@ -87,3 +87,47 @@ class TestIgnore:
 
         do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=200)
         assert do.status_code == 200
+
+
+class TestOverride:
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_override(self, user, testapp, rodne_cislo):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+
+        old_data = DonorsOverview.query.get(rodne_cislo)
+
+        # Test save
+        form = res.forms["donorsOverrideForm"]
+        form["first_name"] = "--First--"
+        form["last_name"] = "--Last--"
+        res = form.submit("save_btn").follow()
+
+        assert "Výjimka uložena" in res
+        assert "Jméno: --First--" in res
+        assert "Příjmení: --Last--" in res
+
+        # Test repeated save
+        form = res.forms["donorsOverrideForm"]
+        res = form.submit("save_btn").follow()
+
+        assert "Výjimka uložena" in res
+        assert "Jméno: --First--" in res
+        assert "Příjmení: --Last--" in res
+
+        # Test removing one field's value but keeping the other
+        form = res.forms["donorsOverrideForm"]
+        form["first_name"] = ""
+        res = form.submit("save_btn").follow()
+
+        assert "Výjimka uložena" in res
+        assert ("Jméno: " + str(old_data.first_name)) in res
+        assert "Příjmení: --Last--" in res
+
+        # Test deleting the override
+        form = res.forms["donorsOverrideForm"]
+        res = form.submit("delete_btn").follow()
+
+        assert "Výjimka smazána" in res
+        assert ("Jméno: " + str(old_data.first_name)) in res
+        assert ("Příjmení: " + str(old_data.last_name)) in res
