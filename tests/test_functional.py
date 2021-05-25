@@ -43,6 +43,7 @@ class TestPublicInterface:
         testapp.get(url_for("batch.batch_list"), status=401)
         testapp.get(url_for("batch.batch_detail", id=1), status=401)
         testapp.get(url_for("batch.download_batch", id=1), status=401)
+        testapp.get(url_for("donor.show_ignored"), status=401)
 
 
 class TestLoggingIn:
@@ -631,5 +632,7 @@ class TestBatch:
         login(user, testapp)
         res = testapp.get(url_for("batch.batch_detail", id=7))
         batch_file = res.click(description="Stáhnout soubor s dávkou")
-        file_to_compare = Path("tests/data/batch7_downloaded.txt").read_text()
+        file_to_compare = Path("tests/data/batch7_downloaded.txt").read_text(
+            encoding="utf-8"
+        )
         assert batch_file.text == file_to_compare
