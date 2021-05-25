@@ -1,0 +1,26 @@
+<div class="modal" tabindex="-1" id="titleModal" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body" style="white-space: pre-wrap;">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready( function() {
+        $('#titleModal').on('show.bs.modal', function(event) {
+            $(this).find('.modal-body').text($(event.relatedTarget).attr('title'));
+        });
+    } );
+</script>
+
+<style>
+    [data-toggle=modal] {
+        cursor: default;
+    }
+</style>
