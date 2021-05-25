@@ -89,15 +89,15 @@ class DonorsOverview(db.Model):
         """Returns a filter to pass to `query.filter()` for a given search string"""
         conditions_all = [
             [
-                DonorsOverview.rodne_cislo.like(f"%{part}%"),
-                DonorsOverview.first_name.like(f"%{part}%"),
-                DonorsOverview.last_name.like(f"%{part}%"),
-                DonorsOverview.address.like(f"%{part}%"),
-                DonorsOverview.city.like(f"%{part}%"),
-                DonorsOverview.postal_code.like(f"%{part}%"),
-                DonorsOverview.kod_pojistovny.like(f"%{part}%"),
+                DonorsOverview.rodne_cislo.contains(part, autoescape=True),
+                DonorsOverview.first_name.contains(part, autoescape=True),
+                DonorsOverview.last_name.contains(part, autoescape=True),
+                DonorsOverview.address.contains(part, autoescape=True),
+                DonorsOverview.city.contains(part, autoescape=True),
+                DonorsOverview.postal_code.contains(part, autoescape=True),
+                DonorsOverview.kod_pojistovny.contains(part, autoescape=True),
             ]
-            for part in search_str.split(" ")
+            for part in search_str.split()
         ]
 
         # We want an OR between columns (jmeno = Jan OR prijmeni = Jan) and an AND
