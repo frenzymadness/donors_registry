@@ -1,12 +1,4 @@
 {% extends "layout.html" %}
-{% block css %}
-<style>
-    [data-toggle=modal] {
-        cursor: default;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
 <h1>Přehled dárců</h1>
@@ -26,19 +18,6 @@
     </tbody>
 </table>
 
-<div class="modal" tabindex="-1" id="donationDetailsModal" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-body" style="white-space: pre-wrap;">
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-dismiss="modal">Zavřít</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 {% endblock %}
 
 {% block js %}
@@ -49,7 +28,7 @@ Krevní centrum: ${row.donation_count_fm_bubenik}
 Třinec: ${row.donation_count_trinec}
 Moje Plazma: ${row.donation_count_mp}
 Jinde: ${row.donation_count_manual}`;
-        return `<span data-toggle="modal" data-target="#donationDetailsModal" title="${title}">❓</span>`;
+        return `<span data-toggle="modal" data-target="#titleModal" title="${title}">❓</span>`;
     }
 
     function last_award_name(row) {
@@ -96,11 +75,8 @@ Jinde: ${row.donation_count_manual}`;
                 "visible": false
             }]
         });
-
-        // set the modal's text according to the element the user clicked on
-        $('#donationDetailsModal').on('show.bs.modal', function(event) {
-            $(this).find('.modal-body').text($(event.relatedTarget).attr('title'));
-        });
     } );
 </script>
+
+{% include "title_popup.html" %}
 {% endblock %}
