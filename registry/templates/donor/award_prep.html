@@ -14,13 +14,13 @@
 <table id="overview" class="table table-striped table-hovered table-hover">
     <thead class="thead-dark">
         <tr>
-            <th class="rodne_cislo">Rodné číslo</th>
-            <th>Jméno</th>
-            <th>Přijmení</th>
-            <th>Adresa</th>
-            <th>Město</th>
-            <th>PSČ</th>
-            <th>Pojišťovna</th>
+            <th class="rodne_cislo" data-name="rodne-cislo">Rodné číslo</th>
+            <th class="first_name">Jméno</th>
+            <th class="last_name">Přijmení</th>
+            <th class="address">Adresa</th>
+            <th class="city">Město</th>
+            <th class="postal_code">PSČ</th>
+            <th class="kod_pojistovny">Pojišťovna</th>
             <th>Darování</th>
             <th class="sign">Podpis</th>
             <th class="chosen">Vybrat vše <input type="checkbox" onClick="toggle(this)" checked=true></th>
@@ -51,33 +51,42 @@
 {% endblock %}
 
 {% block js %}
+<script src="/static/donors_override_highlight.js"></script>
 <script type="text/javascript">
     $(document).ready( function () {
-        $('#overview').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
-            },
-            buttons: [{
-                extend: 'print',
-                text: 'Tisk prezenční listiny',
-                title: '',
-                exportOptions: {
-                    columns: [...Array(9).keys()]
-                }
-            }],
-            dom: "Blfrtip",
-            columnDefs: [{
+        const columnDefs =  [{
                 "targets": "rodne_cislo",
-                "render": function ( data, type, row, meta ) {
-                  return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row[0]) + "'>" + row[0] + "</a>";}
-            },{
+                "render": function (data, type, row, meta) {
+                    if (type == "display")
+                        return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row[0]) + "'>" + row[0] + "</a>"
+                    else
+                        return data;
+                }
+            }, {
                 "targets": "sign",
                 "visible": false
-            },{
+            }, {
                 "targets": "chosen",
                 "orderable": false
-            }]
-        });
+            }];
+
+        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", columnDefs, function() {
+            $('#overview').DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
+                },
+                buttons: [{
+                    extend: 'print',
+                    text: 'Tisk prezenční listiny',
+                    title: '',
+                    exportOptions: {
+                        columns: [...Array(9).keys()]
+                    }
+                }],
+                dom: "Blfrtip",
+                columnDefs: columnDefs
+            });
+        });        
     } );
 
     function toggle(source) {

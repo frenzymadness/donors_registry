@@ -19,6 +19,7 @@
 {% endblock %}
 
 {% block js %}
+<script src="/static/donors_override_highlight.js"></script>
 <script type="text/javascript">
     function create_tooltip_for_donations(data) {
         var title = ``;
@@ -29,7 +30,31 @@
     }
 
     $(document).ready( function () {
-        $('#overview').DataTable({
+        const columnDefs = [
+            {
+                "targets": "rodne_cislo",
+                "render": function (data, type, row, meta) {
+                    if (type == "display")
+                        return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>"
+                    else
+                        return data;
+                }
+            }, {
+                "targets": "donations",
+                "render": function (data, type, row, meta) {
+                    return data.total + create_tooltip_for_donations(data);
+                }
+            },
+        ];
+
+        let dataTable = null;
+        
+        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", columnDefs, function() {
+            if (dataTable !== null)
+                dataTable.draw();
+        });
+
+        dataTable = $('#overview').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
             },
@@ -41,15 +66,7 @@
                     {"data": "{{ column_class }}"},
                 {%- endfor %}
             ],
-            "columnDefs": [{
-                "targets": "rodne_cislo",
-                "render": function ( data, type, row, meta ) {
-                  return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
-            },{
-                "targets": "donations",
-                "render": function ( data, type, row, meta ) {
-                  return data.total + create_tooltip_for_donations(data);}
-            },]
+            "columnDefs": columnDefs
         });
     } );
 </script>
