@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from datatables import ColumnDT, DataTables
 from flask import (
     Blueprint,
@@ -14,8 +16,14 @@ from sqlalchemy import and_
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 
-from .forms import AwardMedalForm, NoteForm, RemoveMedalForm
-from .models import AwardedMedals, DonorsOverview, Note, Record
+from .forms import (
+    AwardMedalForm,
+    IgnoreDonorForm,
+    NoteForm,
+    RemoveFromIgnored,
+    RemoveMedalForm,
+)
+from .models import AwardedMedals, DonorsOverview, IgnoredDonors, Note, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
@@ -172,3 +180,45 @@ def save_note():
     db.session.commit()
     flash("Poznámka uložena.", "success")
     return redirect(url_for("donor.detail", rc=note_form.rodne_cislo.data))
+
+
+@blueprint.get("/donor/ignore")
+@login_required
+def show_ignored():
+    ignored = IgnoredDonors.query.all()
+    return render_template(
+        "donor/ignore_donor.html",
+        ignore_form=IgnoreDonorForm(),
+        ignored=ignored,
+        unignore_form=RemoveFromIgnored(),
+    )
+
+
+@blueprint.post("/donor/ignore/add")
+@login_required
+def ignore_donor():
+    ignore_form = IgnoreDonorForm()
+    if ignore_form.validate_on_submit():
+        ignored = IgnoredDonors(
+            rodne_cislo=ignore_form.rodne_cislo.data,
+            reason=ignore_form.reason.data,
+            ignored_since=datetime.now(),
+        )
+        db.session.add(ignored)
+        db.session.commit()
+        DonorsOverview.remove_ignored()
+        flash("Dárce ignorován.", "success")
+        return redirect(url_for("donor.show_ignored"))
+
+
+@blueprint.post("/donor/ignore/remove")
+@login_required
+def unignore_donor():
+    unignore_form = RemoveFromIgnored()
+    if unignore_form.validate_on_submit():
+        ignored_donor = IgnoredDonors.query.get(unignore_form.rodne_cislo.data)
+        db.session.delete(ignored_donor)
+        db.session.commit()
+        DonorsOverview.refresh_overview()
+        flash("Zrušena ignorace.", "success")
+        return redirect(url_for("donor.show_ignored"))
