@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+<h1>Přehled ignorovaných dárců</h1>
+{% with form=ignore_form %}
+
+<div class="row">
+    <form id="ignoreDonorForm" action="{{ url_for('donor.ignore_donor') }}" method="POST" class="form-inline mb-md-3" role="form">
+    {{ form.csrf_token }}
+        {{ form.rodne_cislo(placeholder="Rodné číslo", class_="form-control mr-sm-2 my-auto") }} {{ form.reason(placeholder="Důvod ignorace",
+        class_="form-control mr-sm-2 my-auto") }}
+        <button class="btn btn-success" type="submit">Ignorovat</button>
+    </form>
+</div>
+
+{% endwith %}
+
+<div class="row">
+    <table class="table">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Rodné číslo</th>
+                <th scope="col">Důvod ignorace</th>
+                <th scope="col">Datum</th>
+                <th scope="col">Zrušit ignorovaného</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for donor in ignored %}
+            <tr>
+                <td>{{ donor.rodne_cislo }}</td>
+                <td>{{ donor.reason }}</td>
+                <td>{{ donor.ignored_since|format_time }}</td>
+                <td>
+                    {% with form=unignore_form %}
+                    <form id="unignoreDonorForm" action="{{ url_for('donor.unignore_donor') }}" method="POST"
+                        class="form-inline" role="form">
+                        <div class="form-group">
+                            {{ form.csrf_token }}
+                            {{ form.rodne_cislo(value=donor.rodne_cislo) }}
+                            <input type="submit" class="btn btn-sm btn-danger" value="🗑">
+                        </div>
+                    </form>
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

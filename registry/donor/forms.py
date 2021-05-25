@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, HiddenField, IntegerField, StringField, TextAreaField
+from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
 from registry.donor.models import AwardedMedals
@@ -40,5 +40,9 @@ class NoteForm(FlaskForm):
 
 
 class IgnoreDonorForm(FlaskForm):
-    rodne_cislo = IntegerField("Rodné číslo", validators=[DataRequired()])
+    rodne_cislo = StringField("Rodné číslo", validators=[DataRequired()])
     reason = StringField("Důvod k ignoraci", validators=[DataRequired()])
+
+
+class RemoveFromIgnored(FlaskForm):
+    rodne_cislo = HiddenField(validators=[DataRequired()])

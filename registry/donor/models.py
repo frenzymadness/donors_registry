@@ -64,7 +64,7 @@ class IgnoredDonors(db.Model):
     __tablename__ = "ignored_donors"
     rodne_cislo = db.Column(db.String(10), primary_key=True)
     reason = db.Column(db.String, nullable=False)
-    ignored_date = db.Column(db.DateTime, nullable=False)
+    ignored_since = db.Column(db.DateTime, nullable=False)
 
 
 class AwardedMedals(db.Model):
@@ -109,7 +109,7 @@ class DonorsOverview(db.Model):
     @classmethod
     def remove_ignored(cls):
         db.session.execute(
-            """DELETE * FROM "donors_overview"
+            """DELETE FROM "donors_overview"
 WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
 """
         )
@@ -366,6 +366,7 @@ FROM (
     JOIN "records"
         ON "records"."id" = "recent_records"."record_id";"""
         )
+        cls.remove_ignored()
         db.session.commit()
 
 
