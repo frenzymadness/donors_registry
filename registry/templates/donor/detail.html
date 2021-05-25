@@ -150,6 +150,37 @@
 
 </div>
 
+<h2>Přepsání údajů</h2>
+{% with form=donors_override_form %}
+<form id="donorsOverrideForm" action="{{ url_for('donor.save_override') }}" method="POST">
+    {{ form.csrf_token }}
+    <table class="table table-striped table-hovered table-hover">
+        <thead class="thead-dark">
+            <th>Rodné číslo</th>
+            <th>Jméno</th>
+            <th>Příjmení</th>
+            <th>Adresa</th>
+            <th>Město</th>
+            <th>PSČ</th>
+            <th>Pojišťovna</th>
+            <th></th>
+        </thead>
+        <tbody>
+            <td>{{ form.rodne_cislo(readonly=True, size=8, class_="form-control") }}</td>
+            <td>{{ form.first_name(size=8, class_="form-control") }}</td>
+            <td>{{ form.last_name(size=8, class_="form-control") }}</td>
+            <td>{{ form.address(size=10, class_="form-control") }}</td>
+            <td>{{ form.city(size=8, class_="form-control") }}</td>
+            <td>{{ form.postal_code(size=3, class_="form-control") }}</td>
+            <td>{{ form.kod_pojistovny(size=3, class_="form-control") }}</td>
+            <td>
+                <button name="save_btn" class="btn btn-success" type="submit" title="Uložit výjimku">✔</button>
+                <button name="delete_btn" class="btn btn-danger" type="submit" title="Smazat výjimku">🗑</button>
+            </td>
+        </tbody>
+    </table>
+</form>
+{% endwith %}
 
 <h2>Historie importů</h2>
 

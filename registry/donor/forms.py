@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
-from registry.donor.models import AwardedMedals
+from registry.donor.models import AwardedMedals, DonorsOverride
 
 
 class RemoveMedalForm(FlaskForm):
@@ -46,3 +46,73 @@ class IgnoreDonorForm(FlaskForm):
 
 class RemoveFromIgnoredForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
+
+
+class DonorsOverrideForm(FlaskForm):
+    rodne_cislo = StringField("Rodné číslo", validators=[DataRequired()])
+    first_name = StringField("Jméno")
+    last_name = StringField("Příjmení")
+    address = StringField("Adresa")
+    city = StringField("Město")
+    postal_code = StringField("PSČ")
+    kod_pojistovny = StringField("Pojišťovna")
+
+    _fields_ = [
+        "rodne_cislo",
+        "first_name",
+        "last_name",
+        "address",
+        "city",
+        "postal_code",
+        "kod_pojistovny",
+    ]
+
+    def validate(self):
+        initial_validation = super(DonorsOverrideForm, self).validate()
+        if not initial_validation:
+            return False
+
+        valid = True
+
+        if self.postal_code.data:
+            self.postal_code.data = self.postal_code.data.replace(" ", "")
+            if not self.postal_code.data.isdigit():
+                self.postal_code.errors.append(
+                    "PSČ může obsahovat pouze číslice a mezeru"
+                )
+                valid = False
+            if len(self.postal_code.data) != 5:
+                self.postal_code.errors.append("PSČ musí mít 5 znaků kromě mezer")
+                valid = False
+
+        if self.kod_pojistovny.data:
+            if not self.kod_pojistovny.data.isdigit():
+                self.kod_pojistovny.errors.append("Kód pojišťovny musí být číslo")
+                valid = False
+            if len(self.kod_pojistovny.data) != 3:
+                self.kod_pojistovny.errors.append("Kód pojišťovny musí být třímístný")
+                valid = False
+
+        self._get_field_data()
+
+        return valid
+
+    def init_fields(self, rodne_cislo):
+        override = DonorsOverride.query.get(rodne_cislo)
+
+        if override is not None:
+            for field in self._fields_:
+                data = getattr(override, field)
+                if data is not None:
+                    getattr(self, field).data = data
+
+        self.rodne_cislo.data = rodne_cislo
+
+        return self
+
+    def _get_field_data(self):
+        self.field_data = {}
+        for field in self._fields_:
+            data = getattr(self, field).data
+            if data != "":
+                self.field_data[field] = data

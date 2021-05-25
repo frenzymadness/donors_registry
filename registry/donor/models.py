@@ -445,3 +445,14 @@ class Note(db.Model):
     __tablename__ = "notes"
     rodne_cislo = db.Column(db.String(10), primary_key=True)
     note = db.Column(db.Text)
+
+
+class DonorsOverride(db.Model):
+    __tablename__ = "donors_override"
+    rodne_cislo = db.Column(db.String(10), primary_key=True)
+    first_name = db.Column(db.String)
+    last_name = db.Column(db.String)
+    address = db.Column(db.String)
+    city = db.Column(db.String)
+    postal_code = db.Column(db.String(5))
+    kod_pojistovny = db.Column(db.String(3))

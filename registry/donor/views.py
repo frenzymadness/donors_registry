@@ -15,15 +15,25 @@ from sqlalchemy import and_
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
+from registry.utils import flash_errors
 
 from .forms import (
     AwardMedalForm,
+    DonorsOverrideForm,
     IgnoreDonorForm,
     NoteForm,
     RemoveFromIgnoredForm,
     RemoveMedalForm,
 )
-from .models import AwardedMedals, DonorsOverview, IgnoredDonors, Note, Record
+from .models import (
+    AwardedMedals,
+    DonorsOverride,
+    DonorsOverview,
+    IgnoredDonors,
+    Note,
+    Record,
+)
+
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
@@ -105,6 +115,8 @@ def detail(rc):
     note_form = NoteForm()
     if overview.note:
         note_form.note.data = overview.note.note
+    donors_override_form = DonorsOverrideForm().init_fields(rc)
+
     return render_template(
         "donor/detail.html",
         overview=overview,
@@ -115,6 +127,7 @@ def detail(rc):
         remove_medal_form=remove_medal_form,
         award_medal_form=award_medal_form,
         note_form=note_form,
+        donors_override_form=donors_override_form,
     )
 
 
@@ -263,3 +276,29 @@ def unignore_donor():
     else:
         flash("Při odebírání ze seznamu ignorovaných dárců došlo k chybě", "danger")
     return redirect(url_for("donor.show_ignored"))
+
+
+@blueprint.post("/override")
+@login_required
+def save_override():
+    override_form = DonorsOverrideForm()
+    delete = True if "delete_btn" in request.form else False
+
+    if override_form.validate_on_submit():
+        if not delete:
+            override = DonorsOverride(**override_form.field_data)
+            db.session.add(override)
+            db.session.commit()
+            flash("Výjimka uložena", "success")
+        else:
+            override = DonorsOverride.query.get(override_form.rodne_cislo.data)
+            if override is not None:
+                db.session.delete(override)
+                db.session.commit()
+                flash("Výjimka smazána", "success")
+            else:
+                flash("Není co mazat", "warning")
+    else:
+        flash_errors(override_form)
+
+    return redirect(url_for("donor.detail", rc=override_form.rodne_cislo.data))
