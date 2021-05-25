@@ -6,20 +6,20 @@
 
   <ul class="navbar-nav mr-auto">
     {% if current_user and current_user.is_authenticated %}
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
-        Dárci
-      </a>
-      <div class="dropdown-menu">
-          <a class="dropdown-item" href="{{ url_for('donor.overview') }}">Přehled dárců</a>
-          <a class="dropdown-item" href="{{ url_for('donor.show_ignored') }}">Ignorovaní dárci</a>
-      </div>
-    </li>
     <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('batch.batch_list') }}">Přehled importů</a>
+      <a class="nav-link" href="{{ url_for('donor.overview') }}">Přehled dárců</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('batch.import_data') }}">Import dat</a>
+    </li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+        Přehledy
+      </a>
+      <div class="dropdown-menu">
+          <a class="dropdown-item" href="{{ url_for('donor.show_ignored') }}">Ignorovaní dárci</a>
+          <a class="dropdown-item" href="{{ url_for('batch.batch_list') }}">Přehled importů</a>
+      </div>
     </li>
 
     <li class="nav-item dropdown">
