@@ -278,7 +278,7 @@ def unignore_donor():
     return redirect(url_for("donor.show_ignored"))
 
 
-@blueprint.post("/override")
+@blueprint.post("/override/")
 @login_required
 def save_override():
     override_form = DonorsOverrideForm()
@@ -306,3 +306,14 @@ def save_override():
         flash_errors(override_form)
 
     return redirect(url_for("donor.detail", rc=override_form.rodne_cislo.data))
+
+
+@blueprint.get("/override/all")
+@login_required
+def get_overrides():
+    overrides_dict = {}
+
+    for override in DonorsOverride.query.all():
+        overrides_dict[str(override.rodne_cislo)] = override.to_dict()
+
+    return jsonify(overrides_dict)

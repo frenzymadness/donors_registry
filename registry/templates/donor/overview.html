@@ -29,7 +29,54 @@
     }
 
     $(document).ready( function () {
-        $('#overview').DataTable({
+        const columnDefs = [
+            {
+                "targets": "rodne_cislo",
+                "render": function (data, type, row, meta) {
+                    if (type == "display")
+                        return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>"
+                    else
+                        return data;
+                }
+            }, {
+                "targets": "donations",
+                "render": function (data, type, row, meta) {
+                    return data.total + create_tooltip_for_donations(data);
+                }
+            },
+        ];
+
+        // Highlight fields that have a corresponding record in donors_override
+        let overrides = {}; // Will be set by an AJAX request
+
+        for (const column of ["first_name", "last_name", "address", "city", "postal_code", "kod_pojistovny"]) {
+            columnDefs.push({
+                "targets": column,
+                "render": function (data, type, row, meta) {
+                    // We only want to highlight the value that is displayed
+                    // to the user, not the ones used for searching and sorting
+                    if (type != "display") return data;
+
+                    if (overrides.hasOwnProperty(row.rodne_cislo) && overrides[row.rodne_cislo][column]) {
+                        return `<mark title="Tato hodnota byla ručně nastavena">${data}</mark>`;
+                    } else {
+                        return data;
+                    }
+                }
+            });
+        }
+
+        // Forward declaration of the DataTable
+        let dataTable = null;
+
+        // Request the list of overrides
+        $.getJSON("{{ url_for('donor.get_overrides') }}", function (data) {
+            overrides = data;
+            if (dataTable !== null)
+                dataTable.draw();
+        });
+
+        dataTable = $('#overview').DataTable({
             language: {
                 url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
             },
@@ -41,15 +88,7 @@
                     {"data": "{{ column_class }}"},
                 {%- endfor %}
             ],
-            "columnDefs": [{
-                "targets": "rodne_cislo",
-                "render": function ( data, type, row, meta ) {
-                  return "<a href='"+"{{ url_for('donor.detail', rc='REPLACE_ME') }}".replace("REPLACE_ME", row.rodne_cislo) + "'>" + row.rodne_cislo + "</a>";}
-            },{
-                "targets": "donations",
-                "render": function ( data, type, row, meta ) {
-                  return data.total + create_tooltip_for_donations(data);}
-            },]
+            "columnDefs": columnDefs
         });
     } );
 </script>

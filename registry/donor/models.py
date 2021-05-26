@@ -564,3 +564,21 @@ class DonorsOverride(db.Model):
     city = db.Column(db.String)
     postal_code = db.Column(db.String(5))
     kod_pojistovny = db.Column(db.String(3))
+
+    def to_dict(self):
+        result = {}
+        for field in [
+            "rodne_cislo",
+            "first_name",
+            "last_name",
+            "address",
+            "city",
+            "postal_code",
+            "kod_pojistovny",
+        ]:
+            if getattr(self, field) is not None:
+                result[field] = str(getattr(self, field))
+            else:
+                result[field] = None
+
+        return result
