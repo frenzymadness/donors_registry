@@ -581,18 +581,18 @@ class TestIgnore:
         assert random_reason in res.text
         assert "Dárce ignorován." in res.text
 
-        do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=302)
-        assert do.status_code == 302
-        assert rodne_cislo not in do.text
+        do = testapp.get(url_for("donor.detail", rc=rodne_cislo)).follow()
+        assert do.status_code == 200
+        assert "Dárce je ignorován" in do.text
 
-        for index, form in res.forms.items():
+        for _, form in res.forms.items():
             if form.fields["rodne_cislo"][0].value == rodne_cislo:
                 unignore_form = form
         res = unignore_form.submit().follow()
 
         assert rodne_cislo not in res.text
         assert random_reason not in res.text
-        assert "Zrušena ignorace." in res.text
+        assert "Dárce již není ignorován." in res.text
 
         do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=200)
         assert do.status_code == 200

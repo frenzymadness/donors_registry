@@ -82,6 +82,7 @@ def detail(rc):
     overview = DonorsOverview.query.get(rc)
     if not overview:
         if IgnoredDonors.query.get(rc):
+            flash("Dárce je ignorován a proto není jeho detail k dispozici.", "danger")
             return redirect(url_for("donor.show_ignored"))
         return abort(404)
     records = Record.query.filter(Record.rodne_cislo == rc).all()
@@ -230,7 +231,7 @@ def unignore_donor():
         db.session.delete(ignored_donor)
         db.session.commit()
         DonorsOverview.refresh_overview()
-        flash("Zrušena ignorace.", "success")
+        flash("Dárce již není ignorován.", "success")
     else:
-        flash("Při odebírání z ignorovaných došlo k chybě", "danger")
+        flash("Při odebírání ze seznamu ignorovaných dárců došlo k chybě", "danger")
     return redirect(url_for("donor.show_ignored"))
