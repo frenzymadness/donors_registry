@@ -480,15 +480,11 @@ class TestMedals:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_amount(self, user, testapp, rodne_cislo):
-        do = DonorsOverview.query.get(rodne_cislo)
-        medals = Medals.query.all()
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
-
-        medal_amount = 0
-        for medal_slug in [medal.slug for medal in medals]:
-            if getattr(do, "awarded_medal_" + medal_slug):
-                medal_amount += 1
+        medal_amount = AwardedMedals.query.filter(
+            AwardedMedals.rodne_cislo == rodne_cislo
+        ).count()
 
         assert medal_amount == len(re.findall('title="Odebrat medaili"', res.text))
 
@@ -496,11 +492,7 @@ class TestMedals:
     def test_medal_eligibility(self, user, testapp, db, rodne_cislo):
         do = DonorsOverview.query.get(rodne_cislo)
         medals = Medals.query.all()
-        awarded_medals = AwardedMedals.query.filter(
-            AwardedMedals.rodne_cislo == rodne_cislo
-        ).all()
-        for awarded_medal in awarded_medals:
-            db.session.delete(awarded_medal)
+        AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo).delete()
         db.session.commit()
         DonorsOverview.refresh_overview()
         login(user, testapp)
