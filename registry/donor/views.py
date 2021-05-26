@@ -289,12 +289,16 @@ def save_override():
             override = DonorsOverride(**override_form.field_data)
             db.session.add(override)
             db.session.commit()
+
+            DonorsOverview.refresh_overview()
             flash("Výjimka uložena", "success")
         else:
             override = DonorsOverride.query.get(override_form.rodne_cislo.data)
             if override is not None:
                 db.session.delete(override)
                 db.session.commit()
+
+                DonorsOverview.refresh_overview()
                 flash("Výjimka smazána", "success")
             else:
                 flash("Není co mazat", "warning")
