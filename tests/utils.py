@@ -1,9 +1,9 @@
 import csv
 from datetime import datetime
 from functools import lru_cache
-from random import uniform
+from random import choice, uniform
 
-from registry.donor.models import AwardedMedals, Batch, Record
+from registry.donor.models import AwardedMedals, Batch, IgnoredDonors, Record
 from registry.list.models import DonationCenter, Medals
 
 try:
@@ -137,3 +137,21 @@ def get_test_data_df(lines):
     return pandas.read_csv(
         "tests/data/imports.csv", dtype={"RC": str, "PSC": str, "POJISTOVNA": str}
     ).head(lines)
+
+
+def test_data_ignored(db, limit=25):
+    duvody = ["Vysoký věk", "Nemoc", "Test"]
+
+    for index, rodne_cislo in tqdm(
+        enumerate(Record.query.with_entities(Record.rodne_cislo).distinct()),
+        desc="Ignored donors",
+    ):
+        if index > limit:
+            break
+        ignored = IgnoredDonors(
+            rodne_cislo=rodne_cislo[0],
+            reason=choice(duvody),
+            ignored_since=datetime.now(),
+        )
+        db.session.add(ignored)
+    db.session.commit()
