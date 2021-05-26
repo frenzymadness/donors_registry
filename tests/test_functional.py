@@ -4,7 +4,6 @@
 See: http://webtest.readthedocs.org/
 """
 import re
-from datetime import datetime
 from pathlib import Path
 from random import choice, randint
 
@@ -16,7 +15,6 @@ from registry.donor.models import (
     AwardedMedals,
     Batch,
     DonorsOverview,
-    IgnoredDonors,
     Note,
     Record,
 )
