@@ -21,7 +21,7 @@ from .forms import (
     AwardMedalForm,
     IgnoreDonorForm,
     NoteForm,
-    RemoveFromIgnored,
+    RemoveFromIgnoredForm,
     RemoveMedalForm,
 )
 from .models import AwardedMedals, DonorsOverview, IgnoredDonors, Note, Record
@@ -195,7 +195,7 @@ def show_ignored():
         "donor/ignore_donor.html",
         ignore_form=IgnoreDonorForm(),
         ignored=ignored,
-        unignore_form=RemoveFromIgnored(),
+        unignore_form=RemoveFromIgnoredForm(),
     )
 
 
@@ -204,15 +204,18 @@ def show_ignored():
 def ignore_donor():
     ignore_form = IgnoreDonorForm()
     if ignore_form.validate_on_submit():
-        ignored = IgnoredDonors(
-            rodne_cislo=ignore_form.rodne_cislo.data,
-            reason=ignore_form.reason.data,
-            ignored_since=datetime.now(),
-        )
-        db.session.add(ignored)
-        db.session.commit()
-        DonorsOverview.remove_ignored()
-        flash("Dárce ignorován.", "success")
+        if not IgnoredDonors.query.get(ignore_form.rodne_cislo.data):
+            ignored = IgnoredDonors(
+                rodne_cislo=ignore_form.rodne_cislo.data,
+                reason=ignore_form.reason.data,
+                ignored_since=datetime.now(),
+            )
+            db.session.add(ignored)
+            db.session.commit()
+            DonorsOverview.remove_ignored()
+            flash("Dárce ignorován.", "success")
+        else:
+            flash("Dárce již je v seznamu ignorovaných", "danger")
     else:
         flash("Při přidávání do ignorovaných došlo k chybě", "danger")
     return redirect(url_for("donor.show_ignored"))
@@ -221,7 +224,7 @@ def ignore_donor():
 @blueprint.post("/donor/ignore/remove")
 @login_required
 def unignore_donor():
-    unignore_form = RemoveFromIgnored()
+    unignore_form = RemoveFromIgnoredForm()
     if unignore_form.validate_on_submit():
         ignored_donor = IgnoredDonors.query.get(unignore_form.rodne_cislo.data)
         db.session.delete(ignored_donor)

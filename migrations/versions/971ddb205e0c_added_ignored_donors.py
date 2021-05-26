@@ -1,4 +1,4 @@
-"""Přidáni ignorovaní dárci
+"""Added ignored donors
 
 Revision ID: 971ddb205e0c
 Revises: 6fe71f4f1aba
