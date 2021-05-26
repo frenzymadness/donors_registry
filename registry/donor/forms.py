@@ -114,5 +114,7 @@ class DonorsOverrideForm(FlaskForm):
         self.field_data = {}
         for field in self._fields_:
             data = getattr(self, field).data
-            if data != "":
+            if data:
                 self.field_data[field] = data
+            else:
+                self.field_data[field] = None

@@ -287,7 +287,7 @@ def save_override():
     if override_form.validate_on_submit():
         if not delete:
             override = DonorsOverride(**override_form.field_data)
-            db.session.add(override)
+            db.session.merge(override)
             db.session.commit()
 
             DonorsOverview.refresh_overview()
