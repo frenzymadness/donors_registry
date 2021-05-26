@@ -7,7 +7,7 @@
     <form id="ignoreDonorForm" action="{{ url_for('donor.ignore_donor') }}" method="POST" class="form-inline mb-md-3" role="form">
     {{ form.csrf_token }}
         {{ form.rodne_cislo(placeholder="Rodné číslo", class_="form-control mr-sm-2 my-auto") }} {{ form.reason(placeholder="Důvod ignorace",
-        class_="form-control mr-sm-2 my-auto") }}
+        class_="form-control mr-sm-2 my-auto", cols=60, rows=1) }}
         <button class="btn btn-success" type="submit">Ignorovat</button>
     </form>
 </div>
@@ -20,8 +20,8 @@
             <tr>
                 <th scope="col">Rodné číslo</th>
                 <th scope="col">Důvod ignorace</th>
-                <th scope="col">Datum</th>
-                <th scope="col">Zrušit ignorovaného</th>
+                <th scope="col">Ignorováno od</th>
+                <th scope="col">Přestat ignorovat</th>
             </tr>
         </thead>
         <tbody>
