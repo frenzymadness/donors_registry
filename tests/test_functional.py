@@ -4,8 +4,9 @@
 See: http://webtest.readthedocs.org/
 """
 import re
+from datetime import datetime
 from pathlib import Path
-from random import choice
+from random import choice, randint
 
 import pytest
 from flask import url_for
@@ -15,6 +16,7 @@ from registry.donor.models import (
     AwardedMedals,
     Batch,
     DonorsOverview,
+    IgnoredDonors,
     Note,
     Record,
 )
@@ -562,6 +564,40 @@ class TestDetail:
 
         assert res.status_code == 404
         assert "404 Stránka nenalezena" in res.text
+
+
+class TestIgnore:
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    def test_ignore(self, user, testapp, rodne_cislo):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.show_ignored"))
+        random_reason = str(randint(11111111, 99999999))
+
+        form = res.forms[0]
+        form.fields["rodne_cislo"][0].value = rodne_cislo
+        form.fields["reason"][0].value = random_reason
+
+        res = form.submit().follow()
+
+        assert rodne_cislo in res.text
+        assert random_reason in res.text
+        assert "Dárce ignorován." in res.text
+
+        do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=302)
+        assert do.status_code == 302
+        assert rodne_cislo not in do.text
+
+        for index, form in res.forms.items():
+            if form.fields["rodne_cislo"][0].value == rodne_cislo:
+                unignore_form = form
+        res = unignore_form.submit().follow()
+
+        assert rodne_cislo not in res.text
+        assert random_reason not in res.text
+        assert "Zrušena ignorace." in res.text
+
+        do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=200)
+        assert do.status_code == 200
 
 
 class TestDatabase:

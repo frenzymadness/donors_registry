@@ -41,7 +41,7 @@ class NoteForm(FlaskForm):
 
 class IgnoreDonorForm(FlaskForm):
     rodne_cislo = StringField("Rodné číslo", validators=[DataRequired()])
-    reason = StringField("Důvod k ignoraci", validators=[DataRequired()])
+    reason = TextAreaField("Důvod k ignoraci", validators=[DataRequired()])
 
 
 class RemoveFromIgnored(FlaskForm):

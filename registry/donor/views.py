@@ -3,6 +3,7 @@ from datetime import datetime
 from datatables import ColumnDT, DataTables
 from flask import (
     Blueprint,
+    abort,
     flash,
     jsonify,
     redirect,
@@ -78,7 +79,11 @@ def detail(rc):
     remove_medal_form = RemoveMedalForm()
     award_medal_form = AwardMedalForm()
     award_medal_form.add_one_rodne_cislo(rc)
-    overview = DonorsOverview.query.get_or_404(rc)
+    overview = DonorsOverview.query.get(rc)
+    if not overview:
+        if IgnoredDonors.query.get(rc):
+            return redirect(url_for("donor.show_ignored"))
+        return abort(404)
     records = Record.query.filter(Record.rodne_cislo == rc).all()
     donation_centers = DonationCenter.query.all()
     awarded_medals = AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc).all()
@@ -208,7 +213,9 @@ def ignore_donor():
         db.session.commit()
         DonorsOverview.remove_ignored()
         flash("Dárce ignorován.", "success")
-        return redirect(url_for("donor.show_ignored"))
+    else:
+        flash("Při přidávání do ignorovaných došlo k chybě", "danger")
+    return redirect(url_for("donor.show_ignored"))
 
 
 @blueprint.post("/donor/ignore/remove")
@@ -221,4 +228,6 @@ def unignore_donor():
         db.session.commit()
         DonorsOverview.refresh_overview()
         flash("Zrušena ignorace.", "success")
-        return redirect(url_for("donor.show_ignored"))
+    else:
+        flash("Při odebírání z ignorovaných došlo k chybě", "danger")
+    return redirect(url_for("donor.show_ignored"))
