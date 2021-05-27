@@ -189,7 +189,7 @@ WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
         return donor_dict
 
     def refresh_override(cls, commit=True):
-        if sqlite3.sqlite_version_info[0] >= 3 and sqlite3.sqlite_version_info[1] >= 33:
+        if sqlite3.sqlite_version_info >= (3, 33):
             # The UPDATE - FROM syntax is supported from SQLite version 3.33.0
             db.session.execute(
                 """

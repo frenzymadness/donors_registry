@@ -1,7 +1,7 @@
 """create_donors_override
 
 Revision ID: 60a681c463a2
-Revises: 6fe71f4f1aba
+Revises: 971ddb205e0c
 Create Date: 2021-05-25 12:50:58.779359
 
 """
@@ -10,7 +10,7 @@ from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "60a681c463a2"
-down_revision = "6fe71f4f1aba"
+down_revision = "971ddb205e0c"
 branch_labels = None
 depends_on = None
 
