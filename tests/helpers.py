@@ -9,5 +9,5 @@ def login(user, testapp):
     assert "Přihlášení proběhlo úspěšně" in res
 
 
-class TestingForm(FlaskForm):
+class FakeForm(FlaskForm):
     field = StringField()
