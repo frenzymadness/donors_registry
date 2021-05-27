@@ -24,7 +24,7 @@ from registry.list.models import DonationCenter, Medals
 from registry.utils import NumericValidator
 
 from .fixtures import sample_of_rc
-from .helpers import TestingForm, login
+from .helpers import FakeForm, login
 
 
 class TestPublicInterface:
@@ -724,7 +724,7 @@ class TestBatch:
 class TestNumericValidator:
     def test_length_validation(self):
         validator = NumericValidator(5)
-        form = TestingForm()
+        form = FakeForm()
 
         form.field.data = "12345"
         validator(form, form.field)
@@ -739,7 +739,7 @@ class TestNumericValidator:
 
     def test_numeric_validation(self):
         validator = NumericValidator(5)
-        form = TestingForm()
+        form = FakeForm()
 
         form.field.data = "12345"
         validator(form, form.field)
@@ -758,7 +758,7 @@ class TestNumericValidator:
 
     def test_messages(self):
         validator = NumericValidator(5, msg_numeric="numeric", msg_length="length")
-        form = TestingForm()
+        form = FakeForm()
 
         form.field.data = "abcde"
         with pytest.raises(ValidationError, match="^numeric$"):
@@ -769,7 +769,7 @@ class TestNumericValidator:
             validator(form, form.field)
 
     def test_plural(self):
-        form = TestingForm()
+        form = FakeForm()
         form.field.data = "11111111111"
 
         validator = NumericValidator(5)
