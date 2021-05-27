@@ -19,6 +19,7 @@
 {% endblock %}
 
 {% block js %}
+<script src="/static/donors_override_highlight.js"></script>
 <script type="text/javascript">
     function create_tooltip_for_donations(data) {
         var title = ``;
@@ -46,32 +47,9 @@
             },
         ];
 
-        // Highlight fields that have a corresponding record in donors_override
-        let overrides = {}; // Will be set by an AJAX request
-
-        for (const column of ["first_name", "last_name", "address", "city", "postal_code", "kod_pojistovny"]) {
-            columnDefs.push({
-                "targets": column,
-                "render": function (data, type, row, meta) {
-                    // We only want to highlight the value that is displayed
-                    // to the user, not the ones used for searching and sorting
-                    if (type != "display") return data;
-
-                    if (overrides.hasOwnProperty(row.rodne_cislo) && overrides[row.rodne_cislo][column]) {
-                        return `<mark title="Tato hodnota byla ručně nastavena">${data}</mark>`;
-                    } else {
-                        return data;
-                    }
-                }
-            });
-        }
-
-        // Forward declaration of the DataTable
         let dataTable = null;
-
-        // Request the list of overrides
-        $.getJSON("{{ url_for('donor.get_overrides') }}", function (data) {
-            overrides = data;
+        
+        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", columnDefs, function() {
             if (dataTable !== null)
                 dataTable.draw();
         });
