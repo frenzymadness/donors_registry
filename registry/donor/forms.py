@@ -49,6 +49,12 @@ class RemoveFromIgnoredForm(FlaskForm):
 
 
 class DonorsOverrideForm(FlaskForm):
+    class Meta:
+        def render_field(self, field, render_kw):
+            # Set the HTML "form" parameter for each of the fields
+            render_kw["form"] = "donorsOverrideForm"
+            return field.widget(field, **render_kw)
+
     rodne_cislo = StringField("Rodné číslo", validators=[DataRequired()])
     first_name = StringField("Jméno")
     last_name = StringField("Příjmení")
@@ -118,3 +124,7 @@ class DonorsOverrideForm(FlaskForm):
                 self.field_data[field] = data
             else:
                 self.field_data[field] = None
+
+
+class DonorsOverrideDeleteForm(FlaskForm):
+    rodne_cislo = HiddenField(validators=[DataRequired()])

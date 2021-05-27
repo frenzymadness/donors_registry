@@ -126,8 +126,8 @@ class TestOverride:
         assert "Příjmení: --Last--" in res
 
         # Test deleting the override
-        form = res.forms["donorsOverrideForm"]
-        res = form.submit("delete_btn").follow()
+        form = res.forms["donorsOverrideDeleteForm"]
+        res = form.submit().follow()
 
         assert "Výjimka smazána" in res
         assert ("Jméno: " + old_first_name) in res
