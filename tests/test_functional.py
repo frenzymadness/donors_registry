@@ -636,6 +636,10 @@ class TestBatch:
         # Take and submit random form
         form = choice(list(res.forms.values()))
         batch_id = form.fields["batch_id"][0].value
+        if batch_id == "7":
+            pytest.skip(
+                "Batch number 7 is protected because it's needed for another test."
+            )
         res = form.submit().follow()
         assert "Dávka smazána." in res
         assert Batch.query.get(batch_id) is None
