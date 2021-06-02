@@ -634,7 +634,7 @@ class TestBatch:
         login(user, testapp)
         res = testapp.get(url_for("batch.batch_list"))
         # Take and submit random form
-        form = choice(res.forms)
+        form = choice(list(res.forms.values()))
         batch_id = form.fields["batch_id"][0].value
         res = form.submit().follow()
         assert "Dávka smazána." in res
