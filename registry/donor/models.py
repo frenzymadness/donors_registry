@@ -56,7 +56,7 @@ class Record(db.Model):
             "donation_count",
         ]
         line = ";".join([str(getattr(self, field)) for field in fields])
-        line += "\n"
+        line += "\r\n"
         return line
 
 
