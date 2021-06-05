@@ -1,4 +1,3 @@
-from pathlib import Path
 from random import choice
 
 import pytest
@@ -62,7 +61,8 @@ class TestBatch:
         login(user, testapp)
         res = testapp.get(url_for("batch.batch_detail", id=7))
         batch_file = res.click(description="Stáhnout soubor s dávkou")
-        file_to_compare = Path("tests/data/batch7_downloaded.txt").read_text(
-            encoding="utf-8"
-        )
-        assert batch_file.text == file_to_compare
+        with open(
+            "tests/data/batch7_downloaded.txt", encoding="utf-8", newline=""
+        ) as f:
+            content_to_compare = f.read()
+        assert batch_file.text == content_to_compare
