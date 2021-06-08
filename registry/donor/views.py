@@ -19,7 +19,6 @@ from registry.utils import flash_errors
 
 from .forms import (
     AwardMedalForm,
-    DonorsOverrideDeleteForm,
     DonorsOverrideForm,
     IgnoreDonorForm,
     NoteForm,
@@ -116,7 +115,6 @@ def detail(rc):
     if overview.note:
         note_form.note.data = overview.note.note
     donors_override_form = DonorsOverrideForm().init_fields(rc)
-    donors_override_delete_form = DonorsOverrideDeleteForm()
 
     return render_template(
         "donor/detail.html",
@@ -129,7 +127,6 @@ def detail(rc):
         award_medal_form=award_medal_form,
         note_form=note_form,
         donors_override_form=donors_override_form,
-        donors_override_delete_form=donors_override_delete_form,
     )
 
 
@@ -283,36 +280,31 @@ def unignore_donor():
 @blueprint.post("/override/")
 @login_required
 def save_override():
-    override_form = DonorsOverrideForm()
-
-    if override_form.validate_on_submit():
-        override = DonorsOverride(**override_form.field_data)
-        db.session.merge(override)
-        db.session.commit()
-
-        DonorsOverview.refresh_overview()
-        flash("Výjimka uložena", "success")
-    else:
-        flash_errors(override_form)
-
-    return redirect(url_for("donor.detail", rc=override_form.rodne_cislo.data))
-
-
-@blueprint.post("/override/delete")
-@login_required
-def delete_override():
-    form = DonorsOverrideDeleteForm()
+    form = DonorsOverrideForm()
+    delete = "delete_btn" in request.form
 
     if form.validate_on_submit():
-        override = DonorsOverride.query.get(form.rodne_cislo.data)
-        if override is not None:
-            db.session.delete(override)
+        if not delete:
+            # Save the override
+            override = DonorsOverride(**form.field_data)
+            db.session.merge(override)
             db.session.commit()
 
             DonorsOverview.refresh_overview()
-            flash("Výjimka smazána", "success")
+            flash("Výjimka uložena", "success")
         else:
-            flash("Není co mazat", "warning")
+            # Delete the override
+            override = DonorsOverride.query.get(form.rodne_cislo.data)
+            if override is not None:
+                db.session.delete(override)
+                db.session.commit()
+
+                DonorsOverview.refresh_overview()
+                flash("Výjimka smazána", "success")
+            else:
+                flash("Není co mazat", "warning")
+    else:
+        flash_errors(form)
 
     return redirect(url_for("donor.detail", rc=form.rodne_cislo.data))
 

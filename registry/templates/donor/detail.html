@@ -1,18 +1,18 @@
 {% extends "layout.html" %}
 {% block css %}
 <style>
-    #override_forms {
+    #donorsOverrideForm {
         display: flex;
         flex-wrap: wrap;
     }
 
-    #override_forms div {
+    #donorsOverrideForm div {
         background-color: #0000000d;
         flex-grow: 1;
         margin-top: 12px;
     }
 
-    #override_forms label {
+    #donorsOverrideForm label {
         color: white;
         background-color: #343a40;
         font-weight: bold;
@@ -21,18 +21,18 @@
         padding: 12px;
     }
 
-    #override_forms input {
+    #donorsOverrideForm input {
         margin: 6px;
         width: calc(100% - 12px);
     }
 
-    #override_forms .btn_container {
+    #donorsOverrideForm .btn_container {
         flex-grow: unset;
     }
-    #override_forms .btn_container label {
+    #donorsOverrideForm .btn_container label {
         padding: 12px 0;
     }
-    #override_forms .btn_container button {
+    #donorsOverrideForm .btn_container button {
         margin: 6px 0;
     }
 </style>
@@ -190,7 +190,8 @@
 
 <h2>Přepsání údajů</h2>
 {% with form=donors_override_form %}
-<div id="override_forms">
+<form id="donorsOverrideForm" action="/override/" method="POST">
+    {{ form.csrf_token }}
     <div style="flex-grow: 8;">
         <label for="rodne_cislo">Rodné číslo</label>
         {{ form.rodne_cislo(readonly=True, size=8, class_="form-control") }}
@@ -221,26 +222,16 @@
     </div>
 
     <div class="btn_container">
-        <form id="donorsOverrideForm" action="{{ url_for('donor.save_override') }}" method="POST">
-            <label>&nbsp;</label>
-
-            {{ form.csrf_token }}
-            <button class="btn btn-success" type="submit" title="Uložit výjimku">✔</button>
-        </form>
+        <label>&nbsp;</label>
+        <button class="btn btn-success" type="submit" name="save_btn" title="Uložit výjimku">✔</button>
     </div>
-{% endwith %}
-{% with form=donors_override_delete_form %}
+
     <div class="btn_container">
-        <form id="donorsOverrideDeleteForm" action="{{ url_for('donor.delete_override') }}" method="POST">
-            <label>&nbsp;</label>
-
-            {{ form.csrf_token }}
-            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
-            <button class="btn btn-danger" type="submit" title="Smazat výjimku">🗑</button>
-        </form>
+        <label>&nbsp;</label>
+        <button class="btn btn-danger" type="submit" name="delete_btn" title="Smazat výjimku">🗑</button>
     </div>
+</form>
 {% endwith %}
-</div>
 
 
 <h2>Historie importů</h2>

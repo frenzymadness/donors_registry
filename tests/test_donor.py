@@ -1,3 +1,4 @@
+import re
 from random import randint
 
 import pytest
@@ -126,8 +127,8 @@ class TestOverride:
         assert "Příjmení: --Last--" in res
 
         # Test deleting the override
-        form = res.forms["donorsOverrideDeleteForm"]
-        res = form.submit().follow()
+        form = res.forms["donorsOverrideForm"]
+        res = form.submit("delete_btn").follow()
 
         assert "Výjimka smazána" in res
         assert ("Jméno: " + old_first_name) in res
