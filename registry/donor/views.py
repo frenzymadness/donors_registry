@@ -35,7 +35,6 @@ from .models import (
     Record,
 )
 
-
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
 
