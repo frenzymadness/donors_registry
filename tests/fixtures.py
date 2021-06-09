@@ -2,12 +2,13 @@
 """Defines fixtures available to all tests."""
 
 import logging
-import os
 from pathlib import Path
 from random import sample
+from shutil import copy
 
 from flask_migrate import Migrate, upgrade
 from pytest import fixture
+from sqlalchemy.exc import IntegrityError
 from webtest import TestApp
 
 from registry.app import create_app
@@ -18,6 +19,8 @@ from registry.user.models import User
 from .utils import get_test_data_df, test_data_medals, test_data_records
 
 TEST_RECORDS = 1000  # Number of test imports to use in test database
+BACKUP_DB_PATH = Path("registry") / "backup.sqlite"
+TEST_DB_PATH = Path("registry") / "test.sqlite"
 
 
 @fixture(scope="session")
@@ -39,41 +42,48 @@ def testapp(app):
     return TestApp(app)
 
 
-@fixture(scope="session")
+@fixture(scope="function", autouse=True)
 def db(app):
     """Create database for the tests."""
-    # If a test fails, it might leave the test database there.
-    # Make sure we create a fresh one everytime.
-    if Path("registry/test.sqlite").exists():
-        os.unlink(Path("registry/test.sqlite"))
-
     _db.app = app
-    with app.app_context():
-        migrate = Migrate()
-        migrate.init_app(app, _db)
-        upgrade()
 
-    test_data_records(_db, limit=TEST_RECORDS)
-    test_data_medals(_db)
+    # If the backup db exists, use it
+    # if not, create it from scratch and save it for other tests
+    if BACKUP_DB_PATH.is_file():
+        copy(BACKUP_DB_PATH, TEST_DB_PATH)
+    else:
+        with app.app_context():
+            migrate = Migrate()
+            migrate.init_app(app, _db)
+            upgrade()
 
-    DonorsOverview.refresh_overview()
+        test_data_records(_db, limit=TEST_RECORDS)
+        test_data_medals(_db)
+
+        DonorsOverview.refresh_overview()
+
+        copy(TEST_DB_PATH, BACKUP_DB_PATH)
 
     yield _db
 
     # Explicitly close DB connection
     _db.session.close()
-    # Remove test DB file
-    os.unlink(Path("registry/test.sqlite"))
 
 
-@fixture(scope="session")
+@fixture(scope="function")
 def user(db):
     """Create user for the tests."""
     user = User("test@example.com", "test123")
     user.test_password = "test123"
     user.active = True
     db.session.add(user)
-    db.session.commit()
+    # The user might already exists in the db and we cannot
+    # combine session-scoped and function-scoped fixtures
+    # so we have to be ready for that situation.
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
     return user
 
 
