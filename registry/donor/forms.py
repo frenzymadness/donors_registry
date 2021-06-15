@@ -3,6 +3,7 @@ from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
 from registry.donor.models import AwardedMedals, DonorsOverride
+from registry.utils import NumericValidator
 
 
 class RemoveMedalForm(FlaskForm):
@@ -54,8 +55,8 @@ class DonorsOverrideForm(FlaskForm):
     last_name = StringField("Příjmení")
     address = StringField("Adresa")
     city = StringField("Město")
-    postal_code = StringField("PSČ")
-    kod_pojistovny = StringField("Pojišťovna")
+    postal_code = StringField("PSČ", validators=[NumericValidator(5)])
+    kod_pojistovny = StringField("Pojišťovna", validators=[NumericValidator(3)])
 
     _fields_ = [
         "rodne_cislo",
@@ -72,30 +73,8 @@ class DonorsOverrideForm(FlaskForm):
         if not initial_validation:
             return False
 
-        valid = True
-
-        if self.postal_code.data:
-            self.postal_code.data = self.postal_code.data.replace(" ", "")
-            if not self.postal_code.data.isdigit():
-                self.postal_code.errors.append(
-                    "PSČ může obsahovat pouze číslice a mezeru"
-                )
-                valid = False
-            if len(self.postal_code.data) != 5:
-                self.postal_code.errors.append("PSČ musí mít 5 znaků kromě mezer")
-                valid = False
-
-        if self.kod_pojistovny.data:
-            if not self.kod_pojistovny.data.isdigit():
-                self.kod_pojistovny.errors.append("Kód pojišťovny musí být číslo")
-                valid = False
-            if len(self.kod_pojistovny.data) != 3:
-                self.kod_pojistovny.errors.append("Kód pojišťovny musí být třímístný")
-                valid = False
-
         self._get_field_data()
-
-        return valid
+        return True
 
     def init_fields(self, rodne_cislo):
         override = DonorsOverride.query.get(rodne_cislo)
