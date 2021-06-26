@@ -9,7 +9,7 @@ repos:
     -   id: check-added-large-files
     -   id: debug-statements
 -   repo: https://github.com/psf/black
-    rev: 21.5b1
+    rev: 21.6b0
     hooks:
     -   id: black
 -   repo: https://github.com/PyCQA/flake8
@@ -17,7 +17,7 @@ repos:
     hooks:
     -   id: flake8
 -   repo: https://github.com/PyCQA/isort
-    rev: 5.8.0
+    rev: 5.9.1
     hooks:
     -   id: isort
 # Currently there is a bug preventing bandit from
