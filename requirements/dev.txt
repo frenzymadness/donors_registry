@@ -8,3 +8,6 @@ WebTest==2.0.35
 # Used to compare calculations we do in SQL with a different approach
 # Using older version because of Python 3.6 support, which pandas > 1.2 doesn't have
 pandas==1.1.5
+
+# Debug toolbar
+Flask-DebugToolbar==0.11.0
