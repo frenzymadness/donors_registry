@@ -1,5 +1,13 @@
 """Public section, including homepage and signup."""
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import and_
 
@@ -64,6 +72,7 @@ def home_post():
     if request.method == "POST":
         if form.validate_on_submit():
             login_user(form.user)
+            session.permanent = True
             flash("Přihlášení proběhlo úspěšně.", "success")
             redirect_url = request.args.get("next") or url_for("public.home")
             return redirect(redirect_url)
