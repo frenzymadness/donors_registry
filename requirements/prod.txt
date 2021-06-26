@@ -20,9 +20,6 @@ WTForms==2.3.3
 Flask-Login==0.5.0
 Flask-Bcrypt==0.7.1
 
-# Debug toolbar
-Flask-DebugToolbar==0.11.0
-
 # Environment variable parsing
 environs==9.3.2
 
