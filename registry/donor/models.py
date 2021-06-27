@@ -44,7 +44,7 @@ class Record(db.Model):
             donation_count=list[8],
         )
 
-    def as_original(self):
+    def as_original(self, donation_count=None):
         fields = [
             "rodne_cislo",
             "first_name",
@@ -55,7 +55,10 @@ class Record(db.Model):
             "kod_pojistovny",
             "donation_count",
         ]
-        line = ";".join([str(getattr(self, field)) for field in fields])
+        values = [str(getattr(self, field)) for field in fields]
+        if donation_count:
+            values[-1] = donation_count
+        line = ";".join(values)
         line += "\r\n"
         return line
 
