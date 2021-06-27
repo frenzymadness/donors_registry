@@ -3,7 +3,7 @@ import re
 import pytest
 from flask import url_for
 
-from registry.donor.models import Note
+from registry.donor.models import DonorsOverview, Note
 
 from .fixtures import sample_of_rc
 from .helpers import login
@@ -46,3 +46,24 @@ class TestDetail:
         assert "Poznámka uložena." in res
         assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
         assert Note.query.count() == existing_notes + 1
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_manual_import_prepare(self, user, testapp, rodne_cislo):
+        do = DonorsOverview.query.get(rodne_cislo)
+        login(user, testapp)
+        detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        import_page = detail.click(description="Připravit manuální import")
+        import_form = import_page.forms[0]
+        assert import_form.fields["donation_center_id"][0].value == "-1"
+        input_data = import_form.fields["input_data"][0].value
+        for field in (
+            "rodne_cislo",
+            "first_name",
+            "last_name",
+            "address",
+            "city",
+            "postal_code",
+            "kod_pojistovny",
+        ):
+            assert getattr(do, field) + ";" in input_data
+        assert ";_POČET_" in input_data

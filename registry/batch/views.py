@@ -16,9 +16,20 @@ blueprint = Blueprint("batch", __name__, static_folder="../static")
 
 
 @blueprint.get("/import/")
+@blueprint.get("/import/<rodne_cislo>")
 @login_required
-def import_data():
+def import_data(rodne_cislo=None):
     import_form = ImportForm()
+    if rodne_cislo:
+        import_form.donation_center_id.default = -1
+        import_form.process()
+        last_record = (
+            Record.query.join(Batch)
+            .filter(Record.rodne_cislo == rodne_cislo)
+            .order_by(Batch.imported_at.desc())
+            .first_or_404()
+        )
+        import_form.input_data.data = last_record.as_original(donation_count="_POČET_")
     return render_template("batch/import.html", form=import_form)
 
 
