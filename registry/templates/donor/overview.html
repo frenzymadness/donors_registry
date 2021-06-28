@@ -9,8 +9,6 @@
             {% for column_class, column_name in column_names.items() %}
             <th class="{{ column_class }}">{{ column_name }}</th>
             {% endfor %}
-            <th class="donations">Darování</th>
-            <th class="awards">Ocenění</th>
         </tr>
     </thead>
     <tbody>
@@ -22,25 +20,12 @@
 
 {% block js %}
 <script type="text/javascript">
-    function create_tooltip_for_donations(row) {
-        const title = `Nemocnice FM: ${row.donation_count_fm}
-Krevní centrum: ${row.donation_count_fm_bubenik}
-Třinec: ${row.donation_count_trinec}
-Moje Plazma: ${row.donation_count_mp}
-Jinde: ${row.donation_count_manual}`;
+    function create_tooltip_for_donations(data) {
+        var title = ``;
+        Object.keys(data).forEach((slug, index) => {
+            title += `${data[slug]["name"]}: ${data[slug]["count"]}\n`;
+        });
         return `<span data-toggle="modal" data-target="#titleModal" title="${title}">❓</span>`;
-    }
-
-    function last_award_name(row) {
-        const awards = ["awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"].reverse();
-        const names =  ["Bronzová medaile", "Stříbrná medaile", "Zlatá medaile", "Kříž III", "Kříž II", "Kříž I", "Plaketa ČČK"].reverse();
-        for (let index = 0; index < awards.length; index++) {
-            const element = awards[index];
-            if (row[element] == true) {
-                return names[index];
-            }
-        }
-        return "Žádné"
     }
 
     $(document).ready( function () {
@@ -55,8 +40,6 @@ Jinde: ${row.donation_count_manual}`;
                 {% for column_class in column_names.keys() -%}
                     {"data": "{{ column_class }}"},
                 {%- endfor %}
-                null, // calculated column donations
-                null, // calculated column awards
             ],
             "columnDefs": [{
                 "targets": "rodne_cislo",
@@ -65,15 +48,8 @@ Jinde: ${row.donation_count_manual}`;
             },{
                 "targets": "donations",
                 "render": function ( data, type, row, meta ) {
-                  return row.donation_count_total + create_tooltip_for_donations(row);}
-            },{
-                "targets": "awards",
-                "render": function ( data, type, row, meta ) {
-                  return last_award_name(row);}
-            },{
-                "targets": ["donation_count_fm", "donation_count_fm_bubenik", "donation_count_trinec", "donation_count_mp", "donation_count_manual", "donation_count_total", "awarded_medal_br", "awarded_medal_st", "awarded_medal_zl", "awarded_medal_kr3", "awarded_medal_kr2", "awarded_medal_kr1", "awarded_medal_plk"],
-                "visible": false
-            }]
+                  return data.total + create_tooltip_for_donations(data);}
+            },]
         });
     } );
 </script>

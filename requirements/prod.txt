@@ -28,6 +28,3 @@ environs==9.3.2
 
 # CLI interface
 click==8.0.0
-
-# DataTables Python backend
-sqlalchemy-datatables==2.0.1
