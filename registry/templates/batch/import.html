@@ -30,6 +30,10 @@
     {% else %}
     <div class="form-group">
         <label for="input_data">Pole pro vstupní data z odběrného místa</label>
+
+        <input type="file" accept="text/plain" id="input_file" class="d-none">
+        <label for="input_file" class="btn btn-sm btn-primary float-right">Použít data ze souboru</label>
+
         {{ form.input_data(rows=30, class_="form-control") }}
     </div>
     {% endif %}
@@ -51,6 +55,14 @@
                 $('.sync_scrolling').not(this).scrollTop($(this).scrollTop());
             }
             $(this).attr("data-scrolling", "false");
+        });
+
+        // File import
+        const input_file = $('#input_file');
+        input_file.change(function() {
+            input_file[0].files[0].text().then(function(text) {
+                $('#input_data').val(text);
+            });
         });
     });
 </script>
