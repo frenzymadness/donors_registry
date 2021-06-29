@@ -105,6 +105,18 @@ class DonorsOverview(db.Model):
         primaryjoin="foreign(DonorsOverview.rodne_cislo) == Note.rodne_cislo",
     )
 
+    frontend_column_names = {
+        "rodne_cislo": "Rodné číslo",
+        "first_name": "Jméno",
+        "last_name": "Příjmení",
+        "address": "Adresa",
+        "city": "Město",
+        "postal_code": "PSČ",
+        "kod_pojistovny": "Pojišťovna",
+        "donations": "Darování Celkem",
+        "last_award": "Ocenění",
+    }
+
     def __repr__(self):
         return f"<DonorsOverview ({self.rodne_cislo})>"
 
@@ -116,6 +128,60 @@ WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
 """
         )
         db.session.commit()
+
+    @classmethod
+    def get_filter_for_search(cls, search_str):
+        conditions_all = []
+        for part in search_str.split():
+            conditions_all.append([])
+            for column_name in cls.frontend_column_names.keys():
+                if hasattr(cls, column_name):
+                    column = getattr(cls, column_name)
+                    contains = getattr(column, "contains")
+                    conditions_all[-1].append(contains(part, autoescape=True))
+        return db.and_(*[db.or_(*conditions) for conditions in conditions_all])
+
+    @classmethod
+    def get_order_by_for_column_id(cls, column_id, direction):
+        column_name = list(cls.frontend_column_names.keys())[column_id]
+        if hasattr(cls, column_name):
+            column = getattr(cls, column_name)
+            return (getattr(column, direction)(),)
+        elif column_name == "donations":
+            column_name = "donation_count_total"
+            column = getattr(cls, column_name)
+            return (getattr(column, direction)(),)
+        elif column_name == "last_award":
+            order_by = []
+            for medal in Medals.query.order_by(Medals.id.asc()).all():
+                column = getattr(cls, "awarded_medal_" + medal.slug)
+                order_by.append(getattr(column, direction)())
+            return order_by
+
+    def dict_for_frontend(self):
+        # All standard attributes
+        donor_dict = {
+            name: getattr(self, name, None)
+            for name in self.frontend_column_names.keys()
+        }
+        # Highest awarded medal
+        for medal in Medals.query.order_by(Medals.id.desc()).all():
+            if getattr(self, "awarded_medal_" + medal.slug):
+                donor_dict["last_award"] = medal.title
+                break
+            else:
+                donor_dict["last_award"] = "Žádné"
+        # Dict with all donations which we use on frontend
+        # to generate tooltip
+        donor_dict["donations"] = {
+            dc.slug: {
+                "count": getattr(self, "donation_count_" + dc.slug),
+                "name": dc.title,
+            }
+            for dc in DonationCenter.query.all()
+        }
+        donor_dict["donations"]["total"] = self.donation_count_total
+        return donor_dict
 
     @classmethod
     def refresh_overview(cls):
