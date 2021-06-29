@@ -27,66 +27,32 @@ from .models import AwardedMedals, DonorsOverview, IgnoredDonors, Note, Record
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
-# TODO: Find a better place where to store these names (db.Column custom attribute?)
-COLUMN_NAMES = {
-    "rodne_cislo": "Rodné číslo",
-    "first_name": "Jméno",
-    "last_name": "Příjmení",
-    "address": "Adresa",
-    "city": "Město",
-    "postal_code": "PSČ",
-    "kod_pojistovny": "Pojišťovna",
-    "donations": "Darování Celkem",
-    "last_award": "Ocenění",
-}
-
 
 @blueprint.get("/overview/")
 @login_required
 def overview():
-    return render_template("donor/overview.html", column_names=COLUMN_NAMES)
+    return render_template(
+        "donor/overview.html", column_names=DonorsOverview.frontend_column_names
+    )
 
 
-@blueprint.get("/overview/data")  # noqa: C901 FIXME
+@blueprint.get("/overview/data")
 @login_required
 def overview_data():
     """JSON end point for JS Datatable"""
     params = request.args.to_dict()
-
-    # Lists and total numbers
-    all_medals = Medals.query.order_by(Medals.id.desc()).all()
-    all_donation_centers = DonationCenter.query.all()
     all_records_count = DonorsOverview.query.count()
+
     # WHERE part
     if params["search[value]"]:
-        conditions_all = []
-        for part in params["search[value]"].split():
-            conditions_all.append([])
-            for column_name in COLUMN_NAMES.keys():
-                if hasattr(DonorsOverview, column_name):
-                    column = getattr(DonorsOverview, column_name)
-                    contains = getattr(column, "contains")
-                    conditions_all[-1].append(contains(part, autoescape=True))
-        filter_ = db.and_(*[db.or_(*conditions) for conditions in conditions_all])
+        filter_ = DonorsOverview.get_filter_for_search(params["search[value]"])
     else:
         filter_ = True
 
     # ORDER BY part
-    order_by_column_id = int(params["order[0][column]"])
-    order_by_column_name = list(COLUMN_NAMES.keys())[order_by_column_id]
-    order_by_direction = params["order[0][dir]"]
-    if hasattr(DonorsOverview, order_by_column_name):
-        order_by_column = getattr(DonorsOverview, order_by_column_name)
-        order_by = (getattr(order_by_column, order_by_direction)(),)
-    elif order_by_column_name == "donations":
-        order_by_column_name = "donation_count_total"
-        order_by_column = getattr(DonorsOverview, order_by_column_name)
-        order_by = (getattr(order_by_column, order_by_direction)(),)
-    elif order_by_column_name == "last_award":
-        order_by = []
-        for medal in reversed(all_medals):
-            order_by_column = getattr(DonorsOverview, "awarded_medal_" + medal.slug)
-            order_by.append(getattr(order_by_column, order_by_direction)())
+    order_by = DonorsOverview.get_order_by_for_column_id(
+        int(params["order[0][column]"]), params["order[0][dir]"]
+    )
 
     # LIMIT, OFFSET
     limit = int(params["length"])
@@ -109,26 +75,7 @@ def overview_data():
     # Data processing
     final_list = []
     for donor in overview:
-        # All standard attributes
-        donor_dict = {name: getattr(donor, name, None) for name in COLUMN_NAMES.keys()}
-        # Highest awarded medal
-        for medal in all_medals:
-            if getattr(donor, "awarded_medal_" + medal.slug):
-                donor_dict["last_award"] = medal.title
-                break
-            else:
-                donor_dict["last_award"] = "Žádné"
-        # Dict with all donations which we use on frontend
-        # to generate tooltip
-        donor_dict["donations"] = {
-            dc.slug: {
-                "count": getattr(donor, "donation_count_" + dc.slug),
-                "name": dc.title,
-            }
-            for dc in all_donation_centers
-        }
-        donor_dict["donations"]["total"] = donor.donation_count_total
-        final_list.append(donor_dict)
+        final_list.append(donor.dict_for_frontend())
     return jsonify(
         {
             "data": final_list,
