@@ -2,7 +2,7 @@
 import logging
 import sys
 
-from flask import Flask, render_template
+from flask import Flask, flash, redirect, url_for
 
 from registry import batch, commands, donor, public, user
 from registry.extensions import (
@@ -32,11 +32,13 @@ def create_app(config_object="registry.settings"):
 
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template("404.html"), 404
+        flash("404 - Stránka, kterou hledáte, neexistuje.", "danger")
+        return redirect(url_for("public.home", status_code=404))
 
     @app.errorhandler(401)
     def unauthorized(e):
-        return render_template("401.html"), 401
+        flash("401 - Nejste přihlášeni. Pro pokračování se prosím přihlaste.", "danger")
+        return redirect(url_for("public.home", status_code=401))
 
     @app.template_filter("format_time")
     def format_time(date, format="%d.%m.%Y %H:%M:%S"):

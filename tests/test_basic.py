@@ -23,6 +23,14 @@ class TestPublicInterface:
         assert "Evidence dárců ČČK Frýdek-Místek" in res
         assert res.status_code == 200
 
+    def test_home_page_status_code(self, testapp, db):
+        """Login form appears on home page."""
+        # Goes to homepage
+        res = testapp.get("/418", status=418)
+        # Check content and status code
+        assert "Evidence dárců ČČK Frýdek-Místek" in res
+        assert res.status_code == 418
+
 
 class TestErrorInterface:
     """Test 404 and 401 pages"""
@@ -54,10 +62,12 @@ class TestErrorInterface:
     def test_dynamic_urls_404(self, user, testapp, case_name):
         login(user, testapp)
         case = self.testcases_404[case_name]
-        res = testapp.get(url_for(case["endpoint"], **case["kwargs"]), status=404)
+        res = testapp.get(url_for(case["endpoint"], **case["kwargs"])).follow(
+            status=404
+        )
 
         assert res.status_code == 404
-        assert "404 Stránka nenalezena" in res.text
+        assert "404 - Stránka, kterou hledáte, neexistuje." in res.text
 
     testcases_401 = [
         ("batch.import_data", {}),
@@ -71,7 +81,12 @@ class TestErrorInterface:
     @pytest.mark.parametrize(("endpoint, kwargs"), testcases_401)
     def test_pages_401(self, testapp, endpoint, kwargs):
         """Test pages which requires login."""
-        testapp.get(url_for(endpoint, **kwargs), status=401)
+        res = testapp.get(url_for(endpoint, **kwargs)).follow(status=401)
+
+        assert res.status_code == 401
+        assert (
+            "401 - Nejste přihlášeni. Pro pokračování se prosím přihlaste." in res.text
+        )
 
 
 class TestLoggingIn:
