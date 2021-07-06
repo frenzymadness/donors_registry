@@ -34,6 +34,15 @@
         <input type="file" accept="text/plain" id="input_file" class="d-none">
         <label for="input_file" class="btn btn-sm btn-primary float-right">Použít data ze souboru</label>
 
+        <div id="encodings" style="display: none;">
+            Pokud se data nezobrazují správně, zkuste použít jinou znakovou sadu:
+            <select id="encoding" class="custom-select" style="width: initial;">
+                <option value="cp1250" selected>CP1250</option>
+                <option value="utf-8">UTF-8</option>
+                <option value="iso-8859-2">ISO-8859-2</option>
+            </select>
+        </div>
+
         {{ form.input_data(rows=30, class_="form-control") }}
     </div>
     {% endif %}
@@ -59,10 +68,20 @@
 
         // File import
         const input_file = $('#input_file');
+        const encoding = $('#encoding');
         input_file.change(function() {
-            input_file[0].files[0].text().then(function(text) {
-                $('#input_data').val(text);
-            });
+            const file = input_file[0].files[0];
+            const reader = new FileReader();
+            reader.onload = function() {
+                $('#input_data').val(reader.result);
+                $('#encodings').css("display", "block");
+            }
+
+            reader.readAsText(file, encoding.val());
+        });
+
+        encoding.change(function() {
+            input_file.change();
         });
     });
 </script>
