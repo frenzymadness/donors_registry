@@ -28,11 +28,12 @@ def load_user(user_id):
 
 
 @blueprint.get("/")
-def home():
+@blueprint.get("/<int:status_code>")
+def home(status_code=200):
     """Home page."""
     if not current_user.is_authenticated:
         form = LoginForm(request.form)
-        return render_template("public/home.html", form=form)
+        return render_template("public/home.html", form=form), status_code
     else:
         donors = DonorsOverview.query.count()
         awarded_medals = AwardedMedals.query.count()
@@ -53,15 +54,18 @@ def home():
                 getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(True)
             ).count()
             awarded[medal.slug] = count
-        return render_template(
-            "public/home.html",
-            donors=donors,
-            awarded_medals=awarded_medals,
-            batches=batches,
-            records=records,
-            medals=medals,
-            awaiting=awaiting,
-            awarded=awarded,
+        return (
+            render_template(
+                "public/home.html",
+                donors=donors,
+                awarded_medals=awarded_medals,
+                batches=batches,
+                records=records,
+                medals=medals,
+                awaiting=awaiting,
+                awarded=awarded,
+            ),
+            status_code,
         )
 
 
