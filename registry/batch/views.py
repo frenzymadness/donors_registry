@@ -54,7 +54,10 @@ def import_data_post():
         # After successfull import, refresh overview table
         DonorsOverview.refresh_overview()
         flash("Import proběhl úspěšně", "success")
-        return redirect(url_for("public.home"))
+        if len(import_form.valid_lines_content) == 1:
+            return redirect(url_for("donor.detail", rc=record.rodne_cislo))
+        else:
+            return redirect(url_for("donor.overview"))
     else:
         flash_errors(import_form)
         return render_template("batch/import.html", form=import_form)

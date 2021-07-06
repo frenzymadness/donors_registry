@@ -11,8 +11,12 @@ from .helpers import login
 class TestImport:
     """Test of imports"""
 
-    def test_valid_input(self, user, testapp):
-        input_data = Path("tests/data/valid_import.txt").read_text(encoding="utf-8")
+    @pytest.mark.parametrize(
+        "input_file",
+        ("tests/data/valid_import.txt", "tests/data/valid_import_single_record.txt"),
+    )
+    def test_valid_input(self, user, testapp, input_file):
+        input_data = Path(input_file).read_text(encoding="utf-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
         existing_batches = Batch.query.count()
@@ -24,6 +28,13 @@ class TestImport:
         res = form.submit().follow()
         assert "Import proběhl úspěšně" in res
         assert res.status_code == 200
+
+        if input_file.endswith("single_record.txt"):
+            expected_page = url_for("donor.detail", rc=input_data.split(";")[0])
+        else:
+            expected_page = url_for("donor.overview")
+
+        assert res.request.path == expected_page
 
         assert Record.query.count() == existing_records + new_records
         assert Batch.query.count() == existing_batches + 1
