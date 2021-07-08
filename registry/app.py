@@ -44,6 +44,19 @@ def create_app(config_object="registry.settings"):
     def format_time(date, format="%d.%m.%Y %H:%M:%S"):
         return date.strftime(format)
 
+    @app.template_filter("translate")
+    def translate(input, rodne_cislo):
+        word_map = {
+            "pracovník": "pracovnice",
+            "p.": "pí",
+            "ocenit jeho hluboce": "ocenit její hluboce",
+            "využijete jeho příkladu": "využijete jejího příkladu",
+        }
+        if rodne_cislo[2] in ("5", "6", "7", "8"):
+            return word_map[input]
+        else:
+            return input
+
     return app
 
 
