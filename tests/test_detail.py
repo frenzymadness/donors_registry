@@ -4,6 +4,7 @@ import pytest
 from flask import url_for
 
 from registry.donor.models import DonorsOverview, Note
+from registry.list.models import Medals
 
 from .fixtures import sample_of_rc
 from .helpers import login
@@ -67,3 +68,50 @@ class TestDetail:
         ):
             assert getattr(do, field) + ";" in input_data
         assert ";_POČET_" in input_data
+
+
+class TestAwardDocument:
+    @pytest.mark.parametrize("rodne_cislo", ("391105000", "9701037137", "151008110"))
+    def test_award_doc_for_man(self, user, testapp, rodne_cislo):
+        overview = DonorsOverview.query.get(rodne_cislo)
+        medals = Medals.query.all()
+        login(user, testapp)
+        for medal in medals:
+            doc = testapp.get(
+                url_for(
+                    "donor.render_award_document", rc=rodne_cislo, medal_slug=medal.slug
+                )
+            )
+
+            assert f"{rodne_cislo[:6]}/{rodne_cislo[6:]}" in doc
+            assert overview.first_name in doc
+            assert overview.last_name in doc
+            assert "pracovník" in doc
+            assert "jeho" in doc
+            assert "p." in doc
+            assert medal.title not in doc
+            assert medal.title_acc in doc
+            assert medal.title_instr in doc
+
+    @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
+    def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
+        rodne_cislo = "095404947"
+        overview = DonorsOverview.query.get(rodne_cislo)
+        medals = Medals.query.all()
+        login(user, testapp)
+        for medal in medals:
+            doc = testapp.get(
+                url_for(
+                    "donor.render_award_document", rc=rodne_cislo, medal_slug=medal.slug
+                )
+            )
+
+            assert f"{rodne_cislo[:6]}/{rodne_cislo[6:]}" in doc
+            assert overview.first_name in doc
+            assert overview.last_name in doc
+            assert "pracovnice" in doc
+            assert "její" in doc
+            assert "pí" in doc
+            assert medal.title not in doc
+            assert medal.title_acc in doc
+            assert medal.title_instr in doc
