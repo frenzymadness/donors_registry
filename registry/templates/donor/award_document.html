@@ -18,8 +18,7 @@
                 Oblastní spolek Českého červeného kříže Frýdek-Místek
             </h1>
             <p>
-                {% set medal_title = medal.title | lower %}
-                uděluje {{ medal_title }} prof. MUDr. J. Janského dárcům krve,
+                uděluje {{ medal.title_acc }} prof. MUDr. J. Janského dárcům krve,
                 kteří dovršili {{ medal.minimum_donations }}&nbsp;bezpříspěvkových odběrů.
             </p>
             <p>
@@ -28,17 +27,17 @@
                 pomohli navrátit zdraví, ale celé naší společnosti.
             </p>
             <p>
-                S potěšením Vám sdělujeme, že mezi vyznamenanými {{ medal_title }}
-                prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je pracovník Vašeho podniku
+                S potěšením Vám sdělujeme, že mezi vyznamenanými {{ medal.title_instr }}
+                prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je {{ "pracovník" | translate(overview.rodne_cislo) }} Vašeho podniku
             </p>
             <p class="donor-name">
-                p. {{ overview.first_name }} {{ overview.last_name }},
+                {{ "p." | translate(overview.rodne_cislo) }} {{ overview.first_name }} {{ overview.last_name }},
                 r. č.
                 {{ [overview.rodne_cislo[:6], overview.rodne_cislo[6:]] | join('/') }}
             </p>
             <p>
-                Věříme, že najdete vhodnou příležitost, jak morálně ocenit
-                jeho hluboce lidský postoj a využijete jeho příkladu k další
+                Věříme, že najdete vhodnou příležitost, jak morálně {{ "ocenit jeho hluboce" | translate(overview.rodne_cislo) }}
+                lidský postoj a {{ "využijete jeho příkladu" | translate(overview.rodne_cislo) }} k další
                 propagaci bezpříspěvkového dárcovství krve.
             </p>
         </main>
