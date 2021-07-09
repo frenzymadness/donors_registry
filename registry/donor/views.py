@@ -118,6 +118,20 @@ def detail(rc):
     )
 
 
+@blueprint.get("/detail/<rc>/award_document/<medal_slug>/")
+@login_required
+def render_award_document(rc, medal_slug):
+    overview = DonorsOverview.query.get_or_404(rc)
+    medal = Medals.query.filter_by(slug=medal_slug).first_or_404()
+
+    return render_template(
+        "donor/award_document.html",
+        overview=overview,
+        medal=medal,
+        today=datetime.now().strftime("%-d. %-m. %Y"),
+    )
+
+
 @blueprint.post("/remove_medal")
 @login_required
 def remove_medal():

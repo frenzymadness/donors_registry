@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darování krve - Udělení medaile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/award_document.css') }}">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <img src="{{ url_for('static', filename='cesky-cerveny-kriz.min.svg') }}" alt="Logo ČK" id="logoCK">
+        </header>
+
+        <main>
+            <h1>
+                Oblastní spolek Českého červeného kříže Frýdek-Místek
+            </h1>
+            <p>
+                {% set medal_title = medal.title | lower %}
+                uděluje {{ medal_title }} prof. MUDr. J. Janského dárcům krve,
+                kteří dovršili {{ medal.minimum_donations }}&nbsp;bezpříspěvkových odběrů.
+            </p>
+            <p>
+                Ochota dárců darovat krev pro zdraví a často i záchranu života je projevem
+                jejich humánního vztahu ke spoluobčanům. Patří jim dík nejen těch, kterým
+                pomohli navrátit zdraví, ale celé naší společnosti.
+            </p>
+            <p>
+                S potěšením Vám sdělujeme, že mezi vyznamenanými {{ medal_title }}
+                prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je pracovník Vašeho podniku
+            </p>
+            <p class="donor-name">
+                p. {{ overview.first_name }} {{ overview.last_name }},
+                r. č.
+                {{ [overview.rodne_cislo[:6], overview.rodne_cislo[6:]] | join('/') }}
+            </p>
+            <p>
+                Věříme, že najdete vhodnou příležitost, jak morálně ocenit
+                jeho hluboce lidský postoj a využijete jeho příkladu k další
+                propagaci bezpříspěvkového dárcovství krve.
+            </p>
+        </main>
+
+        <footer class="flex-container">
+            <aside>
+                Ve Frýdku-Místku, dne {{ today }}
+            </aside>
+            <aside>
+
+                <ul>
+                    <li>
+                        <img src="{{ url_for('static', filename='signature-white.png') }}" alt="podpis" id="signature">
+                    </li>
+                    <li>Jana Měrková</li>
+                    <li>Předseda Oblastní výkonné rady</li>
+                    <li>Českého červeného kříže Frýdek-Místek</li>
+                </ul>
+            </aside>
+        </footer>
+    </div>
+
+</body>
+</html>
