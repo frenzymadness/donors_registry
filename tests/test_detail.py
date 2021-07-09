@@ -18,8 +18,8 @@ class TestDetail:
         assert res.status_code == 200
         assert "<td></td>" not in res
         # Check that the sum of the donations is eqal to the total count
-        donations_list = re.search(r"<h2>Počty darování</h2>(.*?)</ul>", res.text, re.S)
-        numbers = re.findall(r">.*?: (\d+)</", donations_list.group())
+        donations_list = re.search(r">Počty darování</h[1-6]>.*?</b>", res.text, re.S)
+        numbers = re.findall(r"(\d+)[\n<]{1}", donations_list.group())
         numbers = list(map(int, numbers))
         assert sum(numbers[:-1]) == numbers[-1]
 
