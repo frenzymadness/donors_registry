@@ -86,6 +86,16 @@
                                         📅
                                     </span>
 
+                                <a href="{{ url_for('donor.render_award_document',
+                                                    rc=overview.rodne_cislo,
+                                                    medal_slug=medal.slug) }}"
+                                    class="btn btn-sm btn-outline-secondary"
+                                    role="button"
+                                    aria-pressed="true"
+                                    target="_blank">
+                                    🖨️
+                                </a>
+
                             </div>
                         </form>
                     {% endwith %}

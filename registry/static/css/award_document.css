@@ -1,0 +1,105 @@
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: grey; /* #FAFAFA */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12pt;
+}
+
+main > * {
+    margin: 40px
+}
+
+h1 {
+    font-size: 16pt;
+    text-align: center;
+}
+
+ul {
+    list-style-type: none;
+}
+
+aside ul {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+footer {
+    margin: 160px 40px 0 40px;
+    font-style: italic;
+    font-size: 11pt;
+}
+
+main p {
+    font-style: italic;
+    text-align: justify;
+}
+
+p:nth-of-type(3) {
+    margin-top: 50px;
+    text-align: center;
+}
+
+* {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+#logoCK {
+    display: block;
+    margin: 20px auto 60px auto;
+    width: 35mm;
+  }
+
+#signature {
+    width: 40mm;
+    margin-bottom: -10mm;
+}
+
+.donor-name {
+    font-size: 13pt;
+    font-weight: bold;
+    margin: 60px;
+    text-align: center;
+}
+
+.flex-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.page {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm 15mm 10mm 15mm;
+    margin: 10mm auto;
+    border: 1px #D3D3D3 solid;
+    border-radius: 5px;
+    background: white;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    html, body {
+        width: 210mm;
+        height: 297mm;
+    }
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}

@@ -133,3 +133,6 @@ dmypy.json
 
 # Development database
 *.sqlite
+
+# signature of chef
+registry/static/signature-white.png
