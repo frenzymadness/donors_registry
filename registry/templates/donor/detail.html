@@ -1,92 +1,146 @@
 {% extends "layout.html" %}
 {% block content %}
 
+
 <h1>Detail dárce</h1>
-<div class="row">
-    <div class="col">
-        <h2>Aktuální informace</h2>
+<div class="row my-5">
 
-        <ul>
-            <li>Rodné číslo: {{ overview.rodne_cislo }}</li>
-            <li>Jméno: {{ overview.first_name }}</li>
-            <li>Příjmení: {{ overview.last_name }}</li>
-            <li>Adresa: {{ overview.address }}</li>
-            <li>Město: {{ overview.city }}</li>
-            <li>PSČ: {{ overview.postal_code }}</li>
-            <li>Pojišťovna: {{ overview.kod_pojistovny }}</li>
-        </ul>
+    <div class="col-auto ml-3 mb-4">
+        <h4 class="text-muted border-bottom">Aktuální informace</h4>
+        <div class="container">
+            <div class="row">
+                Rodné číslo: {{ overview.rodne_cislo }}
+            </div>
+            <div class="row">
+                Jméno: {{ overview.first_name }}
+            </div>
+            <div class="row">
+                Příjmení: {{ overview.last_name }}
+            </div>
+            <div class="row">
+                Adresa: {{ overview.address }}
+            </div>
+            <div class="row">
+                Město: {{ overview.city }}
+            </div>
+            <div class="row">
+                PSČ: {{ overview.postal_code }}
+            </div>
+            <div class="row">
+                Pojišťovna: {{ overview.kod_pojistovny }}
+            </div>
+        </div>
     </div>
-    <div class="col">
-        <h2>Počty darování</h2>
 
-        <ul>
+    <div class="col-xs ml-3 mb-4">
+        <h4 class="text-muted border-bottom">Počty darování</h4>
+
+        <div class="container">
             {% for donation_center in donation_centers %}
-                <li>{{ donation_center.title }}: {{ overview["donation_count_" + donation_center.slug] }}</li>
+                <div class="row">
+                    {{ donation_center.title }}:&nbsp;{{ overview["donation_count_" + donation_center.slug] }}
+                </div>
             {% endfor %}
-            <li>Jinde: {{ overview["donation_count_manual"] }}</li>
-            <li><b>Celkem: {{ overview.donation_count_total }}</b></li>
-        </ul>
+            <div class="row border-bottom">
+                Jinde: {{ overview["donation_count_manual"] }}
+            </div>
+            <div class="row">
+                <b>Celkem: {{ overview.donation_count_total }}</b>
+            </div>
+        </div>
     </div>
-    <div class="col">
-        <h2>Získaná ocenění</h2>
 
-        <ul>
+    <div class="col-auto ml-3 mb-4">
+        <h4 class="text-muted border-bottom">Získaná ocenění</h4>
+
+        <div class="container">
             {% for medal in all_medals %}
-            <li>
                 {% if medal.id in awarded_medals.keys() %}
+
                     {% with form=remove_medal_form %}
-                    <form id="removeMedalForm" action="{{ url_for('donor.remove_medal') }}" method="POST"
-                        class="form-inline" role="form">
-                        <div class="form-group">
+                        <form id="removeMedalForm"
+                            action="{{ url_for('donor.remove_medal') }}"
+                            method="POST"
+                            class="row align-items-center"
+                            role="form">
+
                             {{ form.csrf_token }}
                             {{ form.rodne_cislo(value=overview.rodne_cislo) }}
                             {{ form.medal_id(value=medal.id) }}
-                            <input type="submit" class="btn btn-sm btn-danger" value="🗑" title="Odebrat medaili">
-                            &nbsp;{{ medal.title }}
-                            &nbsp;<div data-toggle="modal" data-target="#titleModal" title="
-                                {%- if awarded_medals[medal.id].awarded_at is not none -%}
-Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
-                                {%- else -%}
-Medaile udělena ve starém systému
-                                {%- endif -%}
-                            ">📅</div>
-                        </div>
-                    </form>
+                            <div class="col-xs">
+                                <input type="submit" class="btn btn-sm btn-outline-danger" value="🗑" title="Odebrat medaili">
+                            </div>
+                            <div class="col-sm">
+                                {{ medal.title }}
+                            </div>
+                            <div class="col-xs">
+                                <span data-toggle="modal"
+                                    data-target="#titleModal"
+                                    title="
+                                    {%- if awarded_medals[medal.id].awarded_at is not none -%}
+                                    Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
+                                    {%- else -%}
+                                    Medaile udělena ve starém systému
+                                    {%- endif -%}
+                                    ">
+                                        📅
+                                    </span>
+
+                            </div>
+                        </form>
                     {% endwith %}
+
                 {% else %}
+
                     {% with form=award_medal_form %}
-                    <form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST"
-                        class="form-inline" role="form">
-                        <div class="form-group">
+                        <form id="awardMedalForm"
+                            action="{{ url_for('donor.award_medal') }}"
+                            method="POST"
+                            class="row align-items-center"
+                            role="form">
+
                             {{ form.csrf_token }}
                             {{ form.rodne_cislo(value=overview.rodne_cislo) }}
                             {{ form.medal_id(value=medal.id) }}
+
                             {% if medal.minimum_donations > overview.donation_count_total %}
-                                <input type="submit" class="btn btn-sm btn-warning" value="✔" title="Udělit medaili (Nemá nárok)">
+                                <div class="col-xs">
+                                    <input type="submit" class="btn btn-sm btn-outline-warning" value="✔" title="Udělit medaili (Nemá nárok)">
+                                </div>
                             {% else %}
-                                <input type="submit" class="btn btn-sm btn-success" value="✔" title="Udělit medaili">
+                                <div class="col-xs">
+                                    <input type="submit" class="btn btn-sm btn-outline-success" value="✔" title="Udělit medaili">
+                                </div>
                             {% endif %}
-                            &nbsp;{{ medal.title }}
-                        </div>
-                    </form>
+                            <div class="col-sm">
+                                {{ medal.title }}
+                            </div>
+                        </form>
                     {% endwith %}
                 {% endif %}
-            </li>
             {% endfor %}
-        </ul>
+        </div>
     </div>
-    <div class="col">
-        <h2>Poznámky</h2>
+
+    <div class="col-auto ml-3">
+        <h4 class="text-muted">Poznámky</h4>
         {% with form=note_form %}
-        <form id="noteForm" action="{{ url_for('donor.save_note') }}" method="POST" role="form">
+        <form id="noteForm" action="{{ url_for('donor.save_note') }}"
+        method="POST"
+        role="form">
             {{ form.csrf_token }}
             {{ form.rodne_cislo(value=overview.rodne_cislo) }}
             {{ form.note(rows=7, class_="form-control") }}
-            <button class="btn btn-success" type="submit">Uložit</button>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <button class="btn btn-success" type="submit">Uložit</button>
+            </div>
         </form>
         {% endwith %}
     </div>
+
 </div>
+
+
 <h2>Historie importů</h2>
 
 <a href="{{ url_for('batch.import_data', rodne_cislo=overview.rodne_cislo) }}" class="btn btn-primary">Připravit manuální import</a>
