@@ -1,13 +1,4 @@
 -r dev.txt
 
-# Security scanner
-bandit==1.7.0
-
-# Code checkers, linters and formatters
-black==21.6b0
-flake8==3.9.2
-flake8-blind-except==0.2.0
-flake8-debugger==4.0.0
-flake8-isort==4.0.0
-isort==5.9.1
-pep8-naming==0.11.1
+# all checks are configured in .pre-commit-config.yaml
+pre-commit==2.14.0
