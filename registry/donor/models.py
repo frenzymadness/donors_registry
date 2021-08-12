@@ -137,8 +137,7 @@ class DonorsOverview(db.Model):
     def remove_ignored(cls):
         db.session.execute(
             """DELETE FROM "donors_overview"
-WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
-"""
+               WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");"""
         )
         db.session.commit()
 
