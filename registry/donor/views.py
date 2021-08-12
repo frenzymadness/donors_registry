@@ -154,10 +154,8 @@ def remove_medal():
     remove_medal_form = RemoveMedalForm()
     if remove_medal_form.validate_on_submit():
         db.session.delete(remove_medal_form.awarded_medal)
-        do = DonorsOverview.query.get(remove_medal_form.rodne_cislo.data)
-        slug = remove_medal_form.awarded_medal.medal.slug
-        setattr(do, "awarded_medal_" + slug, False)
         db.session.commit()
+        DonorsOverview.refresh_overview(rodne_cislo=remove_medal_form.rodne_cislo.data)
         flash("Medaile byla úspěšně odebrána.", "success")
     else:
         flash("Při odebrání medaile došlo k chybě.", "danger")
@@ -198,13 +196,9 @@ def award_medal():
                 awarded_at=datetime.now(),
             )
             db.session.add(am)
-            setattr(
-                award_medal_form.overviews[rodne_cislo],
-                "awarded_medal_" + award_medal_form.medal.slug,
-                True,
-            )
+            db.session.commit()
+            DonorsOverview.refresh_overview(rodne_cislo=rodne_cislo)
 
-        db.session.commit()
         if len(award_medal_form.rodna_cisla) == 1:
             flash("Medaile udělena.", "success")
         else:
@@ -268,7 +262,7 @@ def unignore_donor():
     if unignore_form.validate_on_submit():
         db.session.delete(unignore_form.ignored_donor)
         db.session.commit()
-        DonorsOverview.refresh_overview()
+        DonorsOverview.refresh_overview(rodne_cislo=unignore_form.rodne_cislo.data)
         flash("Dárce již není ignorován.", "success")
     else:
         flash("Při odebírání ze seznamu ignorovaných dárců došlo k chybě", "danger")

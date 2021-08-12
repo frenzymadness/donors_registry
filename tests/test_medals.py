@@ -146,7 +146,7 @@ class TestMedals:
         medals = Medals.query.all()
         AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo).delete()
         db.session.commit()
-        DonorsOverview.refresh_overview()
+        DonorsOverview.refresh_overview(rodne_cislo=do.rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         el_medal_amount = 0
