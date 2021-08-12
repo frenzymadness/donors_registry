@@ -303,10 +303,24 @@ SET
             )
 
     @classmethod
-    def refresh_overview(cls):
-        cls.query.delete()
+    def refresh_overview(cls, rodne_cislo=None):
+        if rodne_cislo:
+            row = cls.query.get(rodne_cislo)
+            if row is not None:
+                db.session.delete(row)
+            else:
+                Record.query.filter(Record.rodne_cislo == rodne_cislo).first_or_404()
+            # Thanks to the lines above, we know that it's safe to create this small
+            # part of the SQL query manually. Usually it's a bad idea due to possible
+            # SQL injection, but, we know that rodne_cislo is valid and exists in
+            # other parts of this database so it should be fine to use it like this.
+            sql_condition = f'"records"."rodne_cislo" = "{rodne_cislo}" AND '
+        else:
+            cls.query.delete()
+            sql_condition = ""
+        db.session.commit()
         db.session.execute(
-            """INSERT INTO "donors_overview"
+            f"""INSERT INTO "donors_overview"
     (
         "rodne_cislo",
         "first_name",
@@ -548,13 +562,13 @@ FROM (
         -- "rodne_cislo".
         SELECT DISTINCT "rodne_cislo"
         FROM "records"
-        WHERE "records"."rodne_cislo" NOT IN (
+        WHERE {sql_condition} "records"."rodne_cislo" NOT IN (
             SELECT "rodne_cislo" FROM "ignored_donors"
         )
     ) AS "rodna_cisla"
 ) AS "recent_records"
     JOIN "records"
-        ON "records"."id" = "recent_records"."record_id";"""
+        ON "records"."id" = "recent_records"."record_id";"""  # nosec - see above
         )
 
         cls.refresh_override()
