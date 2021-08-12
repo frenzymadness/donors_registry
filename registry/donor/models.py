@@ -548,13 +548,15 @@ FROM (
         -- "rodne_cislo".
         SELECT DISTINCT "rodne_cislo"
         FROM "records"
+        WHERE "records"."rodne_cislo" NOT IN (
+            SELECT "rodne_cislo" FROM "ignored_donors"
+        )
     ) AS "rodna_cisla"
 ) AS "recent_records"
     JOIN "records"
         ON "records"."id" = "recent_records"."record_id";"""
         )
 
-        cls.remove_ignored()
         cls.refresh_override()
         db.session.commit()
 
