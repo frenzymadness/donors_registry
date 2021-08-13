@@ -114,7 +114,8 @@ def detail(rc):
     note_form = NoteForm()
     if overview.note:
         note_form.note.data = overview.note.note
-    donors_override_form = DonorsOverrideForm().init_fields(rc)
+    donors_override_form = DonorsOverrideForm()
+    donors_override_form.init_fields(rc)
 
     return render_template(
         "donor/detail.html",
@@ -286,7 +287,7 @@ def save_override():
     if form.validate_on_submit():
         if not delete:
             # Save the override
-            override = DonorsOverride(**form.field_data)
+            override = DonorsOverride(**form.get_field_data())
             db.session.merge(override)
             db.session.commit()
 
@@ -315,6 +316,6 @@ def get_overrides():
     overrides_dict = {}
 
     for override in DonorsOverride.query.all():
-        overrides_dict[str(override.rodne_cislo)] = override.to_dict()
+        overrides_dict[override.rodne_cislo] = override.to_dict()
 
     return jsonify(overrides_dict)

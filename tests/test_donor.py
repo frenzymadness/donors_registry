@@ -1,4 +1,3 @@
-import re
 from random import randint
 
 import pytest
@@ -96,8 +95,7 @@ class TestOverride:
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
 
-        old_first_name = re.search(r"<li>\s*Jméno: (.*)\s*</li>", str(res)).group(1)
-        old_last_name = re.search(r"<li>\s*Příjmení: (.*)\s*</li>", str(res)).group(1)
+        old_data = DonorsOverview.query.get(rodne_cislo)
 
         # Test save
         form = res.forms["donorsOverrideForm"]
@@ -123,7 +121,7 @@ class TestOverride:
         res = form.submit("save_btn").follow()
 
         assert "Výjimka uložena" in res
-        assert ("Jméno: " + old_first_name) in res
+        assert ("Jméno: " + str(old_data.first_name)) in res
         assert "Příjmení: --Last--" in res
 
         # Test deleting the override
@@ -131,5 +129,5 @@ class TestOverride:
         res = form.submit("delete_btn").follow()
 
         assert "Výjimka smazána" in res
-        assert ("Jméno: " + old_first_name) in res
-        assert ("Příjmení: " + old_last_name) in res
+        assert ("Jméno: " + str(old_data.first_name)) in res
+        assert ("Příjmení: " + str(old_data.last_name)) in res

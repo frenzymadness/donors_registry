@@ -68,14 +68,6 @@ class DonorsOverrideForm(FlaskForm):
         "kod_pojistovny",
     ]
 
-    def validate(self):
-        initial_validation = super(DonorsOverrideForm, self).validate()
-        if not initial_validation:
-            return False
-
-        self._get_field_data()
-        return True
-
     def init_fields(self, rodne_cislo):
         override = DonorsOverride.query.get(rodne_cislo)
 
@@ -87,13 +79,9 @@ class DonorsOverrideForm(FlaskForm):
 
         self.rodne_cislo.data = rodne_cislo
 
-        return self
-
-    def _get_field_data(self):
-        self.field_data = {}
+    def get_field_data(self):
+        field_data = {}
         for field in self._fields_:
-            data = getattr(self, field).data
-            if data:
-                self.field_data[field] = data
-            else:
-                self.field_data[field] = None
+            field_data[field] = getattr(self, field).data or None
+
+        return field_data
