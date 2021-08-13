@@ -188,6 +188,7 @@ WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
         donor_dict["donations"]["total"] = self.donation_count_total
         return donor_dict
 
+    @classmethod
     def refresh_override(cls, commit=True):
         if sqlite3.sqlite_version_info >= (3, 33):
             # The UPDATE - FROM syntax is supported from SQLite version 3.33.0
