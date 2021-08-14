@@ -23,6 +23,7 @@
             <th class="kod_pojistovny">Pojišťovna</th>
             <th>Darování</th>
             <th class="sign">Podpis</th>
+            <th class="note">Pozn.</th>
             <th class="chosen">Vybrat vše <input type="checkbox" onClick="toggle(this)" checked=true></th>
         </tr>
     </thead>
@@ -38,6 +39,7 @@
             <td>{{ donor.kod_pojistovny }}</td>
             <td>{{ donor.donation_count_total }}</td>
             <td>&nbsp;</td>
+            <td>{{ donor.note.note }}</td>
             <td>{{ form["rodne_cislo_" + donor.rodne_cislo](value=donor.rodne_cislo) }}</td>
         </tr>
         {% endfor %}
@@ -68,7 +70,15 @@
             }, {
                 "targets": "chosen",
                 "orderable": false
-            }];
+            },{
+                "targets": "note",
+                "render": function ( data, type, row, meta ) {
+                  if (data)
+                    return `<span data-toggle="modal" data-target="#titleModal" title="${data}">⚠️</span>`;
+                  return "";
+                },
+                "orderable": false,
+            },];
 
         highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }} , columnDefs, function() {
             $('#overview').DataTable({
@@ -96,4 +106,6 @@
         }
     }
 </script>
+
+{% include "title_popup.html" %}
 {% endblock %}

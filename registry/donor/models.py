@@ -120,11 +120,14 @@ class DonorsOverview(db.Model):
         "kod_pojistovny": "Pojišťovna",
         "donations": "Darování Celkem",
         "last_award": "Ocenění",
+        "note": "Pozn.",
     }
 
     # Fields for frontend not calculated from multiple columns
     basic_fields = [
-        c for c in frontend_column_names.keys() if c not in ("donations", "last_award")
+        c
+        for c in frontend_column_names.keys()
+        if c not in ("donations", "last_award", "note")
     ]
 
     def __repr__(self):
@@ -170,10 +173,15 @@ WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
 
     def dict_for_frontend(self):
         # All standard attributes
-        donor_dict = {
-            name: getattr(self, name, None)
-            for name in self.frontend_column_names.keys()
-        }
+        donor_dict = {}
+        for name in self.frontend_column_names.keys():
+            donor_dict[name] = getattr(self, name, None)
+            # Note is special because note column contains
+            # Note object but we need to get its text which
+            # is in Note.note attr.
+            if donor_dict[name] is not None and name == "note":
+                donor_dict[name] = donor_dict[name].note
+
         # Highest awarded medal
         for medal in Medals.query.order_by(Medals.id.desc()).all():
             if getattr(self, "awarded_medal_" + medal.slug):
