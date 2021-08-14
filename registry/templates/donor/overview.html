@@ -44,6 +44,14 @@
                 "render": function (data, type, row, meta) {
                     return data.total + create_tooltip_for_donations(data);
                 }
+            }, {
+                "targets": "note",
+                "render": function ( data, type, row, meta ) {
+                  if (data)
+                    return `<span data-toggle="modal" data-target="#titleModal" title="${data}">⚠️</span>`;
+                  return "";
+                },
+                "orderable": false,
             },
         ];
 
