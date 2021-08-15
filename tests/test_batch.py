@@ -18,7 +18,7 @@ class TestBatch:
         assert res.status_code == 200
         batch = Batch.query.get(batch_id)
         assert f">{batch.id}</a></td>" in res
-        assert f"<td>{format_time(batch.imported_at)}</td>" in res
+        assert f">{format_time(batch.imported_at)}</td>" in res
         assert "<td></td>" not in res
 
     @pytest.mark.parametrize("unused", range(1, 6))

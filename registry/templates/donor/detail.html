@@ -256,7 +256,7 @@
         {% for record in records %}
         <tr>
             <td><a href="{{ url_for('batch.batch_detail', id=record.batch.id) }}">{{ record.batch_id }}</a></td>
-            <td>{{ record.batch.imported_at|format_time }}</td>
+            <td data-sort="{{ record.batch.imported_at }}">{{ record.batch.imported_at|format_time }}</td>
             <td>{{ record.batch.donation_center.title or "Jinde" }}</td>
             <td>{{ record.rodne_cislo }}</td>
             <td>{{ record.first_name }}</td>
