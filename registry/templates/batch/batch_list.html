@@ -16,7 +16,7 @@
         {% for batch in batches %}
         <tr>
             <td><a href="{{ url_for('batch.batch_detail', id=batch.id) }}">{{ batch.id}}</a></td>
-            <td>{{ batch.imported_at|format_time}}</td>
+            <td data-sort="{{ batch.imported_at }}">{{ batch.imported_at|format_time}}</td>
             <td>{{ batch.donation_center.title or "Jinde"}}</td>
             <td>
                 {% with form=delete_batch_form %}
