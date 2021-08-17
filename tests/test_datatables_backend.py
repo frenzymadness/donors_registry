@@ -3,7 +3,7 @@ from operator import ge, le
 import pytest
 from flask import url_for
 
-from registry.donor.models import AwardedMedals, DonorsOverview
+from registry.donor.models import AwardedMedals, DonorsOverview, IgnoredDonors
 from registry.list.models import Medals
 from tests.fixtures import sample_of_rc, skip_if_ignored
 
@@ -125,7 +125,10 @@ class TestDataTablesBackend:
             for medal in Medals.query.order_by(Medals.minimum_donations.desc()).all():
                 if (
                     AwardedMedals.query.filter(
-                        AwardedMedals.medal_id == medal.id
+                        AwardedMedals.medal_id == medal.id,
+                        AwardedMedals.rodne_cislo.notin_(
+                            IgnoredDonors.query.with_entities(IgnoredDonors.rodne_cislo)
+                        ),
                     ).count()
                     > 0
                 ):
