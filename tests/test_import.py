@@ -89,7 +89,7 @@ class TestImport:
             form = res.form
             assert len(form["valid_lines"].value.splitlines()) == 0
             # And the rest are invalid lines
-            assert len(form["invalid_lines"].value.splitlines()) == 7
+            assert len(form["invalid_lines"].value.splitlines()) == 9
             # We have to have as many lines of errors as invalid lines
             assert len(form["invalid_lines_errors"].value.splitlines()) == len(
                 form["invalid_lines"].value.splitlines()
