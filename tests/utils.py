@@ -174,7 +174,7 @@ def test_data_ignored(db, limit=25):
         enumerate(Record.query.with_entities(Record.rodne_cislo).distinct()),
         desc="Ignored donors",
     ):
-        if index > limit:
+        if index >= limit:
             break
         ignored = IgnoredDonors(
             rodne_cislo=rodne_cislo[0],
