@@ -2,7 +2,7 @@ import pytest
 from flask import url_for
 
 from registry.donor.models import DonorsOverview
-from tests.fixtures import sample_of_rc
+from tests.fixtures import sample_of_rc, skip_if_ignored
 
 from .helpers import login
 
@@ -26,8 +26,9 @@ class TestDataTablesBackend:
         assert res.status_code == 200
         assert len(res.json["data"]) == limit
 
-    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(3))
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_json_backend_search(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         params = {
             "draw": "1",
             "order[0][column]": "0",

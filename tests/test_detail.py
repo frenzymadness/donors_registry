@@ -6,7 +6,7 @@ from flask import url_for
 from registry.donor.models import Batch, DonorsOverview, Note, Record
 from registry.list.models import Medals
 
-from .fixtures import sample_of_rc
+from .fixtures import sample_of_rc, skip_if_ignored
 from .helpers import login
 
 
@@ -14,6 +14,7 @@ class TestDetail:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(50))
     def test_detail(self, user, testapp, rodne_cislo):
         """Just a simple test that the detail page loads for some random donors"""
+        skip_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         assert res.status_code == 200
@@ -26,6 +27,7 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_save_update_note(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         existing_notes = Note.query.count()
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
@@ -50,6 +52,7 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_manual_import_prepare(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         last_record = (
             Record.query.join(Batch)
             .filter(Record.rodne_cislo == rodne_cislo)

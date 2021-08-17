@@ -6,7 +6,7 @@ from flask import url_for
 
 from registry.donor.models import AwardedMedals, DonorsOverview, Medals
 
-from .fixtures import sample_of_rc
+from .fixtures import sample_of_rc, skip_if_ignored
 from .helpers import login
 
 
@@ -123,6 +123,7 @@ class TestMedals:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_amount(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         medal_amount = AwardedMedals.query.filter(
@@ -133,6 +134,7 @@ class TestMedals:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_eligibility(self, user, testapp, db, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         do = DonorsOverview.query.get(rodne_cislo)
         medals = Medals.query.all()
         AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo).delete()
