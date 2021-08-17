@@ -148,7 +148,7 @@
                             role="form">
 
                             {{ form.csrf_token }}
-                            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
+                            {{ form["rodne_cislo_" + overview.rodne_cislo](value=overview.rodne_cislo) }}
                             {{ form.medal_id(value=medal.id) }}
 
                             {% if medal.minimum_donations > overview.donation_count_total %}

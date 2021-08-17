@@ -1,8 +1,15 @@
+from flask import flash
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
-from registry.donor.models import AwardedMedals, DonorsOverride, DonorsOverview
+from registry.donor.models import (
+    AwardedMedals,
+    DonorsOverride,
+    DonorsOverview,
+    IgnoredDonors,
+    Medals,
+)
 from registry.utils import NumericValidator
 
 
@@ -32,7 +39,25 @@ class AwardMedalForm(FlaskForm):
             _form=self, _name="rodne_cislo", validators=[DataRequired()]
         )
         rodne_cislo_input.data = rodne_cislo
-        setattr(self, "rodne_cislo", rodne_cislo_input)
+        setattr(self, "rodne_cislo_" + rodne_cislo, rodne_cislo_input)
+
+    def validate(self):
+        self.medal = Medals.query.get(self.medal_id.data)
+
+        if self.medal is None:
+            flash("Odeslána nevalidní data.", "danger")
+            return False
+
+        self.overviews = {}
+        for rodne_cislo in self.rodna_cisla:
+            do = DonorsOverview.query.get(rodne_cislo)
+            if do:
+                self.overviews[rodne_cislo] = do
+            else:
+                flash("Odeslána nevalidní data.", "danger")
+                return False
+
+        return True
 
 
 class NoteForm(FlaskForm):
@@ -47,6 +72,10 @@ class IgnoreDonorForm(FlaskForm):
 
 class RemoveFromIgnoredForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
+
+    def validate(self):
+        self.ignored_donor = IgnoredDonors.query.get(self.rodne_cislo.data)
+        return self.ignored_donor is not None
 
 
 class DonorsOverrideForm(FlaskForm):

@@ -189,33 +189,27 @@ def award_prep(medal_slug):
 @login_required
 def award_medal():
     award_medal_form = AwardMedalForm()
+    award_medal_form.rodna_cisla = request.form.getlist("rodne_cislo")
     if award_medal_form.validate_on_submit():
-        # TODO: Find a way how to validate dynamic form the standard way
-        medal = Medals.query.get(request.form["medal_id"])
-
-        if medal is None:
-            flash("Odeslána nevalidní data.", "danger")
-            return redirect(url_for("donor.overview"))
-
-        rodna_cisla = request.form.getlist("rodne_cislo")
-        for rodne_cislo in rodna_cisla:
-            do = DonorsOverview.query.get(rodne_cislo)
-            if do is None:
-                flash("Odeslána nevalidní data.", "danger")
-                return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
-
+        for rodne_cislo in award_medal_form.rodna_cisla:
             am = AwardedMedals(
-                rodne_cislo=rodne_cislo, medal_id=medal.id, awarded_at=datetime.now()
+                rodne_cislo=rodne_cislo,
+                medal_id=award_medal_form.medal.id,
+                awarded_at=datetime.now(),
             )
             db.session.add(am)
-            setattr(do, "awarded_medal_" + medal.slug, True)
+            setattr(
+                award_medal_form.overviews[rodne_cislo],
+                "awarded_medal_" + award_medal_form.medal.slug,
+                True,
+            )
 
         db.session.commit()
-        if len(rodna_cisla) == 1:
+        if len(award_medal_form.rodna_cisla) == 1:
             flash("Medaile udělena.", "success")
         else:
             flash("Medaile uděleny.", "success")
-        return redirect(request.referrer)
+    return redirect(request.referrer)
 
 
 @blueprint.post("/note/save")
@@ -272,8 +266,7 @@ def ignore_donor():
 def unignore_donor():
     unignore_form = RemoveFromIgnoredForm()
     if unignore_form.validate_on_submit():
-        ignored_donor = IgnoredDonors.query.get(unignore_form.rodne_cislo.data)
-        db.session.delete(ignored_donor)
+        db.session.delete(unignore_form.ignored_donor)
         db.session.commit()
         DonorsOverview.refresh_overview()
         flash("Dárce již není ignorován.", "success")
