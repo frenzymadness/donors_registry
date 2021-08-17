@@ -45,7 +45,7 @@ def test_data_records(db, limit=None):
                 import_date,
             ) = tuple(row.values())
 
-            if limit is not None and index > limit:
+            if limit is not None and index >= limit:
                 break
 
             if donation_center != "manual" and donation_center not in donation_centers:
