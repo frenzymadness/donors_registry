@@ -8,5 +8,7 @@ omit =
 [report]
 # Regexes for lines to exclude from consideration
 exclude_lines =
+    # Ignore manually skipped lines
+    pragma: no cover
     # Don't complain about missing debug-only code:
     def __repr__
