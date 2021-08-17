@@ -3,7 +3,8 @@ from operator import ge, le
 import pytest
 from flask import url_for
 
-from registry.donor.models import DonorsOverview
+from registry.donor.models import AwardedMedals, DonorsOverview
+from registry.list.models import Medals
 from tests.fixtures import sample_of_rc, skip_if_ignored
 
 from .helpers import login
@@ -117,6 +118,18 @@ class TestDataTablesBackend:
         assert res.status_code == 200
         assert len(res.json["data"]) == 10
 
-        expected_first_medal = "Žádné" if direction == "asc" else "Plaketa ČČK"
+        if direction == "asc":
+            expected_first_medal = "Žádné"
+        else:
+            # Find the highest medal at least one donor has
+            for medal in Medals.query.order_by(Medals.minimum_donations.desc()).all():
+                if (
+                    AwardedMedals.query.filter(
+                        AwardedMedals.medal_id == medal.id
+                    ).count()
+                    > 0
+                ):
+                    expected_first_medal = medal.title
+                    break
 
         assert res.json["data"][0]["last_award"] == expected_first_medal
