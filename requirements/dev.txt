@@ -11,3 +11,6 @@ pandas==1.1.5
 
 # Debug toolbar
 Flask-DebugToolbar==0.11.0
+
+# Test coverage
+coverage==5.5
