@@ -1,0 +1,12 @@
+[run]
+source = registry/
+omit =
+    migrations/*
+    tests/*
+    .tox/*
+
+[report]
+# Regexes for lines to exclude from consideration
+exclude_lines =
+    # Don't complain about missing debug-only code:
+    def __repr__
