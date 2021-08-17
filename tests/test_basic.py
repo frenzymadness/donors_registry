@@ -92,7 +92,7 @@ class TestErrorInterface:
 class TestLoggingIn:
     """Login."""
 
-    def test_log_in(self, user, testapp):
+    def test_log_in_log_out(self, user, testapp):
         """Login successful."""
         # Goes to homepage
         res = testapp.get("/")
@@ -104,6 +104,47 @@ class TestLoggingIn:
         res = form.submit().follow()
         assert "Přihlášení proběhlo úspěšně" in res
         res.status_code == 200
+        res = res.click(description="Odhlásit se").follow()
+        assert "Odhlášení bylo úspěšné." in res
+        res.status_code == 200
+
+    def test_invalid_user(self, user, testapp):
+        res = testapp.get("/")
+        form = res.form
+        form["email"] = "foobarbaz"
+        form["password"] = "foobarbaz"
+        res = form.submit()
+        assert "Neznámý uživatel" in res
+
+    def test_invalid_pass(self, user, testapp):
+        res = testapp.get("/")
+        form = res.form
+        form["email"] = user.email
+        form["password"] = "foobarbaz"
+        res = form.submit()
+        assert "Nesprávné heslo" in res
+
+    def test_empty_input(self, user, testapp):
+        res = testapp.get("/")
+        form = res.form
+        form["email"] = None
+        form["password"] = None
+        res = form.submit()
+        assert "Email - This field is required." in res
+
+    def test_inactive_user(self, user, testapp, db):
+        res = testapp.get("/")
+        user.active = False
+        db.session.add(user)
+        db.session.commit()
+        form = res.form
+        form["email"] = user.email
+        form["password"] = user.test_password
+        res = form.submit()
+        assert "Neaktivní uživatel" in res
+        user.active = True
+        db.session.add(user)
+        db.session.commit()
 
 
 class TestHomePage:
