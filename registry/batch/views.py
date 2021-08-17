@@ -40,7 +40,7 @@ def import_data_post():
     if import_form.validate_on_submit():
         batch = Batch(
             donation_center_id=import_form.donation_center.id
-            if import_form.donation_center
+            if getattr(import_form, "donation_center", None)
             else None,
             imported_at=datetime.now(),
         )

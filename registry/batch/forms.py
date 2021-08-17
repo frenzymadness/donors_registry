@@ -37,11 +37,6 @@ class ImportForm(FlaskForm):
 
         self.reset_validator()
 
-        self.donation_center = DonationCenter.query.get(self.donation_center_id.data)
-        if not self.donation_center and int(self.donation_center_id.data) != -1:
-            self.donation_center_id.errors.append("Odběrné místo neexistuje")
-            return False
-
         repeated_import = False
         if self.valid_lines.data or self.invalid_lines.data:
             # repeated import with hopefully fixed errors
