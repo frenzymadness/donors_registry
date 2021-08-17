@@ -33,6 +33,16 @@ class TestBatch:
         assert Batch.query.get(batch_id) is None
         assert Record.query.filter(Record.batch_id == batch_id).count() == 0
 
+    def test_delete_nonexisting_batch(self, user, testapp):
+        login(user, testapp)
+        res = testapp.get(url_for("batch.batch_list"))
+        form = res.forms[0]
+        # Modify the form content to point to batch that
+        # does not exist.
+        form.fields["batch_id"][0].value = 99999
+        res = form.submit().follow()
+        assert "Při odebrání dávky došlo k chybě." in res
+
     @pytest.mark.parametrize("unused", range(1, 11))
     def test_batch_detail(self, user, testapp, unused):
         login(user, testapp)
