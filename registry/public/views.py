@@ -73,15 +73,14 @@ def home(status_code=200):
 def home_post():
     """Home page."""
     form = LoginForm(request.form)
-    if request.method == "POST":
-        if form.validate_on_submit():
-            login_user(form.user)
-            session.permanent = True
-            flash("Přihlášení proběhlo úspěšně.", "success")
-            redirect_url = request.args.get("next") or url_for("public.home")
-            return redirect(redirect_url)
-        else:
-            flash_errors(form)
+    if form.validate_on_submit():
+        login_user(form.user)
+        session.permanent = True
+        flash("Přihlášení proběhlo úspěšně.", "success")
+        redirect_url = request.args.get("next") or url_for("public.home")
+        return redirect(redirect_url)
+
+    flash_errors(form)
     return render_template("public/home.html", form=form)
 
 
