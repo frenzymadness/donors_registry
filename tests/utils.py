@@ -201,7 +201,7 @@ def test_data_overrides(db, limit=25):
     fields = cycle(DonorsOverview.basic_fields)
 
     for index, record in tqdm(
-        enumerate(Record.query.all()),
+        enumerate(Record.query.distinct(Record.rodne_cislo).all()),
         desc="Overrides for donors",
     ):
         if index > limit:
