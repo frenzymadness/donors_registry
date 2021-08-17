@@ -77,6 +77,8 @@ class TestMedals:
         do = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
         ).first()
+        if do is None:
+            pytest.skip(f"No donors with medal id {medal_id}")
         login(user, testapp)
         detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
         # Medal is there
