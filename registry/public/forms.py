@@ -25,14 +25,14 @@ class LoginForm(FlaskForm):
 
         self.user = User.query.filter_by(email=self.email.data).first()
         if not self.user:
-            self.email.errors.append("Unknown email")
+            self.email.errors.append("Neznámý uživatel")
             return False
 
         if not self.user.check_password(self.password.data):
-            self.password.errors.append("Invalid password")
+            self.password.errors.append("Nesprávné heslo")
             return False
 
         if not self.user.active:
-            self.email.errors.append("User not activated")
+            self.email.errors.append("Neaktivní uživatel")
             return False
         return True
