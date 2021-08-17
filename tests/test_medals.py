@@ -4,7 +4,12 @@ from datetime import datetime
 import pytest
 from flask import url_for
 
-from registry.donor.models import AwardedMedals, DonorsOverview, Medals
+from registry.donor.models import (
+    AwardedMedals,
+    DonorsOverview,
+    IgnoredDonors,
+    Medals,
+)
 
 from .fixtures import sample_of_rc, skip_if_ignored
 from .helpers import login
@@ -151,3 +156,44 @@ class TestMedals:
                 unel_medal_amount += 1
         assert el_medal_amount == len(re.findall('title="Udělit medaili"', res.text))
         assert unel_medal_amount == len(re.findall("(Nemá nárok)", res.text))
+
+    def test_award_nonexisting_medal(self, user, testapp):
+        awarded = AwardedMedals.query.count()
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug="br"))
+        page.form.fields["medal_id"][0].value = "foo"
+        page = page.form.submit().follow()
+        assert "Odeslána nevalidní data" in page
+        assert awarded == AwardedMedals.query.count()
+
+    def test_award_invalid_rc(self, user, testapp):
+        awarded = AwardedMedals.query.count()
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug="br"))
+        page.form.fields["rodne_cislo"][0].force_value("foobarbaz")
+        page = page.form.submit().follow()
+        assert "Odeslána nevalidní data" in page
+        assert awarded == AwardedMedals.query.count()
+
+    def test_remove_nonexisting_medal(self, user, testapp):
+        awarded = AwardedMedals.query.count()
+        login(user, testapp)
+        # First rodne cislo with some medal and not ignored
+        rodne_cislo = (
+            AwardedMedals.query.filter(
+                AwardedMedals.rodne_cislo.notin_(
+                    IgnoredDonors.query.with_entities(IgnoredDonors.rodne_cislo)
+                )
+            )
+            .first()
+            .rodne_cislo
+        )
+        detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        # Find the right form to remove it
+        for index, form in detail.forms.items():
+            if form.id == "removeMedalForm":
+                break
+        form.fields["medal_id"][0].value = "999"
+        detail = form.submit().follow()
+        assert "Při odebrání medaile došlo k chybě." in detail
+        assert awarded == AwardedMedals.query.count()
