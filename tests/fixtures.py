@@ -7,17 +7,18 @@ from random import sample
 from shutil import copy
 
 from flask_migrate import Migrate, upgrade
-from pytest import fixture
+from pytest import fixture, skip
 from sqlalchemy.exc import IntegrityError
 from webtest import TestApp
 
 from registry.app import create_app
-from registry.donor.models import DonorsOverview
+from registry.donor.models import DonorsOverview, IgnoredDonors
 from registry.extensions import db as _db
 from registry.user.models import User
 
 from .utils import (
     get_test_data_df,
+    test_data_ignored,
     test_data_medals,
     test_data_overrides,
     test_data_records,
@@ -65,6 +66,7 @@ def db(app):
         test_data_records(_db, limit=TEST_RECORDS)
         test_data_medals(_db)
         test_data_overrides(_db)
+        test_data_ignored(_db, limit=3)
 
         DonorsOverview.refresh_overview()
 
@@ -103,3 +105,8 @@ def sample_of_rc(amount=100):
     """Yields random sample of RC from test data"""
     for rc in sample(list(get_test_data_df(TEST_RECORDS).RC.unique()), amount):
         yield rc
+
+
+def skip_if_ignored(rodne_cislo):
+    if IgnoredDonors.query.get(rodne_cislo):
+        skip("Donor is ignored")
