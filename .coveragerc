@@ -6,6 +6,7 @@ omit =
     .tox/*
 
 [report]
+fail_under = 100
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Ignore manually skipped lines
