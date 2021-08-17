@@ -7,6 +7,7 @@ from registry.donor.models import (
     DonationCenter,
     DonorsOverride,
     DonorsOverview,
+    IgnoredDonors,
 )
 
 from .fixtures import sample_of_rc, skip_if_ignored
@@ -100,6 +101,45 @@ class TestIgnore:
 
         do = testapp.get(url_for("donor.detail", rc=rodne_cislo), status=200)
         assert do.status_code == 200
+
+    def test_ignore_already_ignored(self, user, testapp):
+        login(user, testapp)
+        ignored_count = IgnoredDonors.query.count()
+        already_ignored_rc = IgnoredDonors.query.first().rodne_cislo
+        res = testapp.get(url_for("donor.show_ignored"))
+        form = res.forms[0]
+        form.fields["rodne_cislo"][0].value = already_ignored_rc
+        form.fields["reason"][0].value = "foobarbaz"
+        res = form.submit().follow()
+        assert "Dárce již je v seznamu ignorovaných" in res
+        assert ignored_count == IgnoredDonors.query.count()
+
+    def test_ignore_no_reason(self, user, testapp):
+        login(user, testapp)
+        ignored_count = IgnoredDonors.query.count()
+        rodne_cislo = DonorsOverview.query.order_by(
+            DonorsOverview.rodne_cislo.desc()
+        ).first()
+        res = testapp.get(url_for("donor.show_ignored"))
+        form = res.forms[0]
+        form.fields["rodne_cislo"][0].value = rodne_cislo
+        form.fields["reason"][0].value = ""
+        res = form.submit().follow()
+        assert "Při přidávání do ignorovaných došlo k chybě" in res
+        assert ignored_count == IgnoredDonors.query.count()
+
+    def test_unignore_not_ignored(self, user, testapp):
+        login(user, testapp)
+        ignored_count = IgnoredDonors.query.count()
+        rodne_cislo = DonorsOverview.query.order_by(
+            DonorsOverview.rodne_cislo.desc()
+        ).first()
+        res = testapp.get(url_for("donor.show_ignored"))
+        form = res.forms[1]
+        form.fields["rodne_cislo"][0].value = rodne_cislo
+        res = form.submit().follow()
+        assert "Při odebírání ze seznamu ignorovaných dárců došlo k chybě" in res
+        assert ignored_count == IgnoredDonors.query.count()
 
 
 class TestOverride:
