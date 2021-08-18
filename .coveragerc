@@ -1,9 +1,10 @@
 [run]
 source = registry/
 omit =
-    migrations/*
-    tests/*
     .tox/*
+    migrations/*
+    registry/settings.py
+    tests/*
 
 [report]
 fail_under = 100
