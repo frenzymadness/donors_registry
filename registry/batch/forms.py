@@ -1,8 +1,8 @@
 from flask_wtf import FlaskForm
 from wtforms import HiddenField, SelectField, TextAreaField
-from wtforms.validators import DataRequired
 
 from registry.donor.models import Batch, DonationCenter
+from registry.utils import DataRequired
 
 from .utils import validate_import_data
 

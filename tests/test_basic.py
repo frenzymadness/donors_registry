@@ -130,7 +130,7 @@ class TestLoggingIn:
         form["email"] = None
         form["password"] = None
         res = form.submit()
-        assert "Email - This field is required." in res
+        assert "E-mail - Toto pole je povinné!" in res
 
     def test_inactive_user(self, user, testapp, db):
         res = testapp.get("/")

@@ -1,5 +1,6 @@
 """Helper utilities and decorators."""
 from flask import flash
+from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
 from registry.donor.models import Medals
@@ -57,3 +58,9 @@ class NumericValidator:
                 raise ValidationError(self.msg_numeric)
             if len(field.data) != self.length:
                 raise ValidationError(self.msg_length)
+
+
+class DataRequired(OriginalDataRequired):
+    def __init__(self, *args, **kwargs):
+        super(OriginalDataRequired, self).__init__(*args, **kwargs)
+        self.message = "Toto pole je povinné!"

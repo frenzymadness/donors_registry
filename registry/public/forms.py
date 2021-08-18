@@ -1,16 +1,16 @@
 """Public forms."""
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField
-from wtforms.validators import DataRequired
 
 from registry.user.models import User
+from registry.utils import DataRequired
 
 
 class LoginForm(FlaskForm):
     """Login form."""
 
-    email = StringField("Email", validators=[DataRequired()])
-    password = PasswordField("Password", validators=[DataRequired()])
+    email = StringField("E-mail", validators=[DataRequired()])
+    password = PasswordField("Heslo", validators=[DataRequired()])
 
     def __init__(self, *args, **kwargs):
         """Create instance."""
