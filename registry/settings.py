@@ -12,9 +12,11 @@ env.read_env()  # reads .env file first
 
 ENV = env.str("FLASK_ENV", default="production")
 DEBUG = ENV == "development"
-SQLALCHEMY_DATABASE_URI = env.str("DATABASE_URL")
+SQLALCHEMY_DATABASE_URI = (
+    "sqlite:///database.sqlite" if DEBUG else env.str("DATABASE_URL")
+)
 SQLALCHEMY_ECHO = DEBUG
-SECRET_KEY = env.str("SECRET_KEY")
+SECRET_KEY = "N0-s0-s3CrEt-d3fAulT-KeY" if DEBUG else env.str("SECRET_KEY")
 BCRYPT_LOG_ROUNDS = env.int("BCRYPT_LOG_ROUNDS", default=13)
 DEBUG_TB_ENABLED = DEBUG
 DEBUG_TB_INTERCEPT_REDIRECTS = False
