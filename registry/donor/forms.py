@@ -1,7 +1,6 @@
 from flask import flash
 from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, TextAreaField
-from wtforms.validators import DataRequired
 
 from registry.donor.models import (
     AwardedMedals,
@@ -10,7 +9,7 @@ from registry.donor.models import (
     IgnoredDonors,
     Medals,
 )
-from registry.utils import NumericValidator
+from registry.utils import DataRequired, NumericValidator
 
 
 class RemoveMedalForm(FlaskForm):
