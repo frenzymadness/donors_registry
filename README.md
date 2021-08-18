@@ -41,3 +41,8 @@ you can use pre-commit which automatically runs linters before every commit
 can install all extra requirements via `pip install -r requirements/extra.txt`.
 1. Then run `pre-commit install`
 1. After that linters should run before every commit.
+
+Code coverage is measured by `coverage` Python package. It's automatically measured for the last tox environment
+with a report at the very end of the output. If you want to run it manually, use `coverage run -m pytest`
+and then `coverage report` to see the results in the command line or `coverage html` which produces folder `htmlcov`
+with more interactive results.
