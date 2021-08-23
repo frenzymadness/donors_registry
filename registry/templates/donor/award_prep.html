@@ -70,7 +70,7 @@
                 "orderable": false
             }];
 
-        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", columnDefs, function() {
+        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }} , columnDefs, function() {
             $('#overview').DataTable({
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
@@ -86,7 +86,7 @@
                 dom: "Blfrtip",
                 columnDefs: columnDefs
             });
-        });        
+        });
     } );
 
     function toggle(source) {

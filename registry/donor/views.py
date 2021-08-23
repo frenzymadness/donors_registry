@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import (
@@ -41,7 +42,9 @@ blueprint = Blueprint("donor", __name__, static_folder="../static")
 @login_required
 def overview():
     return render_template(
-        "donor/overview.html", column_names=DonorsOverview.frontend_column_names
+        "donor/overview.html",
+        column_names=DonorsOverview.frontend_column_names,
+        override_column_names=json.dumps(DonorsOverview.basic_fields),
     )
 
 
@@ -178,6 +181,7 @@ def award_prep(medal_slug):
         medal=medal,
         donors=donors,
         award_medal_form=award_medal_form,
+        override_column_names=json.dumps(DonorsOverview.basic_fields),
     )
 
 

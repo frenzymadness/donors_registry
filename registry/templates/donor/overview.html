@@ -48,8 +48,8 @@
         ];
 
         let dataTable = null;
-        
-        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", columnDefs, function() {
+
+        highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }}, columnDefs, function() {
             if (dataTable !== null)
                 dataTable.draw();
         });

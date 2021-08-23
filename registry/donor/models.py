@@ -122,6 +122,11 @@ class DonorsOverview(db.Model):
         "last_award": "Ocenění",
     }
 
+    # Fields for frontend not calculated from multiple columns
+    basic_fields = [
+        c for c in frontend_column_names.keys() if c not in ("donations", "last_award")
+    ]
+
     def __repr__(self):
         return f"<DonorsOverview ({self.rodne_cislo})>"
 
@@ -568,15 +573,7 @@ class DonorsOverride(db.Model):
 
     def to_dict(self):
         result = {}
-        for field in [
-            "rodne_cislo",
-            "first_name",
-            "last_name",
-            "address",
-            "city",
-            "postal_code",
-            "kod_pojistovny",
-        ]:
+        for field in DonorsOverview.basic_fields:
             if getattr(self, field) is not None:
                 result[field] = str(getattr(self, field))
             else:
