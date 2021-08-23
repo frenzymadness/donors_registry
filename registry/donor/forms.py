@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, HiddenField, StringField, TextAreaField
 from wtforms.validators import DataRequired
 
-from registry.donor.models import AwardedMedals, DonorsOverride
+from registry.donor.models import AwardedMedals, DonorsOverride, DonorsOverview
 from registry.utils import NumericValidator
 
 
@@ -58,15 +58,7 @@ class DonorsOverrideForm(FlaskForm):
     postal_code = StringField("PSČ", validators=[NumericValidator(5)])
     kod_pojistovny = StringField("Pojišťovna", validators=[NumericValidator(3)])
 
-    _fields_ = [
-        "rodne_cislo",
-        "first_name",
-        "last_name",
-        "address",
-        "city",
-        "postal_code",
-        "kod_pojistovny",
-    ]
+    _fields_ = DonorsOverview.basic_fields
 
     def init_fields(self, rodne_cislo):
         override = DonorsOverride.query.get(rodne_cislo)

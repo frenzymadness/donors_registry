@@ -1,13 +1,14 @@
 /**
  * Sets up highlighting of values overriden in donors_override
  * @param {string} url The URL to request (url_for('donor.get_overrides'))
+ * @param {array} columnNames Array of column names
  * @param {object} columnDefs DataTables columnDefs
  * @param {Function} onDataReady Called when information about overrides is downloaded
  */
-function highlightOverridenValues(url, columnDefs, onDataReady) {
+function highlightOverridenValues(url, columnNames, columnDefs, onDataReady) {
     let overrides = {}; // Will be set by an AJAX request
 
-    for (const column of ["first_name", "last_name", "address", "city", "postal_code", "kod_pojistovny"]) {
+    for (const column of columnNames) {
         columnDefs.push({
             "targets": column,
             "name": column,
@@ -15,7 +16,7 @@ function highlightOverridenValues(url, columnDefs, onDataReady) {
                 // We only want to highlight the value that is displayed
                 // to the user, not the ones used for searching and sorting
                 if (type != "display") return data;
-                
+
                 let rodneCislo;
                 if (row instanceof Array)
                     rodneCislo = row[0]
