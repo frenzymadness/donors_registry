@@ -3,7 +3,7 @@ import re
 import pytest
 from flask import url_for
 
-from registry.donor.models import DonorsOverview, Note
+from registry.donor.models import Batch, DonorsOverview, Note, Record
 from registry.list.models import Medals
 
 from .fixtures import sample_of_rc
@@ -50,7 +50,12 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_manual_import_prepare(self, user, testapp, rodne_cislo):
-        do = DonorsOverview.query.get(rodne_cislo)
+        last_record = (
+            Record.query.join(Batch)
+            .filter(Record.rodne_cislo == rodne_cislo)
+            .order_by(Batch.imported_at.desc())
+            .first()
+        )
         login(user, testapp)
         detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         import_page = detail.click(description="Připravit manuální import")
@@ -66,7 +71,7 @@ class TestDetail:
             "postal_code",
             "kod_pojistovny",
         ):
-            assert getattr(do, field) + ";" in input_data
+            assert getattr(last_record, field) + ";" in input_data
         assert ";_POČET_" in input_data
 
 

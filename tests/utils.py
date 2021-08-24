@@ -1,9 +1,18 @@
 import csv
 from datetime import datetime
 from functools import lru_cache
+from itertools import cycle
 from random import choice, uniform
+from string import ascii_letters, digits
 
-from registry.donor.models import AwardedMedals, Batch, IgnoredDonors, Record
+from registry.donor.models import (
+    AwardedMedals,
+    Batch,
+    DonorsOverride,
+    DonorsOverview,
+    IgnoredDonors,
+    Record,
+)
 from registry.list.models import DonationCenter, Medals
 
 try:
@@ -173,4 +182,40 @@ def test_data_ignored(db, limit=25):
             ignored_since=datetime.now(),
         )
         db.session.add(ignored)
+    db.session.commit()
+
+
+def random_string(allowed_chars, size):
+    return "".join(choice(allowed_chars) for x in range(size))
+
+
+def random_postal_code():
+    return random_string(digits, 5)
+
+
+def random_kod_pojistovny():
+    return random_string(digits, 3)
+
+
+def test_data_overrides(db, limit=25):
+    fields = cycle(DonorsOverview.basic_fields)
+
+    for index, record in tqdm(
+        enumerate(Record.query.all()),
+        desc="Overrides for donors",
+    ):
+        if index > limit:
+            break
+        field = next(fields)
+
+        if field == "postal_code":
+            random_value = random_postal_code()
+        elif field == "kod_pojistovny":
+            random_value = random_kod_pojistovny()
+        else:
+            random_value = random_string(ascii_letters, len(getattr(record, field)))
+        override = DonorsOverride(rodne_cislo=record.rodne_cislo)
+        setattr(override, field, random_value)
+
+        db.session.add(override)
     db.session.commit()

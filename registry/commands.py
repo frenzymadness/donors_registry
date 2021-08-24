@@ -6,7 +6,12 @@ from flask.cli import with_appcontext
 from registry.donor.models import DonorsOverview
 from registry.extensions import db
 from registry.user.models import User
-from tests.utils import test_data_ignored, test_data_medals, test_data_records
+from tests.utils import (
+    test_data_ignored,
+    test_data_medals,
+    test_data_overrides,
+    test_data_records,
+)
 
 
 @click.command()
@@ -29,6 +34,7 @@ def install_test_data():
     test_data_records(db)
     test_data_medals(db)
     test_data_ignored(db)
+    test_data_overrides(db)
     DonorsOverview.refresh_overview()
 
 
