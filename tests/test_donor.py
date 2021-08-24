@@ -3,7 +3,11 @@ from random import randint
 import pytest
 from flask import url_for
 
-from registry.donor.models import DonationCenter, DonorsOverview
+from registry.donor.models import (
+    DonationCenter,
+    DonorsOverride,
+    DonorsOverview,
+)
 
 from .fixtures import sample_of_rc
 from .helpers import login
@@ -41,6 +45,8 @@ class TestDonorsOverview:
         # Check of all other attributes
         last_import = last_imports.tail(1)
 
+        override = DonorsOverride.query.get(rodne_cislo)
+
         for csv_column, attr in (
             ("JMENO", "first_name"),
             ("PRIJMENI", "last_name"),
@@ -49,7 +55,12 @@ class TestDonorsOverview:
             ("PSC", "postal_code"),
             ("POJISTOVNA", "kod_pojistovny"),
         ):
-            assert last_import[csv_column].values[0] == getattr(donor_overview, attr)
+            if override and getattr(override, attr):
+                assert getattr(donor_overview, attr) == getattr(override, attr)
+            else:
+                assert last_import[csv_column].values[0] == getattr(
+                    donor_overview, attr
+                )
 
 
 class TestIgnore:

@@ -16,7 +16,12 @@ from registry.donor.models import DonorsOverview
 from registry.extensions import db as _db
 from registry.user.models import User
 
-from .utils import get_test_data_df, test_data_medals, test_data_records
+from .utils import (
+    get_test_data_df,
+    test_data_medals,
+    test_data_overrides,
+    test_data_records,
+)
 
 TEST_RECORDS = 1000  # Number of test imports to use in test database
 BACKUP_DB_PATH = Path("registry") / "backup.sqlite"
@@ -59,6 +64,7 @@ def db(app):
 
         test_data_records(_db, limit=TEST_RECORDS)
         test_data_medals(_db)
+        test_data_overrides(_db)
 
         DonorsOverview.refresh_overview()
 
