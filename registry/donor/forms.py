@@ -58,13 +58,11 @@ class DonorsOverrideForm(FlaskForm):
     postal_code = StringField("PSČ", validators=[NumericValidator(5)])
     kod_pojistovny = StringField("Pojišťovna", validators=[NumericValidator(3)])
 
-    _fields_ = DonorsOverview.basic_fields
-
     def init_fields(self, rodne_cislo):
         override = DonorsOverride.query.get(rodne_cislo)
 
         if override is not None:
-            for field in self._fields_:
+            for field in DonorsOverview.basic_fields:
                 data = getattr(override, field)
                 if data is not None:
                     getattr(self, field).data = data
@@ -73,7 +71,7 @@ class DonorsOverrideForm(FlaskForm):
 
     def get_field_data(self):
         field_data = {}
-        for field in self._fields_:
+        for field in DonorsOverview.basic_fields:
             field_data[field] = getattr(self, field).data or None
 
         return field_data
