@@ -134,14 +134,6 @@ class DonorsOverview(db.Model):
         return f"<DonorsOverview ({self.rodne_cislo})>"
 
     @classmethod
-    def remove_ignored(cls):
-        db.session.execute(
-            """DELETE FROM "donors_overview"
-               WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");"""
-        )
-        db.session.commit()
-
-    @classmethod
     def get_filter_for_search(cls, search_str):
         conditions_all = []
         for part in search_str.split():
