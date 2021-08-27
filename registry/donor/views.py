@@ -244,9 +244,11 @@ def ignore_donor():
                 reason=ignore_form.reason.data,
                 ignored_since=datetime.now(),
             )
+            DonorsOverview.query.filter(
+                DonorsOverview.rodne_cislo == ignore_form.rodne_cislo.data
+            ).delete()
             db.session.add(ignored)
             db.session.commit()
-            DonorsOverview.remove_ignored()
             flash("Dárce ignorován.", "success")
         else:
             flash("Dárce již je v seznamu ignorovaných", "danger")
