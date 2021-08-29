@@ -202,7 +202,7 @@ WHERE "rodne_cislo" IN (SELECT "rodne_cislo" FROM "ignored_donors");
         return donor_dict
 
     @classmethod
-    def refresh_override(cls, commit=True):
+    def refresh_override(cls):
         if sqlite3.sqlite_version_info >= (3, 33):
             # The UPDATE - FROM syntax is supported from SQLite version 3.33.0
             db.session.execute(
@@ -302,9 +302,6 @@ SET
 );
             """
             )
-
-        if commit:
-            db.session.commit()
 
     @classmethod
     def refresh_overview(cls):
@@ -559,7 +556,7 @@ FROM (
         )
 
         cls.remove_ignored()
-        cls.refresh_override(commit=False)
+        cls.refresh_override()
         db.session.commit()
 
 
