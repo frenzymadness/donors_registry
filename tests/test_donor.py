@@ -193,3 +193,28 @@ class TestOverride:
         assert len(overrides) == len(res.json)
         for override in res.json.values():
             assert len(DonorsOverview.basic_fields) == len(override)
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
+    def test_incorrect_override(self, user, testapp, rodne_cislo):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        form = res.forms["donorsOverrideForm"]
+        form.fields["rodne_cislo"][0].value = "9999999999"
+        res = form.submit(name="delete_btn").follow()
+        # First follow above tries to redirect us to non-existing donor detail
+        # so the second one gives us HTTP/404 and then the home
+        # page with the error messages.
+        res = res.follow(status=404)
+        assert "Není co mazat" in res
+        assert "Stránka, kterou hledáte, neexistuje" in res
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
+    def test_form_errors(self, user, testapp, rodne_cislo):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        form = res.forms["donorsOverrideForm"]
+        form.fields["postal_code"][0].value = "7380X"
+        form.fields["kod_pojistovny"][0].value = "1X0"
+        res = form.submit(name="save_btn").follow()
+        assert "PSČ - Pole musí obsahovat pouze číslice" in res
+        assert "Pojišťovna - Pole musí obsahovat pouze číslice" in res
