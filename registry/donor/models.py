@@ -260,7 +260,7 @@ WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo";
             #           LEFT JOIN donors_override
             #               ON donors_override.rodne_cislo = records.rodne_cislo
         else:
-            db.session.execute(
+            db.session.execute(  # pragma: no cover
                 """
 UPDATE "donors_overview"
 SET
