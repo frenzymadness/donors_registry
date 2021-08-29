@@ -184,3 +184,12 @@ class TestOverride:
         assert "Výjimka smazána" in res
         assert ("Jméno: " + str(old_data.first_name)) in res
         assert ("Příjmení: " + str(old_data.last_name)) in res
+
+    def test_get_overrides_json_endpoint(self, user, testapp):
+        login(user, testapp)
+        res = testapp.get(url_for("donor.get_overrides"))
+        overrides = DonorsOverride.query.all()
+
+        assert len(overrides) == len(res.json)
+        for override in res.json.values():
+            assert len(DonorsOverview.basic_fields) == len(override)
