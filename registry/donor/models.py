@@ -300,19 +300,21 @@ SET
             row = cls.query.get(rodne_cislo)
             if row is not None:
                 db.session.delete(row)
-            else:
-                Record.query.filter(Record.rodne_cislo == rodne_cislo).first_or_404()
+            record = Record.query.filter(
+                Record.rodne_cislo == rodne_cislo
+            ).first_or_404()
             # Thanks to the lines above, we know that it's safe to create this small
             # part of the SQL query manually. Usually it's a bad idea due to possible
             # SQL injection, but, we know that rodne_cislo is valid and exists in
             # other parts of this database so it should be fine to use it like this.
-            sql_condition = f'"records"."rodne_cislo" = "{rodne_cislo}" AND '
+            sql_condition = "records.rodne_cislo = :rodne_cislo AND "
+            params = {"rodne_cislo": record.rodne_cislo}
         else:
             cls.query.delete()
             sql_condition = ""
+            params = {}
         db.session.commit()
-        db.session.execute(
-            f"""INSERT INTO "donors_overview"
+        full_query = f"""INSERT INTO "donors_overview"
     (
         "rodne_cislo",
         "first_name",
@@ -561,7 +563,8 @@ FROM (
 ) AS "recent_records"
     JOIN "records"
         ON "records"."id" = "recent_records"."record_id";"""  # nosec - see above
-        )
+
+        db.session.execute(full_query, params)
 
         cls.refresh_override()
         db.session.commit()
