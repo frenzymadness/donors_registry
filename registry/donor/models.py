@@ -1,5 +1,3 @@
-import sqlite3
-
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 
@@ -196,108 +194,6 @@ class DonorsOverview(db.Model):
         return donor_dict
 
     @classmethod
-    def refresh_override(cls):
-        if sqlite3.sqlite_version_info >= (3, 33):
-            # The UPDATE - FROM syntax is supported from SQLite version 3.33.0
-            db.session.execute(
-                """
--- Rewrite rows in "donors_overview" that have a record in "donors_override"
--- with the corresponding values.
-UPDATE "donors_overview"
-SET
-    "first_name" = COALESCE(
-        "donors_override"."first_name",
-        "donors_overview"."first_name"
-    ),
-    "last_name" = COALESCE(
-        "donors_override"."last_name",
-        "donors_overview"."last_name"
-    ),
-    "address" = COALESCE(
-        "donors_override"."address",
-        "donors_overview"."address"
-    ),
-    "city" = COALESCE(
-        "donors_override"."city",
-        "donors_overview"."city"
-    ),
-    "postal_code" = COALESCE(
-        "donors_override"."postal_code",
-        "donors_overview"."postal_code"
-    ),
-    "kod_pojistovny" = COALESCE(
-        "donors_override"."kod_pojistovny",
-        "donors_overview"."kod_pojistovny"
-    )
-FROM "donors_override"
-WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo";
-            """
-            )
-
-            # Note: because UPDATE - FROM is not a standard SQL construct, it is
-            # implemented differently in each database system. The SQLite query
-            # should be complatible with PostgreSQL, but for MySQL it would look
-            # something like this:
-            #  UPDATE "donors_overview"
-            #          INNER JOIN "donors_override"
-            #              ON "donors_overview"."rodne_cislo" =
-            #                  "donors_override"."rodne_cislo"
-            # and there would be no FROM of WHERE clause.
-
-            # TODO?: build this into the refresh_overview query, like this:
-            #  INSERT INTO donors_overview (...)
-            #      SELECT records.rodne_cislo,
-            #             COALESCE(donors_override.first_name,
-            #                      records.first_name),
-            #             ...
-            #      FROM ...
-            #           LEFT JOIN donors_override
-            #               ON donors_override.rodne_cislo = records.rodne_cislo
-        else:
-            db.session.execute(  # pragma: no cover
-                """
-UPDATE "donors_overview"
-SET
-"first_name" = COALESCE(
-    (SELECT "first_name"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."first_name"
-),
-"last_name" = COALESCE(
-    (SELECT "last_name"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."last_name"
-),
-"address" = COALESCE(
-    (SELECT "address"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."address"
-),
-"city" = COALESCE(
-    (SELECT "city"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."city"
-),
-"postal_code" = COALESCE(
-    (SELECT "postal_code"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."postal_code"
-),
-"kod_pojistovny" = COALESCE(
-    (SELECT "kod_pojistovny"
-        FROM "donors_override"
-        WHERE "donors_override"."rodne_cislo" = "donors_overview"."rodne_cislo"),
-    "donors_overview"."kod_pojistovny"
-);
-            """
-            )
-
-    @classmethod
     def refresh_overview(cls, rodne_cislo=None):
         if rodne_cislo:
             row = cls.query.get(rodne_cislo)
@@ -343,13 +239,32 @@ SET
 SELECT
     -- "rodne_cislo" uniquely identifies a person.
     "records"."rodne_cislo",
-    -- Personal data from the person’s most recent batch.
-    "records"."first_name",
-    "records"."last_name",
-    "records"."address",
-    "records"."city",
-    "records"."postal_code",
-    "records"."kod_pojistovny",
+    -- Personal data from the person’s most recent batch
+    -- or from manual overrides.
+    COALESCE(
+        "donors_override"."first_name",
+        "records"."first_name"
+    ),
+    COALESCE(
+        "donors_override"."last_name",
+        "records"."last_name"
+    ),
+    COALESCE(
+        "donors_override"."address",
+        "records"."address"
+    ),
+    COALESCE(
+        "donors_override"."city",
+        "records"."city"
+    ),
+    COALESCE(
+        "donors_override"."postal_code",
+        "records"."postal_code"
+    ),
+    COALESCE(
+        "donors_override"."kod_pojistovny",
+        "records"."kod_pojistovny"
+    ),
     -- Total donation counts for each donation center. The value in
     -- a record is incremental. Thus retrieving the one from the most
     -- recent batch that belongs to the donation center. Coalescing to
@@ -565,11 +480,12 @@ FROM (
     ) AS "rodna_cisla"
 ) AS "recent_records"
     JOIN "records"
-        ON "records"."id" = "recent_records"."record_id";"""  # nosec - see above
+        ON "records"."id" = "recent_records"."record_id"
+    LEFT JOIN "donors_override"
+        ON "donors_override"."rodne_cislo" = "records"."rodne_cislo";
+"""  # nosec - see above
 
         db.session.execute(full_query, params)
-
-        cls.refresh_override()
         db.session.commit()
 
 
