@@ -1,5 +1,6 @@
 """The app module, containing the app factory function."""
 import logging
+import re
 import sys
 
 from flask import Flask, flash, redirect, url_for
@@ -56,6 +57,17 @@ def create_app(config_object="registry.settings"):
             return word_map[input]
         else:
             return input
+
+    @app.template_filter("capitalize")
+    def capitalize(string):
+        def get_replacement(match):
+            word = match[0]
+            if word.isupper():
+                return word.capitalize()
+            else:
+                return word
+
+        return re.sub(r"\w{2,}", get_replacement, string)
 
     return app
 
