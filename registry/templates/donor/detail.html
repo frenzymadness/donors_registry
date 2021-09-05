@@ -50,16 +50,16 @@
                 Rodné číslo: {{ overview.rodne_cislo }}
             </div>
             <div class="row">
-                Jméno: {{ overview.first_name }}
+                Jméno: {{ overview.first_name|capitalize }}
             </div>
             <div class="row">
-                Příjmení: {{ overview.last_name }}
+                Příjmení: {{ overview.last_name|capitalize }}
             </div>
             <div class="row">
-                Adresa: {{ overview.address }}
+                Adresa: {{ overview.address|capitalize }}
             </div>
             <div class="row">
-                Město: {{ overview.city }}
+                Město: {{ overview.city|capitalize }}
             </div>
             <div class="row">
                 PSČ: {{ overview.postal_code }}
