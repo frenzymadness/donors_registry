@@ -24,7 +24,8 @@
     function create_tooltip_for_donations(data) {
         var title = ``;
         Object.keys(data).forEach((slug, index) => {
-            title += `${data[slug]["name"]}: ${data[slug]["count"]}\n`;
+            if (slug != "total")
+                title += `${data[slug]["name"]}: ${data[slug]["count"]}\n`;
         });
         return `<span data-toggle="modal" data-target="#titleModal" title="${title}">❓</span>`;
     }
