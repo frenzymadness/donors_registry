@@ -140,7 +140,10 @@ class DonorsOverview(db.Model):
             conditions_all.append([])
             for column_name in cls.frontend_column_names.keys():
                 if hasattr(cls, column_name):
-                    column = getattr(cls, column_name)
+                    if column_name == "note":
+                        column = Note.note
+                    else:
+                        column = getattr(cls, column_name)
                     contains = getattr(column, "contains")
                     conditions_all[-1].append(contains(part, autoescape=True))
         return db.and_(*[db.or_(*conditions) for conditions in conditions_all])

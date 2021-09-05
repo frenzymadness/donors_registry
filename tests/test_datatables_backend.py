@@ -3,7 +3,13 @@ from operator import ge, le
 import pytest
 from flask import url_for
 
-from registry.donor.models import AwardedMedals, DonorsOverview, IgnoredDonors
+from registry.donor.models import (
+    AwardedMedals,
+    DonorsOverview,
+    IgnoredDonors,
+    Note,
+)
+from registry.extensions import db
 from registry.list.models import Medals
 from tests.fixtures import sample_of_rc, skip_if_ignored
 
@@ -46,6 +52,44 @@ class TestDataTablesBackend:
         assert res.status_code == 200
         assert len(res.json["data"]) == 1
         assert res.json["data"][0]["rodne_cislo"] == rodne_cislo
+
+    def test_json_backend_search_by_note(self, user, testapp):
+        note_text = "FooBarBaz note special text"
+        while True:
+            first_rodne_cislo, second_rodne_cislo = sample_of_rc(2)
+            if not (
+                IgnoredDonors.query.get(first_rodne_cislo)
+                or IgnoredDonors.query.get(second_rodne_cislo)
+            ):
+                break
+
+        note = Note(rodne_cislo=first_rodne_cislo, note=note_text)
+        db.session.add(note)
+        db.session.commit()
+
+        params = {
+            "draw": "1",
+            "order[0][column]": "0",
+            "order[0][dir]": "asc",
+            "start": "0",
+            "length": "10",
+            "search[value]": "FooBarBaz",
+            "search[regex]": "false",
+        }
+        login(user, testapp)
+        res = testapp.get(url_for("donor.overview_data"), params=params)
+        assert res.status_code == 200
+        assert len(res.json["data"]) == 1
+        assert res.json["data"][0]["note"] == note_text
+
+        note = Note(rodne_cislo=second_rodne_cislo, note=note_text)
+        db.session.add(note)
+        db.session.commit()
+
+        res = testapp.get(url_for("donor.overview_data"), params=params)
+        assert res.status_code == 200
+        assert len(res.json["data"]) == 2
+        assert res.json["data"][1]["note"] == note_text
 
     @pytest.mark.parametrize("direction", ("asc", "desc"))
     def test_json_backend_order_by_rodne_cislo(self, user, testapp, direction):

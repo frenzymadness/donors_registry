@@ -73,11 +73,15 @@ def overview_data():
     # Final query without limits to see how many records we have after filtering
     # this number is important for pagination
     filtered_records_count = (
-        DonorsOverview.query.filter(filter_).order_by(*order_by).count()
+        DonorsOverview.query.outerjoin(DonorsOverview.note)
+        .filter(filter_)
+        .order_by(*order_by)
+        .count()
     )
     # Final query
     overview = (
-        DonorsOverview.query.filter(filter_)
+        DonorsOverview.query.outerjoin(DonorsOverview.note)
+        .filter(filter_)
         .order_by(*order_by)
         .limit(limit)
         .offset(offset)
