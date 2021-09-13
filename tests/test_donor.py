@@ -145,6 +145,7 @@ class TestIgnore:
 class TestOverride:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_override(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
 
@@ -196,6 +197,7 @@ class TestOverride:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
     def test_incorrect_override(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         form = res.forms["donorsOverrideForm"]
@@ -210,6 +212,7 @@ class TestOverride:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
     def test_form_errors(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         form = res.forms["donorsOverrideForm"]
