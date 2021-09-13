@@ -68,3 +68,30 @@ class TestNumericValidator:
         validator = NumericValidator(1)
         with pytest.raises(ValidationError, match="^Pole musí mít právě 1 znak$"):
             validator(form, form.field)
+
+
+class TestCapitalizer:
+    @pytest.mark.parametrize(
+        ("input", "expected"),
+        (
+            ("karlov", "karlov"),
+            ("Karlov", "Karlov"),
+            ("KARLOV", "Karlov"),
+            ("Velké KARLOVICE", "Velké Karlovice"),
+            ("velké karlovice", "velké karlovice"),
+            ("VELKÉ karlovice", "Velké karlovice"),
+            ("VELKÉ KARLOVICE", "Velké Karlovice"),
+            ("a b c d", "a b c d"),
+            ("A B C D", "A B C D"),
+            ("a B c D", "a B c D"),
+            ("U LÍPY", "U Lípy"),
+            ("u lípy", "u lípy"),
+            ("U Lípy", "U Lípy"),
+            ("Frýdlant nad Ostravicí", "Frýdlant nad Ostravicí"),
+            ("FRÝDLANT NAD OSTRAVICÍ", "Frýdlant Nad Ostravicí"),
+        ),
+    )
+    def test_capitalize(self, testapp, input, expected):
+        capitalize = testapp.app.jinja_env.filters["capitalize"]
+        output = capitalize(input)
+        assert output == expected
