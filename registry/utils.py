@@ -5,7 +5,7 @@ from flask import flash
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
-from registry.donor.models import Medals
+from registry.list.models import Medals
 
 
 def capitalize(string):
