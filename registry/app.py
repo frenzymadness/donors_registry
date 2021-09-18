@@ -1,6 +1,5 @@
 """The app module, containing the app factory function."""
 import logging
-import re
 import sys
 
 from flask import Flask, flash, redirect, url_for
@@ -14,7 +13,7 @@ from registry.extensions import (
     login_manager,
     migrate,
 )
-from registry.utils import template_globals
+from registry.utils import capitalize, template_globals
 
 
 def create_app(config_object="registry.settings"):
@@ -58,16 +57,7 @@ def create_app(config_object="registry.settings"):
         else:
             return input
 
-    @app.template_filter("capitalize")
-    def capitalize(string):
-        def get_replacement(match):
-            word = match[0]
-            if word.isupper():
-                return word.capitalize()
-            else:
-                return word
-
-        return re.sub(r"\w{2,}", get_replacement, string)
+    app.template_filter("capitalize")(capitalize)
 
     return app
 
