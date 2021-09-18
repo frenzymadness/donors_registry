@@ -6,8 +6,6 @@ from markupsafe import Markup
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
-from registry.list.models import Medals
-
 
 def capitalize(string):
     def get_replacement(match):
@@ -36,6 +34,8 @@ def template_globals():
     Injected into all templates
      - all medals are needed for the nav bar
     """
+    from registry.donor.models import Medals
+
     all_medals = Medals.query.all()
     return dict(all_medals=all_medals)
 
