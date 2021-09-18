@@ -31,7 +31,7 @@
                 prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je {{ "pracovník" | translate(overview.rodne_cislo) }} Vašeho podniku
             </p>
             <p class="donor-name">
-                {{ "p." | translate(overview.rodne_cislo) }} {{ overview.first_name }} {{ overview.last_name }},
+                {{ "p." | translate(overview.rodne_cislo) }} {{ overview.first_name|capitalize }} {{ overview.last_name|capitalize }},
                 r. č.
                 {{ [overview.rodne_cislo[:6], overview.rodne_cislo[6:]] | join('/') }}
             </p>

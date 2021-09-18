@@ -31,10 +31,10 @@
         {% for donor in donors %}
         <tr>
             <td>{{ donor.rodne_cislo }}</td>
-            <td>{{ donor.first_name }}</td>
-            <td>{{ donor.last_name }}</td>
-            <td>{{ donor.address }}</td>
-            <td>{{ donor.city }}</td>
+            <td>{{ donor.first_name|capitalize }}</td>
+            <td>{{ donor.last_name|capitalize }}</td>
+            <td>{{ donor.address|capitalize }}</td>
+            <td>{{ donor.city|capitalize }}</td>
             <td>{{ donor.postal_code }}</td>
             <td>{{ donor.kod_pojistovny }}</td>
             <td>{{ donor.donation_count_total }}</td>

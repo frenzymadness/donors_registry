@@ -1,5 +1,6 @@
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
+from registry.utils import capitalize
 
 
 class Batch(db.Model):
@@ -173,6 +174,13 @@ class DonorsOverview(db.Model):
             # is in Note.note attr.
             if donor_dict[name] is not None and name == "note":
                 donor_dict[name] = donor_dict[name].note
+            elif donor_dict[name] is not None and name in (
+                "first_name",
+                "last_name",
+                "address",
+                "city",
+            ):
+                donor_dict[name] = capitalize(donor_dict[name])
 
         # Highest awarded medal
         for medal in Medals.query.order_by(Medals.id.desc()).all():
