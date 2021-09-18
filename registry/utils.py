@@ -1,9 +1,22 @@
 """Helper utilities and decorators."""
+import re
+
 from flask import flash
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
 from registry.donor.models import Medals
+
+
+def capitalize(string):
+    def get_replacement(match):
+        word = match[0]
+        if word.isupper():
+            return word.capitalize()
+        else:
+            return word
+
+    return re.sub(r"\w{2,}", get_replacement, string)
 
 
 def flash_errors(form, category="warning"):
