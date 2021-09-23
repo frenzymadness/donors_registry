@@ -3,6 +3,7 @@ import logging
 import sys
 
 from flask import Flask, flash, redirect, url_for
+from markupsafe import Markup
 
 from registry import batch, commands, donor, public, user
 from registry.extensions import (
@@ -58,6 +59,10 @@ def create_app(config_object="registry.settings"):
             return input
 
     app.template_filter("capitalize")(capitalize)
+
+    @app.template_filter("psc")
+    def psc(cislo: str):
+        return cislo[:3] + Markup('&nbsp;') + cislo[3:]
 
     return app
 

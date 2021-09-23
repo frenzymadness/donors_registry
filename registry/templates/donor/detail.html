@@ -62,7 +62,7 @@
                 Město: {{ overview.city|capitalize }}
             </div>
             <div class="row">
-                PSČ: {{ overview.postal_code }}
+                PSČ: {{ overview.postal_code|psc }}
             </div>
             <div class="row">
                 Pojišťovna: {{ overview.kod_pojistovny }}
@@ -263,7 +263,7 @@
             <td>{{ record.last_name }}</td>
             <td>{{ record.address }}</td>
             <td>{{ record.city }}</td>
-            <td>{{ record.postal_code }}</td>
+            <td>{{ record.postal_code|psc }}</td>
             <td>{{ record.kod_pojistovny }}</td>
             <td>{{ record.donation_count }}</td>
         </tr>
