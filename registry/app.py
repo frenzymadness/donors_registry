@@ -3,7 +3,6 @@ import logging
 import sys
 
 from flask import Flask, flash, redirect, url_for
-from markupsafe import Markup
 
 from registry import batch, commands, donor, public, user
 from registry.extensions import (
@@ -14,7 +13,7 @@ from registry.extensions import (
     login_manager,
     migrate,
 )
-from registry.utils import capitalize, template_globals
+from registry.utils import capitalize, format_postal_code, template_globals
 
 
 def create_app(config_object="registry.settings"):
@@ -62,7 +61,7 @@ def create_app(config_object="registry.settings"):
 
     @app.template_filter("postal_code")
     def postal_code(code: str):
-        return code[:3] + Markup("&nbsp;") + code[3:]
+        return format_postal_code(code)
 
     return app
 
