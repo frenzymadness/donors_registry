@@ -2,6 +2,7 @@
 import re
 
 from flask import flash
+from markupsafe import Markup
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
@@ -17,6 +18,10 @@ def capitalize(string):
             return word
 
     return re.sub(r"\w{2,}", get_replacement, string)
+
+
+def format_postal_code(code: str):
+    return code[:3] + Markup("&nbsp;") + code[3:]
 
 
 def flash_errors(form, category="warning"):

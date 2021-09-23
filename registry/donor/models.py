@@ -1,6 +1,6 @@
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import capitalize
+from registry.utils import capitalize, format_postal_code
 
 
 class Batch(db.Model):
@@ -199,6 +199,9 @@ class DonorsOverview(db.Model):
             for dc in DonationCenter.query.all()
         }
         donor_dict["donations"]["total"] = self.donation_count_total
+
+        # Format the donor's postal code
+        donor_dict["postal_code"] = format_postal_code(self.postal_code)
         return donor_dict
 
     @classmethod
