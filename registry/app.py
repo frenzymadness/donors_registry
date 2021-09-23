@@ -60,9 +60,9 @@ def create_app(config_object="registry.settings"):
 
     app.template_filter("capitalize")(capitalize)
 
-    @app.template_filter("psc")
-    def psc(cislo: str):
-        return cislo[:3] + Markup('&nbsp;') + cislo[3:]
+    @app.template_filter("postal_code")
+    def postal_code(code: str):
+        return code[:3] + Markup("&nbsp;") + code[3:]
 
     return app
 
