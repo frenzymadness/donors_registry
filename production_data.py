@@ -88,6 +88,8 @@ def load_text_file(filename, batch):  # noqa: C901
                 else:
                     row = new_row
 
+            row = [element.strip() for element in row]
+
             try:
                 (
                     rodne_cislo,
