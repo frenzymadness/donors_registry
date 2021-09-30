@@ -11,20 +11,24 @@ from .helpers import login
 class TestImport:
     """Test of imports"""
 
+    @pytest.mark.parametrize("donation_center_id", range(1, 5))
     @pytest.mark.parametrize(
         "input_file",
         ("tests/data/valid_import.txt", "tests/data/valid_import_single_record.txt"),
     )
-    def test_valid_input(self, user, testapp, input_file):
+    def test_valid_input(self, user, testapp, input_file, donation_center_id):
         input_data = Path(input_file).read_text(encoding="utf-8")
         new_records = len(input_data.strip().splitlines())
         existing_records = Record.query.count()
-        existing_batches = Batch.query.count()
+        existing_batches = Batch.query.filter(
+            Batch.donation_center_id == donation_center_id
+        ).count()
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
         form["input_data"] = input_data
+        form.fields["donation_center_id"][0].select(donation_center_id)
         res = form.submit().follow()
         assert "Import proběhl úspěšně" in res
         assert res.status_code == 200
@@ -37,7 +41,10 @@ class TestImport:
         assert res.request.path == expected_page
 
         assert Record.query.count() == existing_records + new_records
-        assert Batch.query.count() == existing_batches + 1
+        assert (
+            Batch.query.filter(Batch.donation_center_id == donation_center_id).count()
+            == existing_batches + 1
+        )
 
     def test_repairable_input(self, user, testapp):
         """Tests an input file the import machinery should be able
