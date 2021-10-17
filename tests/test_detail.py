@@ -1,9 +1,16 @@
 import re
+from datetime import datetime
 
 import pytest
 from flask import url_for
 
-from registry.donor.models import Batch, DonorsOverview, Note, Record
+from registry.donor.models import (
+    AwardedMedals,
+    Batch,
+    DonorsOverview,
+    Note,
+    Record,
+)
 from registry.list.models import Medals
 
 from .fixtures import sample_of_rc, skip_if_ignored
@@ -123,3 +130,48 @@ class TestAwardDocument:
             assert medal.title not in doc
             assert medal.title_acc in doc
             assert medal.title_instr in doc
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_award_doc_dates(self, user, testapp, db, rodne_cislo):
+        today = datetime.now().strftime("%-d. %-m. %Y")
+        login(user, testapp)
+
+        # Test medal from the old system, where the date is unknown
+        awarded_at = None
+        am = AwardedMedals.query.filter(
+            AwardedMedals.rodne_cislo == rodne_cislo, AwardedMedals.medal_id == 1
+        ).first()
+        if am:
+            am.awarded_at = awarded_at
+        else:
+            am = AwardedMedals(
+                rodne_cislo=rodne_cislo, medal_id=1, awarded_at=awarded_at
+            )
+        db.session.add(am)
+        db.session.commit()
+
+        doc = testapp.get(
+            url_for("donor.render_award_document", rc=rodne_cislo, medal_slug="br")
+        )
+
+        assert f"Ve Frýdku-Místku, dne {today}" in doc
+
+        # Test medal from the new system, where the date is known
+        awarded_at = datetime(1989, 11, 17, 12, 23, 12)
+        am = AwardedMedals.query.filter(
+            AwardedMedals.rodne_cislo == rodne_cislo, AwardedMedals.medal_id == 2
+        ).first()
+        if am:
+            am.awarded_at = awarded_at
+        else:
+            am = AwardedMedals(
+                rodne_cislo=rodne_cislo, medal_id=2, awarded_at=awarded_at
+            )
+        db.session.add(am)
+        db.session.commit()
+
+        doc = testapp.get(
+            url_for("donor.render_award_document", rc=rodne_cislo, medal_slug="st")
+        )
+
+        assert "Ve Frýdku-Místku, dne 17. 11. 1989" in doc

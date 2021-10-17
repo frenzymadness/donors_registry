@@ -143,12 +143,20 @@ def detail(rc):
 def render_award_document(rc, medal_slug):
     overview = DonorsOverview.query.get_or_404(rc)
     medal = Medals.query.filter_by(slug=medal_slug).first_or_404()
+    awarded_medal = AwardedMedals.query.filter(
+        AwardedMedals.rodne_cislo == overview.rodne_cislo,
+        AwardedMedals.medal_id == medal.id,
+    ).first()
+    if awarded_medal and awarded_medal.awarded_at:
+        awarded_at = awarded_medal.awarded_at
+    else:
+        awarded_at = datetime.now()
 
     return render_template(
         "donor/award_document.html",
         overview=overview,
         medal=medal,
-        today=datetime.now().strftime("%-d. %-m. %Y"),
+        awarded_at=awarded_at.strftime("%-d. %-m. %Y"),
     )
 
 
