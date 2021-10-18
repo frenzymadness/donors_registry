@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/award_document.css') }}">
 </head>
 <body>
+    {% for donor in donors %}
     <div class="page">
         <header>
             <img src="{{ url_for('static', filename='cesky-cerveny-kriz.min.svg') }}" alt="Logo ČK" id="logoCK">
@@ -28,16 +29,16 @@
             </p>
             <p>
                 S potěšením Vám sdělujeme, že mezi vyznamenanými {{ medal.title_instr }}
-                prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je {{ "pracovník" | translate(overview.rodne_cislo) }} Vašeho podniku
+                prof.&nbsp;MUDr.&nbsp;J.&nbsp;Jánského je {{ "pracovník" | translate(donor.rodne_cislo) }} Vašeho podniku
             </p>
             <p class="donor-name">
-                {{ "p." | translate(overview.rodne_cislo) }} {{ overview.first_name|capitalize }} {{ overview.last_name|capitalize }},
+                {{ "p." | translate(donor.rodne_cislo) }} {{ donor.first_name|capitalize }} {{ donor.last_name|capitalize }},
                 r. č.
-                {{ [overview.rodne_cislo[:6], overview.rodne_cislo[6:]] | join('/') }}
+                {{ [donor.rodne_cislo[:6], donor.rodne_cislo[6:]] | join('/') }}
             </p>
             <p>
-                Věříme, že najdete vhodnou příležitost, jak morálně {{ "ocenit jeho hluboce" | translate(overview.rodne_cislo) }}
-                lidský postoj a {{ "využijete jeho příkladu" | translate(overview.rodne_cislo) }} k další
+                Věříme, že najdete vhodnou příležitost, jak morálně {{ "ocenit jeho hluboce" | translate(donor.rodne_cislo) }}
+                lidský postoj a {{ "využijete jeho příkladu" | translate(donor.rodne_cislo) }} k další
                 propagaci bezpříspěvkového dárcovství krve.
             </p>
         </main>
@@ -59,6 +60,7 @@
             </aside>
         </footer>
     </div>
+    {% endfor %}
 
 </body>
 </html>

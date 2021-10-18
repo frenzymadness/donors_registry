@@ -141,10 +141,10 @@ def detail(rc):
 @blueprint.get("/detail/<rc>/award_document/<medal_slug>/")
 @login_required
 def render_award_document(rc, medal_slug):
-    overview = DonorsOverview.query.get_or_404(rc)
+    donor = DonorsOverview.query.get_or_404(rc)
     medal = Medals.query.filter_by(slug=medal_slug).first_or_404()
     awarded_medal = AwardedMedals.query.filter(
-        AwardedMedals.rodne_cislo == overview.rodne_cislo,
+        AwardedMedals.rodne_cislo == donor.rodne_cislo,
         AwardedMedals.medal_id == medal.id,
     ).first()
     if awarded_medal and awarded_medal.awarded_at:
@@ -154,9 +154,28 @@ def render_award_document(rc, medal_slug):
 
     return render_template(
         "donor/award_document.html",
-        overview=overview,
+        donors=(donor,),
         medal=medal,
         awarded_at=awarded_at.strftime("%-d. %-m. %Y"),
+    )
+
+
+@blueprint.get("/award_prep/documents/<medal_slug>/")
+@login_required
+def render_award_documents_for_award_prep(medal_slug):
+    medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
+    donors = DonorsOverview.query.filter(
+        and_(
+            DonorsOverview.donation_count_total >= medal.minimum_donations,
+            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+        )
+    ).all()
+
+    return render_template(
+        "donor/award_document.html",
+        donors=donors,
+        medal=medal,
+        awarded_at=datetime.now().strftime("%-d. %-m. %Y"),
     )
 
 

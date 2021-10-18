@@ -175,3 +175,15 @@ class TestAwardDocument:
         )
 
         assert "Ve Frýdku-Místku, dne 17. 11. 1989" in doc
+
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_award_prep_documents(self, user, testapp, medal_id):
+        today = datetime.now().strftime("%-d. %-m. %Y")
+        medal = Medals.query.get(medal_id)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        rows = page.text.count("<tr") - 1  # Minus 1 for table header
+        documents = page.click(description="Potvrzení k medailím")
+
+        assert rows == documents.text.count('<div class="page">')
+        assert rows == documents.text.count(f"Ve Frýdku-Místku, dne {today}")
