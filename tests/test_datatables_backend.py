@@ -2,6 +2,7 @@ from operator import ge, le
 
 import pytest
 from flask import url_for
+from sqlalchemy import and_, extract
 
 from registry.donor.models import (
     AwardedMedals,
@@ -180,3 +181,51 @@ class TestDataTablesBackend:
                     break
 
         assert res.json["data"][0]["last_award"] == expected_first_medal
+
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_json_backend_for_awarded_medals(self, user, testapp, db, medal_id):
+        params = {
+            "draw": "1",
+            "order[0][column]": "0",
+            "order[0][dir]": "asc",
+            "start": "0",
+            "length": "100000",
+            "search[value]": "",
+            "search[regex]": "false",
+        }
+
+        login(user, testapp)
+        medal = Medals.query.get(medal_id)
+        # Set some random awarded_at to some awarded medals
+        db.session.execute(
+            "UPDATE awarded_medals SET awarded_at = :awarded_at "
+            "WHERE rodne_cislo LIKE :rc_start;",
+            params={"awarded_at": "2000-12-12 13:13:13", "rc_start": "8%"},
+        )
+        db.session.execute(
+            "UPDATE awarded_medals SET awarded_at = :awarded_at "
+            "WHERE rodne_cislo LIKE :rc_start;",
+            params={"awarded_at": "2020-12-12 13:13:13", "rc_start": "9%"},
+        )
+        db.session.commit()
+
+        for year in 0, 2000, 2020:
+            res = testapp.get(
+                url_for("donor.overview_data", year=year, medal_slug=medal.slug),
+                params=params,
+            )
+            assert res.status_code == 200
+            awarded_medals = AwardedMedals.query.filter(
+                and_(
+                    extract("year", AwardedMedals.awarded_at) == (year or None),
+                    AwardedMedals.medal_id == medal.id,
+                )
+            ).all()
+
+            count = DonorsOverview.query.filter(
+                DonorsOverview.rodne_cislo.in_(
+                    [am.rodne_cislo for am in awarded_medals]
+                )
+            ).count()
+
+            assert len(res.json["data"]) == count

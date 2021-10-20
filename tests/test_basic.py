@@ -75,6 +75,8 @@ class TestErrorInterface:
         ("batch.batch_detail", {"id": 1}),
         ("batch.download_batch", {"id": 1}),
         ("donor.overview", {}),
+        ("donor.awarded", {}),
+        ("donor.show_ignored", {}),
         ("donor.award_prep", {"medal_slug": "br"}),
     ]
 
@@ -169,3 +171,17 @@ class TestDatabase:
         with pytest.raises(IntegrityError):
             db.session.commit()
         db.session.rollback()
+
+
+class TestPageRender:
+    testcases = [
+        ("donor.overview", {}),
+        ("donor.awarded", {"year": None, "medal_slug": 1}),
+    ]
+
+    @pytest.mark.parametrize(("endpoint, kwargs"), testcases)
+    def test_pages_401(self, testapp, user, endpoint, kwargs):
+        login(user, testapp)
+        res = testapp.get(url_for(endpoint, **kwargs))
+
+        assert res.status_code == 200
