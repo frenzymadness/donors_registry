@@ -12,7 +12,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from sqlalchemy import and_
+from sqlalchemy import and_, extract
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -38,6 +38,24 @@ from .models import (
 blueprint = Blueprint("donor", __name__, static_folder="../static")
 
 
+@blueprint.get("/awarded/")
+@login_required
+def awarded():
+    awarded_medals = AwardedMedals.query.order_by(AwardedMedals.awarded_at.desc()).all()
+    years = set()
+    for medal in awarded_medals:
+        if medal.awarded_at:
+            years.add(medal.awarded_at.year)
+    years = sorted(years, reverse=True)
+    years.append("")  # For the old system
+    return render_template(
+        "donor/awarded.html",
+        years=years,
+        column_names=DonorsOverview.frontend_column_names,
+        override_column_names=json.dumps(DonorsOverview.basic_fields),
+    )
+
+
 @blueprint.get("/overview/")
 @login_required
 def overview():
@@ -49,17 +67,33 @@ def overview():
 
 
 @blueprint.get("/overview/data")
+@blueprint.get("/overview/data/year/<int:year>/medal/<medal_slug>")
 @login_required
-def overview_data():
+def overview_data(year=None, medal_slug=None):
     """JSON end point for JS Datatable"""
+    filter_ = True
     params = request.args.to_dict()
-    all_records_count = DonorsOverview.query.count()
+
+    # Block listing only users with awarded medal in the selected year
+    if year is not None:
+        year = year if year else None
+        medal = Medals.query.filter(Medals.slug == medal_slug).first()
+        awarded_medals = AwardedMedals.query.filter(
+            and_(
+                extract("year", AwardedMedals.awarded_at) == year,
+                AwardedMedals.medal_id == medal.id,
+            ),
+        ).all()
+        rodna_cisla = [am.rodne_cislo for am in awarded_medals]
+        filter_ = DonorsOverview.rodne_cislo.in_(rodna_cisla)
+    all_records_count = DonorsOverview.query.filter(filter_).count()
 
     # WHERE part
     if params["search[value]"]:
-        filter_ = DonorsOverview.get_filter_for_search(params["search[value]"])
-    else:
-        filter_ = True
+        filter_ = and_(
+            filter_,
+            DonorsOverview.get_filter_for_search(params["search[value]"]),
+        )
 
     # ORDER BY part
     order_by = DonorsOverview.get_order_by_for_column_id(

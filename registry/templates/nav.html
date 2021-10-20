@@ -17,6 +17,7 @@
         Přehledy
       </a>
       <div class="dropdown-menu">
+          <a class="dropdown-item" href="{{ url_for('donor.awarded') }}">Přehled oceněných dárců</a>
           <a class="dropdown-item" href="{{ url_for('donor.show_ignored') }}">Ignorovaní dárci</a>
           <a class="dropdown-item" href="{{ url_for('batch.batch_list') }}">Přehled importů</a>
       </div>
