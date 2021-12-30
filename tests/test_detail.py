@@ -183,7 +183,7 @@ class TestAwardDocument:
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         rows = page.text.count("<tr") - 1  # Minus 1 for table header
-        documents = page.click(description="Potvrzení k medailím")
+        documents = page.click(description="Potvrzení k medailím pro všechny")
 
         assert rows == documents.text.count('<div class="page">')
         assert rows == documents.text.count(f"Ve Frýdku-Místku, dne {today}")
