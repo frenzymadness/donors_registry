@@ -1,27 +1,27 @@
 # Everything needed in production
 
 # Flask
-Flask==2.0.1
-Werkzeug==2.0.1
+Flask==2.0.2
+Werkzeug==2.0.2
 
 # Database
 Flask-SQLAlchemy==2.5.1
-SQLAlchemy==1.4.19
+SQLAlchemy==1.4.29
 
 # Migrations
-Flask-Migrate==3.0.1
+Flask-Migrate==3.1.0
 
 # Forms
 email-validator==1.1.3
-Flask-WTF==0.15.1
-WTForms==2.3.3
+Flask-WTF==1.0.0
+WTForms==3.0.1
 
 # Auth
 Flask-Login==0.5.0
 Flask-Bcrypt==0.7.1
 
 # Environment variable parsing
-environs==9.3.2
+environs==9.3.5
 
 # CLI interface
-click==8.0.1
+click==8.0.3

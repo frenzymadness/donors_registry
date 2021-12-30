@@ -29,13 +29,13 @@ class AwardMedalForm(FlaskForm):
     def add_checkboxes(self, rodna_cisla):
         for rodne_cislo in rodna_cisla:
             name = "rodne_cislo_" + rodne_cislo
-            checkbox = BooleanField(_form=self, _name="rodne_cislo", default="checked")
+            checkbox = BooleanField(_form=self, name="rodne_cislo", default="checked")
             checkbox.data = rodne_cislo
             setattr(self, name, checkbox)
 
     def add_one_rodne_cislo(self, rodne_cislo):
         rodne_cislo_input = HiddenField(
-            _form=self, _name="rodne_cislo", validators=[DataRequired()]
+            _form=self, name="rodne_cislo", validators=[DataRequired()]
         )
         rodne_cislo_input.data = rodne_cislo
         setattr(self, "rodne_cislo_" + rodne_cislo, rodne_cislo_input)
