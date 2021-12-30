@@ -43,7 +43,7 @@
 <h1>Detail dárce</h1>
 <div class="row my-5">
 
-    <div class="col-auto ml-3 mb-4">
+    <div class="col-xs ml-3">
         <h4 class="text-muted border-bottom">Aktuální informace</h4>
         <div class="container">
             <div class="row">
@@ -70,7 +70,7 @@
         </div>
     </div>
 
-    <div class="col-xs ml-3 mb-4">
+    <div class="col-xs ml-3">
         <h4 class="text-muted border-bottom">Počty darování</h4>
 
         <div class="container">
@@ -88,63 +88,52 @@
         </div>
     </div>
 
-    <div class="col-auto ml-3 mb-4">
+    <div class="col-4 ml-3">
         <h4 class="text-muted border-bottom">Získaná ocenění</h4>
 
         <div class="container">
             {% for medal in all_medals %}
+            <div class="row">
                 {% if medal.id in awarded_medals.keys() %}
-
+                <div class="col-2">
                     {% with form=remove_medal_form %}
                         <form id="removeMedalForm"
                             action="{{ url_for('donor.remove_medal') }}"
                             method="POST"
-                            class="row align-items-center"
+                            class="form-inline"
                             role="form">
 
                             {{ form.csrf_token }}
                             {{ form.rodne_cislo(value=overview.rodne_cislo) }}
                             {{ form.medal_id(value=medal.id) }}
-                            <div class="col-xs">
-                                <input type="submit" class="btn btn-sm btn-outline-danger" value="🗑" title="Odebrat medaili">
-                            </div>
-                            <div class="col-sm">
-                                {{ medal.title }}
-                            </div>
-                            <div class="col-xs">
-                                <span data-toggle="modal"
-                                    data-target="#titleModal"
-                                    title="
-                                    {%- if awarded_medals[medal.id].awarded_at is not none -%}
-                                    Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
-                                    {%- else -%}
-                                    Medaile udělena ve starém systému
-                                    {%- endif -%}
-                                    ">
-                                        📅
-                                    </span>
+                            <input type="submit" class="btn btn-sm btn-outline-danger" value="🗑" title="Odebrat medaili">
 
-                                <a href="{{ url_for('donor.render_award_document',
-                                                    rc=overview.rodne_cislo,
-                                                    medal_slug=medal.slug) }}"
-                                    class="btn btn-sm btn-outline-secondary"
-                                    role="button"
-                                    aria-pressed="true"
-                                    target="_blank">
-                                    🖨️
-                                </a>
-
-                            </div>
                         </form>
                     {% endwith %}
-
+                </div>
+                <div class="col-7">
+                    {{ medal.title }}
+                </div>
+                <div class="col-1">
+                    <span data-toggle="modal"
+                        data-target="#titleModal"
+                        title="
+                        {%- if awarded_medals[medal.id].awarded_at is not none -%}
+                        Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
+                        {%- else -%}
+                        Medaile udělena ve starém systému
+                        {%- endif -%}
+                        ">
+                            📅
+                        </span>
+                </div>
                 {% else %}
-
+                <div class="col-2">
                     {% with form=award_medal_form %}
                         <form id="awardMedalForm"
                             action="{{ url_for('donor.award_medal') }}"
                             method="POST"
-                            class="row align-items-center"
+                            class="form-inline"
                             role="form">
 
                             {{ form.csrf_token }}
@@ -152,25 +141,36 @@
                             {{ form.medal_id(value=medal.id) }}
 
                             {% if medal.minimum_donations > overview.donation_count_total %}
-                                <div class="col-xs">
-                                    <input type="submit" class="btn btn-sm btn-outline-warning" value="✔" title="Udělit medaili (Nemá nárok)">
-                                </div>
+                                <input type="submit" class="btn btn-sm btn-outline-warning" value="✔" title="Udělit medaili (Nemá nárok)">
                             {% else %}
-                                <div class="col-xs">
-                                    <input type="submit" class="btn btn-sm btn-outline-success" value="✔" title="Udělit medaili">
-                                </div>
+                                <input type="submit" class="btn btn-sm btn-outline-success" value="✔" title="Udělit medaili">
                             {% endif %}
-                            <div class="col-sm">
-                                {{ medal.title }}
-                            </div>
                         </form>
                     {% endwith %}
+                    </div>
+                    <div class="col-7">
+                        {{ medal.title }}
+                    </div>
+                    <div class="col-1"></div>
                 {% endif %}
+
+                <div class="col-1">
+                    <a href="{{ url_for('donor.render_award_document',
+                                        rc=overview.rodne_cislo,
+                                        medal_slug=medal.slug) }}"
+                        class="btn btn-sm btn-outline-secondary"
+                        role="button"
+                        aria-pressed="true"
+                        target="_blank">
+                        🖨️
+                    </a>
+                </div>
+                </div>
             {% endfor %}
         </div>
     </div>
 
-    <div class="col-auto ml-3">
+    <div class="col-xs ml-3">
         <h4 class="text-muted">Poznámky</h4>
         {% with form=note_form %}
         <form id="noteForm" action="{{ url_for('donor.save_note') }}"
