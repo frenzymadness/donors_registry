@@ -46,6 +46,8 @@ $(document).ready( function () {
         },
         "processing": true,
         "serverSide": true,
+        "stateSave": true,
+        "stateDuration": -1, // -1 means session storage in the current browser window
         "ajax": "{{ url_for('donor.overview_data') }}",
         "columns": [
             {% for column_class in column_names.keys() -%}
