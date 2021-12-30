@@ -128,6 +128,7 @@ def overview_data(year=None, medal_slug=None):
         final_list.append(donor.dict_for_frontend())
     return jsonify(
         {
+            "draw": int(params["draw"]),
             "data": final_list,
             "recordsTotal": all_records_count,
             "recordsFiltered": filtered_records_count,
