@@ -37,7 +37,7 @@ $(document).ready( function () {
 
     highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }}, columnDefs, function() {
         if (dataTable !== null)
-            dataTable.draw();
+            dataTable.draw("page");
     });
 
     dataTable = $('#overview').DataTable({
