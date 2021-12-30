@@ -198,6 +198,10 @@ class DonorsOverview(db.Model):
             }
             for dc in DonationCenter.query.all()
         }
+        donor_dict["donations"]["manual"] = {
+            "count": self.donation_count_manual,
+            "name": "Jinde",
+        }
         donor_dict["donations"]["total"] = self.donation_count_total
 
         # Format the donor's postal code
