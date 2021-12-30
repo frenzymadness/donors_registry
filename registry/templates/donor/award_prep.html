@@ -83,6 +83,8 @@
 
         highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }} , columnDefs, function() {
             $('#overview').DataTable({
+                stateSave: true,
+                stateDuration: -1, // -1 means session storage in the current browser window
                 language: {
                     url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
                 },
