@@ -5,12 +5,9 @@ from collections import defaultdict
 from datetime import datetime
 from glob import glob
 
-try:
-    from dbfread import DBF
-    from tqdm import tqdm
-except ImportError:
-    pass
+from dbfread import DBF
 from sqlalchemy.exc import IntegrityError
+from tqdm import tqdm
 
 from registry.donor.models import AwardedMedals, Batch, DonorsOverview, Record
 from registry.extensions import db
