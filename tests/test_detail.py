@@ -1,8 +1,10 @@
 import re
 from datetime import datetime
+from math import ceil
 
 import pytest
 from flask import url_for
+from sqlalchemy import and_
 
 from registry.donor.models import (
     AwardedMedals,
@@ -187,3 +189,113 @@ class TestAwardDocument:
 
         assert rows == documents.text.count('<div class="page">')
         assert rows == documents.text.count(f"Ve Frýdku-Místku, dne {today}")
+
+
+class TestEnvelopeLabels:
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_envelope_labels(self, user, testapp, medal_id):
+        medal = Medals.query.get(medal_id)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        labels = page.forms["printEnvelopeLabelsForm"].submit()
+        eligible_donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).count()
+
+        pages_count = labels.text.count('<div class="page">')
+        assert ceil(eligible_donors / 16) == pages_count
+
+        labels_count = labels.text.count('<div class="label">')
+        assert labels_count == eligible_donors
+
+    def test_envelope_labels_detail(self, user, testapp):
+        medal = Medals.query.get(1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        labels = page.forms["printEnvelopeLabelsForm"].submit()
+        eligible_donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).all()
+
+        for donor in eligible_donors:
+            assert f"<p>{donor.first_name} {donor.last_name}</p>" in labels.text
+            assert f"<p>{donor.address}</p>" in labels.text
+            assert f"<p>{donor.postal_code} {donor.city}</p>" in labels.text
+
+    @pytest.mark.parametrize("skip", (1, 3, 9, 13))
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_envelope_labels_skip(self, user, testapp, medal_id, skip):
+        medal = Medals.query.get(medal_id)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
+        labels = page.forms["printEnvelopeLabelsForm"].submit()
+        eligible_donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).count()
+
+        labels_count = labels.text.count('<div class="label">')
+        assert labels_count == eligible_donors + skip
+
+        pages_count = labels.text.count('<div class="page">')
+        assert ceil((eligible_donors + skip) / 16) == pages_count
+
+        empty_p = labels.text.count("<p></p>")  # for address
+        space_p = labels.text.count("<p> </p>")  # for name and city
+
+        assert empty_p == skip
+        assert space_p == skip * 2
+
+    @pytest.mark.parametrize("skip", (-1, -33, 99, 16))
+    def test_envelope_labels_invalid_skip(self, user, testapp, skip):
+        medal = Medals.query.get(1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
+        labels = page.forms["printEnvelopeLabelsForm"].submit().follow()
+
+        assert "Vynechat lze 0 až 15 štítků." in labels.text
+
+    def test_envelope_labels_empty_skip(self, user, testapp):
+        medal = Medals.query.get(1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = ""
+        labels = page.forms["printEnvelopeLabelsForm"].submit()
+        eligible_donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).count()
+
+        labels_count = labels.text.count('<div class="label">')
+        assert labels_count == eligible_donors
+
+        pages_count = labels.text.count('<div class="page">')
+        assert ceil(eligible_donors / 16) == pages_count
+
+        empty_p = labels.text.count("<p></p>")  # for address
+        space_p = labels.text.count("<p> </p>")  # for name and city
+
+        assert empty_p == 0
+        assert space_p == 0
+
+    @pytest.mark.parametrize("medal_id", (-1, -33, 99, 16))
+    def test_envelope_labels_invalid_medal(self, user, testapp, medal_id):
+        medal = Medals.query.get(1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        page.forms["printEnvelopeLabelsForm"].fields["medal_id"][0].value = medal_id
+        labels = page.forms["printEnvelopeLabelsForm"].submit().follow()
+
+        assert "Odeslána nevalidní data." in labels.text
