@@ -26,16 +26,17 @@ class TestMedals:
         ).count()
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        form = page.forms["awardMedalForm"]
         try:
-            checkboxes = len(page.form.fields["rodne_cislo"])
+            checkboxes = len(form.fields["rodne_cislo"])
         except KeyError:
             pytest.skip("No medals to award.")
         uncheck = checkboxes // 4
         # Uncheck some checkboxes
         for i in range(uncheck):
-            page.form.fields["rodne_cislo"][i].checked = False
+            form.fields["rodne_cislo"][i].checked = False
         # Award first batch of medals
-        page = page.form.submit().follow()
+        page = form.submit().follow()
         awarded_new = AwardedMedals.query.count()
         awarded_do_new = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
@@ -50,14 +51,17 @@ class TestMedals:
         for awarded_medal in awarded_medals:
             assert awarded_medal.awarded_at.date() == datetime.now().date()
 
+        form = page.forms["awardMedalForm"]
+
         try:
-            assert len(page.form.fields["rodne_cislo"]) == uncheck
+            assert len(form.fields["rodne_cislo"]) == uncheck
         except KeyError:
             return  # No more checkboxes, no reason to continue
         # Award the remaining medals
-        page = page.form.submit().follow()
+        page = form.submit().follow()
+        form = page.forms["awardMedalForm"]
         # No checkboxes left
-        assert page.form.fields.get("rodne_cislo", None) is None
+        assert form.fields.get("rodne_cislo", None) is None
         awarded_new = AwardedMedals.query.count()
         awarded_do_new = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
@@ -163,8 +167,8 @@ class TestMedals:
         awarded = AwardedMedals.query.count()
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug="br"))
-        page.form.fields["medal_id"][0].value = "foo"
-        page = page.form.submit().follow()
+        page.forms["awardMedalForm"].fields["medal_id"][0].value = "foo"
+        page = page.forms["awardMedalForm"].submit().follow()
         assert "Odeslána nevalidní data" in page
         assert awarded == AwardedMedals.query.count()
 
@@ -172,8 +176,8 @@ class TestMedals:
         awarded = AwardedMedals.query.count()
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug="br"))
-        page.form.fields["rodne_cislo"][0].force_value("foobarbaz")
-        page = page.form.submit().follow()
+        page.forms["awardMedalForm"].fields["rodne_cislo"][0].force_value("foobarbaz")
+        page = page.forms["awardMedalForm"].submit().follow()
         assert "Odeslána nevalidní data" in page
         assert awarded == AwardedMedals.query.count()
 
