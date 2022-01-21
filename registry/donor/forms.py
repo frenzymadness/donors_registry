@@ -1,6 +1,12 @@
 from flask import flash
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, HiddenField, StringField, TextAreaField
+from wtforms import (
+    BooleanField,
+    HiddenField,
+    IntegerField,
+    StringField,
+    TextAreaField,
+)
 
 from registry.donor.models import (
     AwardedMedals,
@@ -103,3 +109,24 @@ class DonorsOverrideForm(FlaskForm):
             field_data[field] = getattr(self, field).data or None
 
         return field_data
+
+
+class PrintEnvelopeLabelsForm(FlaskForm):
+    medal_id = HiddenField(validators=[DataRequired()])
+    skip = IntegerField(validators=[DataRequired()])
+
+    def validate(self):
+        self.medal = Medals.query.get(self.medal_id.data)
+
+        if self.medal is None:
+            flash("Odeslána nevalidní data.", "danger")
+            return False
+
+        if self.skip.data is None:
+            self.skip.data = 0
+
+        if not (0 <= self.skip.data < 16):
+            flash("Vynechat lze 0 až 15 štítků.", "danger")
+            return False
+
+        return True
