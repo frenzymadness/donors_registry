@@ -1,5 +1,6 @@
 import json
 from datetime import datetime
+from itertools import chain
 
 from flask import (
     Blueprint,
@@ -23,6 +24,7 @@ from .forms import (
     DonorsOverrideForm,
     IgnoreDonorForm,
     NoteForm,
+    PrintEnvelopeLabelsForm,
     RemoveFromIgnoredForm,
     RemoveMedalForm,
 )
@@ -214,6 +216,40 @@ def render_award_documents_for_award_prep(medal_slug):
     )
 
 
+@blueprint.post("/award_prep/envelope_labels")
+@login_required
+def render_envelope_labels():
+    print_envelope_labels_form = PrintEnvelopeLabelsForm()
+    if print_envelope_labels_form.validate_on_submit():
+        medal = print_envelope_labels_form.medal
+        donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).all()
+
+        # To skip already used labels, we prepend some
+        # empty donors to the list.
+        empty_donor = {
+            k: "" for k in ("first_name", "last_name", "address", "city", "postal_code")
+        }
+        all_donors = chain([empty_donor] * print_envelope_labels_form.skip.data, donors)
+        pages = []
+
+        for index, donor in enumerate(all_donors):
+            if index % 16 == 0:
+                pages.append([])
+            pages[-1].append(donor)
+
+        return render_template(
+            "donor/envelope_labels.html",
+            pages=pages,
+        )
+
+    return redirect(request.referrer)
+
+
 @blueprint.post("/remove_medal")
 @login_required
 def remove_medal():
@@ -240,12 +276,14 @@ def award_prep(medal_slug):
     ).all()
     award_medal_form = AwardMedalForm()
     award_medal_form.add_checkboxes([d.rodne_cislo for d in donors])
+    print_envelope_labels_form = PrintEnvelopeLabelsForm()
     return render_template(
         "donor/award_prep.html",
         medal=medal,
         donors=donors,
         award_medal_form=award_medal_form,
         override_column_names=json.dumps(DonorsOverview.basic_fields),
+        print_envelope_labels_form=print_envelope_labels_form,
     )
 
 

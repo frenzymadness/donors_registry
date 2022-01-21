@@ -1,0 +1,80 @@
+<!--
+
+    This page is prepared for 16 labels 105×37 mm each.
+    For example: https://obalyostrava.cz/samolepici-etikety/428-etikety-a4-105x37mm-100stranek.html
+
+ -->
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Štítky na obálky</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/award_document.css') }}"> -->
+    <style>
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: grey; /* #FAFAFA */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16pt;
+}
+
+.page {
+    width: 210mm;
+    height: 297mm;
+    margin: 10mm auto;
+    background: white;
+}
+
+.label {
+    width: 105mm;
+    height: 37mm;
+    float: left;
+}
+
+p {
+    margin: 4mm auto auto 5mm;
+}
+
+@page {
+    size: A4;
+    margin: 0;
+}
+
+@media print {
+    html, body {
+        width: 210mm;
+        height: 297mm;
+    }
+    .page {
+        margin: 0;
+        border: initial;
+        border-radius: initial;
+        width: initial;
+        min-height: initial;
+        box-shadow: initial;
+        background: initial;
+        page-break-after: always;
+    }
+}
+
+    </style>
+</head>
+<body>
+    {% for page in pages %}
+    <div class="page">
+        {% for donor in page %}
+        <div class="label">
+            <p>{{ donor.first_name}} {{ donor.last_name }}</p>
+            <p>{{ donor.address }}</p>
+            <p>{{ donor.postal_code }} {{donor.city}}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</body>
+</html>

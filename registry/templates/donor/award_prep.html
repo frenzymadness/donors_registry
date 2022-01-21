@@ -3,12 +3,19 @@
 
 <h1>Přehled dárců k ocenění: {{ medal.title }}</h1>
 
-{% with form=award_medal_form %}
-
 <a class="btn btn-primary" role="button" href="{{ url_for('donor.render_award_documents_for_award_prep', medal_slug=medal.slug) }}" target="_blank">Potvrzení k medailím pro všechny</a>
+{% with form=print_envelope_labels_form %}
+<form id="printEnvelopeLabelsForm" action="{{ url_for('donor.render_envelope_labels') }}" method="POST" class="form-inline" role="form" target="_blank">
+    {{ form.csrf_token }}
+    {{ form.medal_id(value=medal.id) }}
+    <input type="submit" class="btn btn-primary" value="Štítky na obálky">
+    <div>Vynechat prvních {{ form.skip(value=0, size=2, min=0, max=15) }} štítků.</div>
+</form>
+{% endwith %}
+{% with form=award_medal_form %}
 <form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST" class="form-inline" role="form">
-{{ form.csrf_token }}
-{{ form.medal_id(value=medal.id) }}
+    {{ form.csrf_token }}
+    {{ form.medal_id(value=medal.id) }}
 <input type="submit" class="btn btn-success" value="Udělit medaili označeným dárcům">
 
 <!-- Updating the table? Don't forget to check the print (pre)view. -->
