@@ -78,6 +78,9 @@ class TestErrorInterface:
         ("donor.awarded", {}),
         ("donor.show_ignored", {}),
         ("donor.award_prep", {"medal_slug": "br"}),
+        ("donor.render_award_document", {"medal_slug": "br", "rc": "0000000000"}),
+        ("donor.render_award_documents_for_award_prep", {"medal_slug": "br"}),
+        ("donor.render_envelope_labels", {}),
     ]
 
     @pytest.mark.parametrize(("endpoint, kwargs"), testcases_401)
