@@ -136,3 +136,6 @@ dmypy.json
 
 # signature of chef
 registry/static/signature-white.png
+
+# stamps
+registry/static/stamps/*.png

@@ -58,6 +58,13 @@ p:nth-of-type(3) {
     margin-bottom: -10mm;
 }
 
+#stamp {
+    width: 20mm;
+    margin-bottom: -15mm;
+    margin-left: -25mm;
+    position: relative;
+}
+
 .donor-name {
     font-size: 13pt;
     font-weight: bold;
