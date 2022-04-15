@@ -1,7 +1,11 @@
 """Helper utilities and decorators."""
+import os
 import re
+from contextlib import contextmanager
+from glob import glob
+from pathlib import Path
 
-from flask import flash
+from flask import flash, url_for
 from markupsafe import Markup
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
@@ -38,6 +42,26 @@ def template_globals():
     """
     all_medals = Medals.query.all()
     return dict(all_medals=all_medals)
+
+
+@contextmanager
+def cd(newdir):
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
+
+
+def get_list_of_stamps():
+    """Returns list of all *.png files from static/stamps folder."""
+    result = []
+    with cd(Path(__file__).parent / "static"):
+        for f in glob("stamps/*.png"):
+            result.append(url_for("static", filename=f))
+
+    return result
 
 
 class NumericValidator:

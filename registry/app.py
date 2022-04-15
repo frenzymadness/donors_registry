@@ -1,6 +1,7 @@
 """The app module, containing the app factory function."""
 import logging
 import sys
+from random import choice
 
 from flask import Flask, flash, redirect, url_for
 
@@ -62,6 +63,10 @@ def create_app(config_object="registry.settings"):
     @app.template_filter("postal_code")
     def postal_code(code: str):
         return format_postal_code(code)
+
+    @app.template_filter("random_choice")
+    def random_choice(iterable):
+        return choice(iterable)  # nosec
 
     return app
 
