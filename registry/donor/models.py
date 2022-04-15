@@ -498,7 +498,7 @@ FROM (
         ON "records"."id" = "recent_records"."record_id"
     LEFT JOIN "donors_override"
         ON "donors_override"."rodne_cislo" = "records"."rodne_cislo";
-"""  # nosec - see above
+"""  # nosec
 
         db.session.execute(full_query, params)
         db.session.commit()

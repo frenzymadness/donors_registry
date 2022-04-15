@@ -1,4 +1,4 @@
 -r dev.txt
 
 # all checks are configured in .pre-commit-config.yaml
-pre-commit==2.14.0
+pre-commit==2.18.1
