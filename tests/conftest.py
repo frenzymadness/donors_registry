@@ -3,6 +3,7 @@ from .fixtures import (  # noqa: F401
     TEST_DB_PATH,
     app,
     db,
+    empty_stamp_png,
     test_data_df,
     testapp,
     user,

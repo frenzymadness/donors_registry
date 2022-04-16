@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from random import sample
 from shutil import copy
+from tempfile import NamedTemporaryFile
 
 from flask_migrate import Migrate, upgrade
 from pytest import fixture, skip
@@ -110,3 +111,9 @@ def sample_of_rc(amount=100):
 def skip_if_ignored(rodne_cislo):
     if IgnoredDonors.query.get(rodne_cislo):
         skip("Donor is ignored")
+
+
+@fixture(scope="session", autouse=True)
+def empty_stamp_png():
+    with NamedTemporaryFile(dir="registry/static/stamps", suffix=".png"):
+        yield
