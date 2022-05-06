@@ -109,7 +109,7 @@ class TestAwardDocument:
             assert medal.title not in doc
             assert medal.title_acc in doc
             assert medal.title_instr in doc
-            assert "/static/stamps/tmp" in doc
+            assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
 
     @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
     def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
@@ -133,7 +133,7 @@ class TestAwardDocument:
             assert medal.title not in doc
             assert medal.title_acc in doc
             assert medal.title_instr in doc
-            assert "/static/stamps/tmp" in doc
+            assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_award_doc_dates(self, user, testapp, db, rodne_cislo):
