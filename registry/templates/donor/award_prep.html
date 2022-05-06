@@ -100,7 +100,9 @@
                     text: 'Tisk prezenční listiny',
                     title: '',
                     exportOptions: {
-                        columns: [...Array(9).keys()]
+                        // Controls which columns are visible on printed sheets.
+                        // Removed column number 7 contains total donations count.
+                        columns: [0, 1, 2, 3, 4, 5, 6, 8]
                     }
                 }],
                 dom: "Blfrtip",
