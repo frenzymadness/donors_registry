@@ -101,8 +101,13 @@
                     title: '',
                     exportOptions: {
                         // Controls which columns are visible on printed sheets.
-                        // Removed column number 7 contains total donations count.
-                        columns: [0, 1, 2, 3, 4, 5, 6, 8]
+                        // Removed column number 7 contains total donations count which should be never shown.
+                        // Column number 8 is for signature which makes sense only for gold medal and higher.
+                        {% if medal.slug == "br" or medal.slug == "st" %}
+                            columns: [0, 1, 2, 3, 4, 5, 6]
+                        {% else %}
+                            columns: [0, 1, 2, 3, 4, 5, 6, 8]
+                        {% endif %}
                     }
                 }],
                 dom: "Blfrtip",
