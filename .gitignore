@@ -134,8 +134,8 @@ dmypy.json
 # Development database
 *.sqlite
 
-# signature of chef
-registry/static/signature-white.png
+# signatures
+registry/static/signatures/*.png
 
 # stamps
 registry/static/stamps/*.png
