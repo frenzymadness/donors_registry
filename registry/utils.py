@@ -54,11 +54,11 @@ def cd(newdir):
         os.chdir(prevdir)
 
 
-def get_list_of_stamps():
-    """Returns list of all *.png files from static/stamps folder."""
+def get_list_of_images(folder):
+    """Returns list of all *.png files from given folder."""
     result = []
     with cd(Path(__file__).parent / "static"):
-        for f in glob("stamps/*.png"):
+        for f in glob(f"{folder}/*.png"):
             result.append(url_for("static", filename=f))
 
     return result

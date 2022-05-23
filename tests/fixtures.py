@@ -115,5 +115,7 @@ def skip_if_ignored(rodne_cislo):
 
 @fixture(scope="session", autouse=True)
 def empty_stamp_png():
-    with NamedTemporaryFile(dir="registry/static/stamps", suffix=".png"):
+    with NamedTemporaryFile(
+        dir="registry/static/stamps", suffix=".png"
+    ), NamedTemporaryFile(dir="registry/static/signatures", suffix=".png"):
         yield

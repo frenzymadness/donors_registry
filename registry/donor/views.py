@@ -17,7 +17,7 @@ from sqlalchemy import and_, extract
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import flash_errors, get_list_of_stamps
+from registry.utils import flash_errors, get_list_of_images
 
 from .forms import (
     AwardMedalForm,
@@ -194,7 +194,8 @@ def render_award_document(rc, medal_slug):
         donors=(donor,),
         medal=medal,
         awarded_at=awarded_at.strftime("%-d. %-m. %Y"),
-        stamps=get_list_of_stamps(),
+        stamps=get_list_of_images("stamps"),
+        signatures=get_list_of_images("signatures"),
     )
 
 
@@ -218,7 +219,8 @@ def render_award_documents_for_award_prep(medal_slug):
         donors=donors,
         medal=medal,
         awarded_at=datetime.now().strftime("%-d. %-m. %Y"),
-        stamps=get_list_of_stamps(),
+        stamps=get_list_of_images("stamps"),
+        signatures=get_list_of_images("signatures"),
     )
 
 
