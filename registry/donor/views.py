@@ -202,12 +202,16 @@ def render_award_document(rc, medal_slug):
 @login_required
 def render_award_documents_for_award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
-    donors = DonorsOverview.query.filter(
-        and_(
-            DonorsOverview.donation_count_total >= medal.minimum_donations,
-            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+    donors = (
+        DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+            )
         )
-    ).all()
+        .order_by(DonorsOverview.last_name.asc())
+        .all()
+    )
 
     return render_template(
         "donor/award_document.html",
