@@ -20,6 +20,7 @@ jobs:
         tox_env: ${{ matrix.tox_env }}
         dnf_install: pkgconfig(libffi)
     - name: pre commit log
+      if: always()
       run: |
         cat /root/.cache/pre-commit/pre-commit.log
     strategy:
