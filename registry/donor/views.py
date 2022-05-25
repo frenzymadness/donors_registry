@@ -230,12 +230,16 @@ def render_envelope_labels():
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
     if print_envelope_labels_form.validate_on_submit():
         medal = print_envelope_labels_form.medal
-        donors = DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+        donors = (
+            DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.donation_count_total >= medal.minimum_donations,
+                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+                )
             )
-        ).all()
+            .order_by(DonorsOverview.last_name.asc())
+            .all()
+        )
 
         # To skip already used labels, we prepend some
         # empty donors to the list.
