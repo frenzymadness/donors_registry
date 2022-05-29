@@ -13,7 +13,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from sqlalchemy import and_, extract
+from sqlalchemy import and_, collate, extract
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -210,7 +210,7 @@ def render_award_documents_for_award_prep(medal_slug):
                 getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
             )
         )
-        .order_by(DonorsOverview.last_name.asc())
+        .order_by(collate(DonorsOverview.last_name, "czech").asc())
         .all()
     )
 
@@ -237,7 +237,7 @@ def render_envelope_labels():
                     getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
                 )
             )
-            .order_by(DonorsOverview.last_name.asc())
+            .order_by(collate(DonorsOverview.last_name, "czech").asc())
             .all()
         )
 

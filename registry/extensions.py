@@ -2,6 +2,7 @@
 Extensions module. Each extension is initialized in the app factory located
 in app.py.
 """
+import locale
 from sqlite3 import Connection as SQLite3Connection
 
 from flask_bcrypt import Bcrypt
@@ -22,8 +23,13 @@ debug_toolbar = DebugToolbarExtension()
 
 
 @event.listens_for(Engine, "connect")
-def _set_sqlite_pragma(dbapi_connection, connection_record):
+def _set_sqlite_params(dbapi_connection, connection_record):
     if isinstance(dbapi_connection, SQLite3Connection):
+        # Create collation for proper sorting
+        locale.setlocale(locale.LC_ALL, "cs_CZ.utf8")
+        dbapi_connection.create_collation("czech", locale.strcoll)
+
+        # Activate foreign keys
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON;")
         cursor.close()

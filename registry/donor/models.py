@@ -1,3 +1,5 @@
+from sqlalchemy import collate
+
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
 from registry.utils import capitalize, format_postal_code
@@ -152,7 +154,8 @@ class DonorsOverview(db.Model):
         column_name = list(cls.frontend_column_names.keys())[column_id]
         if hasattr(cls, column_name):
             column = getattr(cls, column_name)
-            return (getattr(column, direction)(),)
+            column_with_collation = collate(column, "czech")
+            return (getattr(column_with_collation, direction)(),)
         elif column_name == "donations":
             column_name = "donation_count_total"
             column = getattr(cls, column_name)
