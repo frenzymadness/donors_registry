@@ -49,6 +49,8 @@
 {% block js %}
 <script type="text/javascript">
     $(document).ready( function () {
+        $.fn.dataTable.ext.order.intl('cs-CZ');
+
         $('#ignored').DataTable({
             stateSave: true,
             stateDuration: -1, // -1 means session storage in the current browser window
