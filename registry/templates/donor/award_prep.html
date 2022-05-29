@@ -89,6 +89,8 @@
             },];
 
         highlightOverridenValues("{{ url_for('donor.get_overrides') }}", {{ override_column_names | safe }} , columnDefs, function() {
+            $.fn.dataTable.ext.order.intl('cs-CZ');
+
             $('#overview').DataTable({
                 stateSave: true,
                 stateDuration: -1, // -1 means session storage in the current browser window

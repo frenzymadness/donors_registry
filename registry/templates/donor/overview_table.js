@@ -40,6 +40,8 @@ $(document).ready( function () {
             dataTable.draw("page");
     });
 
+    $.fn.dataTable.ext.order.intl('cs-CZ');
+
     dataTable = $('#overview').DataTable({
         language: {
             url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
