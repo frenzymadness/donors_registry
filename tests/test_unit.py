@@ -1,8 +1,10 @@
+from datetime import datetime
+
 import pytest
 from flask import url_for
 from wtforms.validators import ValidationError
 
-from registry.donor.models import DonorsOverview
+from registry.donor.models import Batch, DonorsOverview, Record
 from registry.utils import NumericValidator
 
 from .helpers import FakeForm, login
@@ -100,7 +102,11 @@ class TestCapitalizer:
 
     def test_capitalize_in_templates(self, user, testapp, db):
         rodne_cislo = "1234567890"
-        do = DonorsOverview(
+        batch = Batch(imported_at=datetime.now())
+        db.session.add(batch)
+        db.session.commit()
+        record = Record(
+            batch_id=batch.id,
             rodne_cislo=rodne_cislo,
             first_name="KAREL",
             last_name="VOMÁČKA",
@@ -108,40 +114,49 @@ class TestCapitalizer:
             city="OSTRAVA",
             postal_code="71600",
             kod_pojistovny="213",
-            donation_count_fm=50,
-            donation_count_fm_bubenik=50,
-            donation_count_trinec=50,
-            donation_count_mp=50,
-            donation_count_manual=50,
-            donation_count_total=250,
-            awarded_medal_br=False,
-            awarded_medal_st=False,
-            awarded_medal_zl=False,
-            awarded_medal_kr3=False,
-            awarded_medal_kr2=False,
-            awarded_medal_kr1=False,
-            awarded_medal_plk=False,
+            donation_count=15,
         )
-
-        db.session.add(do)
+        db.session.add(record)
         db.session.commit()
+        DonorsOverview.refresh_overview(rodne_cislo=rodne_cislo)
 
         login(user, testapp)
 
-        pages = (
-            ("donor.detail", {"rc": rodne_cislo}),
-            ("donor.award_prep", {"medal_slug": "br"}),
-            ("donor.render_award_document", {"rc": rodne_cislo, "medal_slug": "br"}),
-        )
+        # On donor detail, we have capitalized data in the
+        # overview and original in the table of imports.
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        assert "Jméno: Karel" in res
+        assert "Příjmení: Vomáčka" in res
+        assert "Adresa: Lipová 33" in res
+        assert "Město: Ostrava" in res
+        assert "<td>KAREL</td>" in res
+        assert "<td>VOMÁČKA</td>" in res
+        assert "<td>LIPOVÁ 33</td>" in res
+        assert "<td>OSTRAVA</td>" in res
 
-        for page, params in pages:
-            res = testapp.get(url_for(page, **params))
-            assert "KAREL" not in res
-            assert "VOMÁČKA" not in res
-            assert "Karel" in res
-            assert "Vomáčka" in res
-            if "award_document" not in page:
-                assert "LIPOVÁ 33" not in res
-                assert "OSTRAVA" not in res
-                assert "Lipová 33" in res
-                assert "Ostrava" in res
+        res = testapp.get(url_for("donor.award_prep", medal_slug="br"))
+        assert "Karel" in res
+        assert "Vomáčka" in res
+        assert "Lipová 33" in res
+        assert "Ostrava" in res
+        assert "KAREL" not in res
+        assert "VOMÁČKA" not in res
+        assert "LIPOVÁ 33" not in res
+        assert "OSTRAVA" not in res
+
+        res = testapp.get(
+            url_for("donor.render_award_document", rc=rodne_cislo, medal_slug="br")
+        )
+        assert "Karel" in res
+        assert "Vomáčka" in res
+        assert "KAREL" not in res
+        assert "VOMÁČKA" not in res
+
+        # Because the capitalization is not perfect, we agreed to use
+        # the original data on envelope labels. Upper case also improves
+        # readability.
+        res = testapp.get(url_for("donor.render_envelope_labels", medal_slug="br"))
+        assert "KAREL" in res
+        assert "VOMÁČKA" in res
+        assert "LIPOVÁ 33" in res
+        assert "OSTRAVA" in res
