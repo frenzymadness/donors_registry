@@ -1,4 +1,4 @@
-from sqlalchemy import collate
+from sqlalchemy import and_, collate
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -505,6 +505,99 @@ FROM (
 
         db.session.execute(full_query, params)
         db.session.commit()
+
+    @staticmethod
+    def eligible_donors(medal, count_only=False):
+        """Returns list or count of eligible donors for the given medal"""
+        donors = (
+            DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.donation_count_total >= medal.minimum_donations,
+                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+                )
+            )
+            .order_by(collate(DonorsOverview.last_name, "czech").asc())
+            .all()
+        )
+
+        # For the four highest medals, we need only donors eligible
+        # since the last year because we send award proposals to Prague yearly.
+        if medal.slug.startswith("kr") or medal.slug == "plk":
+            donors = DonorsOverview.filter_out_uneligible_donors(donors, medal)
+
+        if count_only:
+            return len(donors)
+
+        return donors
+
+    @staticmethod
+    def filter_out_uneligible_donors(donors, medal):
+        """This methods returns only donors which were already
+        eligible for the given medal last year"""
+        sql_query = """
+        SELECT
+            (
+                -- Sum all the respective donation counts including manual
+                -- entries.
+                SELECT SUM("donation_count"."donation_count")
+                FROM (
+                    SELECT (
+                        -- Loads the most recent donation count for the
+                        -- donation center.
+                        SELECT "records"."donation_count"
+                        FROM "records"
+                            JOIN "batches"
+                                ON "batches"."id" = "records"."batch_id"
+                        WHERE "records"."rodne_cislo" = :rodne_cislo
+                            AND (
+                                -- NULL values represent manual entries and
+                                -- cannot be compared by =.
+                                "batches"."donation_center_id" =
+                                    "donation_center_null"."donation_center_id"
+                                OR (
+                                    "batches"."donation_center_id" IS NULL AND
+                                    "donation_center_null"."donation_center_id" IS NULL
+                                )
+                            ) AND strftime('%Y', "batches"."imported_at") <
+                                      strftime('%Y', DATE('now'))
+                        ORDER BY "batches"."imported_at" DESC,
+                            "records"."donation_count" DESC
+                        LIMIT 1
+                    ) AS "donation_count"
+                    FROM (
+                        -- All possible donation centers including NULL
+                        -- for manual entries.
+                        SELECT "donation_centers"."id" AS "donation_center_id"
+                        FROM "donation_centers"
+                        UNION
+                        SELECT NULL AS "donation_centers"
+                    ) AS "donation_center_null"
+                    -- Removes donation centers from which the person does
+                    -- not have any records. This removes the need for
+                    -- coalescing the value to 0 before summing.
+                    WHERE "donation_count" IS NOT NULL
+                ) AS "donation_count"
+            ) AS "donation_count_total"
+        FROM "records"
+        WHERE "records"."rodne_cislo" = :rodne_cislo
+        LIMIT 1
+        """
+
+        result = []
+        for donor in donors:
+            donation_count_last_year = db.session.execute(
+                sql_query, {"rodne_cislo": donor.rodne_cislo}
+            ).fetchone()[0]
+
+            # None in donation_count_last_year means that a donor
+            # has no records from previous years.
+            if (
+                donation_count_last_year
+                and donation_count_last_year >= medal.minimum_donations
+            ):
+                result.append(donor)
+
+        return result
 
 
 class Note(db.Model):

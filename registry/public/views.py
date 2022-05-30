@@ -9,7 +9,6 @@ from flask import (
     url_for,
 )
 from flask_login import current_user, login_required, login_user, logout_user
-from sqlalchemy import and_
 
 from registry.donor.models import AwardedMedals, Batch, DonorsOverview, Record
 from registry.extensions import login_manager
@@ -43,12 +42,7 @@ def home(status_code=200):
         awaiting = {}
         awarded = {}
         for medal in medals:
-            count = DonorsOverview.query.filter(
-                and_(
-                    DonorsOverview.donation_count_total >= medal.minimum_donations,
-                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-                )
-            ).count()
+            count = DonorsOverview.eligible_donors(medal, count_only=True)
             awaiting[medal.slug] = count
             count = DonorsOverview.query.filter(
                 getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(True)

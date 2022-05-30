@@ -1,14 +1,16 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytest
 from flask import url_for
 
 from registry.donor.models import (
     AwardedMedals,
+    Batch,
     DonorsOverview,
     IgnoredDonors,
     Medals,
+    Record,
 )
 
 from .fixtures import sample_of_rc, skip_if_ignored
@@ -203,3 +205,60 @@ class TestMedals:
         detail = form.submit().follow()
         assert "Při odebrání medaile došlo k chybě." in detail
         assert awarded == AwardedMedals.query.count()
+
+    # TODO: Find a better way to parametrize this
+    @pytest.mark.parametrize("medal_id", range(4, 8))
+    def test_award_prep_medals_yearly(self, db, user, testapp, medal_id):
+        medal = Medals.query.get(medal_id)
+        rodne_cislo = "9999999999"
+        urls = [
+            url_for("donor.award_prep", medal_slug=medal.slug),
+            url_for("donor.render_envelope_labels", medal_slug=medal.slug),
+            url_for(
+                "donor.render_award_documents_for_award_prep", medal_slug=medal.slug
+            ),
+        ]
+        # When a donors gets an eligibility for one of the 4 highest medals
+        # this year, it will be actually eligible next year.
+        # So a fresh import with enough donations does not make
+        # the donor eligible.
+        batch = Batch(imported_at=datetime.now())
+        db.session.add(batch)
+        db.session.commit()
+        record_params = [
+            batch.id,
+            rodne_cislo,
+            "Charles Philip Arthur George",
+            "Mountbatten-Windsor",
+            "Buckingham Palace",
+            "London",
+            "99888",
+            "111",
+            medal.minimum_donations + 5,
+        ]
+        # Properties of donor we can find on all tested pages
+        search_params = record_params[2:4]
+        record = Record.from_list(record_params)
+        db.session.add(record)
+        db.session.commit()
+        DonorsOverview.refresh_overview(rodne_cislo=rodne_cislo)
+
+        login(user, testapp)
+
+        for url in urls:
+            page = testapp.get(url)
+            assert page.status_code == 200
+            for param in search_params:
+                assert param not in page
+
+        # But when we move the latest batch to the previous year,
+        # the donor is eligible this year.
+        batch.imported_at = batch.imported_at - timedelta(days=365)
+        db.session.add(batch)
+        db.session.commit()
+
+        for url in urls:
+            page = testapp.get(url)
+            assert page.status_code == 200
+            for param in search_params:
+                assert param in page

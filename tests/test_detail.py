@@ -4,7 +4,6 @@ from math import ceil
 
 import pytest
 from flask import url_for
-from sqlalchemy import and_
 
 from registry.donor.models import (
     AwardedMedals,
@@ -200,12 +199,7 @@ class TestEnvelopeLabels:
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         labels = page.forms["printEnvelopeLabelsForm"].submit()
-        eligible_donors = DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-            )
-        ).count()
+        eligible_donors = DonorsOverview.eligible_donors(medal, count_only=True)
 
         pages_count = labels.text.count('<div class="page">')
         assert ceil(eligible_donors / 16) == pages_count
@@ -218,12 +212,7 @@ class TestEnvelopeLabels:
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         labels = page.forms["printEnvelopeLabelsForm"].submit()
-        eligible_donors = DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-            )
-        ).all()
+        eligible_donors = DonorsOverview.eligible_donors(medal)
 
         for donor in eligible_donors:
             assert f"<p>{donor.first_name} {donor.last_name}</p>" in labels.text
@@ -238,12 +227,7 @@ class TestEnvelopeLabels:
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
         labels = page.forms["printEnvelopeLabelsForm"].submit()
-        eligible_donors = DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-            )
-        ).count()
+        eligible_donors = DonorsOverview.eligible_donors(medal, count_only=True)
 
         labels_count = labels.text.count('<div class="label">')
         assert labels_count == eligible_donors + skip
@@ -273,12 +257,7 @@ class TestEnvelopeLabels:
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = ""
         labels = page.forms["printEnvelopeLabelsForm"].submit()
-        eligible_donors = DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-            )
-        ).count()
+        eligible_donors = DonorsOverview.eligible_donors(medal, count_only=True)
 
         labels_count = labels.text.count('<div class="label">')
         assert labels_count == eligible_donors

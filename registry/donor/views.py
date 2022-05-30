@@ -13,7 +13,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
-from sqlalchemy import and_, collate, extract
+from sqlalchemy import and_, extract
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -203,16 +203,7 @@ def render_award_document(rc, medal_slug):
 @login_required
 def render_award_documents_for_award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
-    donors = (
-        DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
-            )
-        )
-        .order_by(collate(DonorsOverview.last_name, "czech").asc())
-        .all()
-    )
+    donors = DonorsOverview.eligible_donors(medal)
 
     return render_template(
         "donor/award_document.html",
@@ -225,41 +216,39 @@ def render_award_documents_for_award_prep(medal_slug):
 
 
 @blueprint.post("/award_prep/envelope_labels")
+@blueprint.get("/award_prep/envelope_labels/<medal_slug>")
 @login_required
-def render_envelope_labels():
-    print_envelope_labels_form = PrintEnvelopeLabelsForm()
-    if print_envelope_labels_form.validate_on_submit():
-        medal = print_envelope_labels_form.medal
-        donors = (
-            DonorsOverview.query.filter(
-                and_(
-                    DonorsOverview.donation_count_total >= medal.minimum_donations,
-                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-                )
-            )
-            .order_by(collate(DonorsOverview.last_name, "czech").asc())
-            .all()
-        )
+def render_envelope_labels(medal_slug=None):
+    if medal_slug is None:
+        print_envelope_labels_form = PrintEnvelopeLabelsForm()
+        if print_envelope_labels_form.validate_on_submit():
+            medal = print_envelope_labels_form.medal
+            skip = print_envelope_labels_form.skip.data
+        else:
+            return redirect(request.referrer)
+    else:
+        medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
+        skip = 0
 
-        # To skip already used labels, we prepend some
-        # empty donors to the list.
-        empty_donor = {
-            k: "" for k in ("first_name", "last_name", "address", "city", "postal_code")
-        }
-        all_donors = chain([empty_donor] * print_envelope_labels_form.skip.data, donors)
-        pages = []
+    donors = DonorsOverview.eligible_donors(medal)
 
-        for index, donor in enumerate(all_donors):
-            if index % 16 == 0:
-                pages.append([])
-            pages[-1].append(donor)
+    # To skip already used labels, we prepend some
+    # empty donors to the list.
+    empty_donor = {
+        k: "" for k in ("first_name", "last_name", "address", "city", "postal_code")
+    }
+    all_donors = chain([empty_donor] * skip, donors)
+    pages = []
 
-        return render_template(
-            "donor/envelope_labels.html",
-            pages=pages,
-        )
+    for index, donor in enumerate(all_donors):
+        if index % 16 == 0:
+            pages.append([])
+        pages[-1].append(donor)
 
-    return redirect(request.referrer)
+    return render_template(
+        "donor/envelope_labels.html",
+        pages=pages,
+    )
 
 
 @blueprint.post("/remove_medal")
@@ -280,12 +269,8 @@ def remove_medal():
 @login_required
 def award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
-    donors = DonorsOverview.query.filter(
-        and_(
-            DonorsOverview.donation_count_total >= medal.minimum_donations,
-            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
-        )
-    ).all()
+    donors = DonorsOverview.eligible_donors(medal)
+
     award_medal_form = AwardMedalForm()
     award_medal_form.add_checkboxes([d.rodne_cislo for d in donors])
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
