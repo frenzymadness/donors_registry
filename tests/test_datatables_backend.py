@@ -1,3 +1,5 @@
+import locale
+from functools import cmp_to_key
 from operator import ge, le
 
 import pytest
@@ -228,4 +230,62 @@ class TestDataTablesBackend:
                 )
             ).count()
 
+            assert len(res.json["data"]) == count
+
+    @pytest.mark.parametrize("direction", ("asc", "desc"))
+    def test_json_backend_order_by_utf_8(self, user, testapp, direction):
+        params = {
+            "draw": "1",
+            "order[0][column]": list(DonorsOverview.frontend_column_names.keys()).index(
+                "last_name"
+            ),
+            "order[0][dir]": direction,
+            "start": "0",
+            "length": "100",
+            "search[value]": "",
+            "search[regex]": "false",
+        }
+
+        login(user, testapp)
+        res = testapp.get(url_for("donor.overview_data"), params=params)
+        assert res.status_code == 200
+        assert len(res.json["data"]) == 100
+
+        last_names = [d["last_name"] for d in res.json["data"]]
+
+        if direction == "asc":
+            reverse = False
+        else:
+            reverse = True
+
+        assert (
+            sorted(last_names, key=cmp_to_key(locale.strcoll), reverse=reverse)
+            == last_names
+        )
+
+    @pytest.mark.parametrize(
+        ("last_names", "count"),
+        (
+            (("Čermáková", "čermáková", "ČERMÁKOVÁ", "ČeRmÁkOvÁ", "čErMáKoVÁ"), 9),
+            (("Blažek", "blažek", "BLAŽEK", "BlAžEk", "bLaŽeK"), 13),
+            (("Bláha", "bláha", "BLÁHA", "BlÁhA", "bLáHa"), 6),
+            (("Bláhová", "bláhová", "BLÁHOVÁ", "BlÁhOvÁ", "bLáHoVá"), 15),
+        ),
+    )
+    def test_json_backend_search_by_utf_8(self, user, testapp, last_names, count):
+        params = {
+            "draw": "1",
+            "order[0][column]": 0,
+            "order[0][dir]": "asc",
+            "start": "0",
+            "length": "100",
+            "search[value]": "",
+            "search[regex]": "false",
+        }
+
+        login(user, testapp)
+        for last_name in last_names:
+            params["search[value]"] = last_name
+            res = testapp.get(url_for("donor.overview_data"), params=params)
+            assert res.status_code == 200
             assert len(res.json["data"]) == count
