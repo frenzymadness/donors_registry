@@ -1,3 +1,5 @@
+from functools import total_ordering
+
 from registry.extensions import db
 
 
@@ -11,6 +13,7 @@ class DonationCenter(db.Model):
         return f"<DonationCenter({self.slug!r})>"
 
 
+@total_ordering
 class Medals(db.Model):
     __tablename__ = "medals"
     id = db.Column(db.Integer, primary_key=True)
@@ -22,3 +25,6 @@ class Medals(db.Model):
 
     def __repr__(self):
         return f"<Medals({self.slug!r})>"
+
+    def __lt__(self, other):
+        return self.minimum_donations < other.minimum_donations
