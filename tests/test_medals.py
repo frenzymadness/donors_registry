@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from operator import eq, gt, lt, ne
 
 import pytest
 from flask import url_for
@@ -203,3 +204,21 @@ class TestMedals:
         detail = form.submit().follow()
         assert "Při odebrání medaile došlo k chybě." in detail
         assert awarded == AwardedMedals.query.count()
+
+    @pytest.mark.parametrize(
+        ("operator", "medal", "other_medal"),
+        (
+            (eq, 1, 1),
+            (eq, 4, 4),
+            (ne, 1, 2),
+            (ne, 4, 5),
+            (lt, 1, 2),
+            (lt, 1, 5),
+            (gt, 3, 2),
+            (gt, 6, 5),
+        ),
+    )
+    def test_medal_sorting(self, operator, medal, other_medal):
+        medal = Medals.query.get(medal)
+        other_medal = Medals.query.get(other_medal)
+        assert operator(medal, other_medal)

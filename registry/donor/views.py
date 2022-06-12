@@ -203,6 +203,7 @@ def render_award_document(rc, medal_slug):
 @login_required
 def render_award_documents_for_award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
+    medal_kr3 = Medals.query.filter(Medals.slug == "kr3").first_or_404()
     donors = (
         DonorsOverview.query.filter(
             and_(
@@ -214,11 +215,14 @@ def render_award_documents_for_award_prep(medal_slug):
         .all()
     )
 
+    # Show date of the award only for lower three medals
+    awarded_at = datetime.now().strftime("%-d. %-m. %Y") if medal < medal_kr3 else ""
+
     return render_template(
         "donor/award_document.html",
         donors=donors,
         medal=medal,
-        awarded_at=datetime.now().strftime("%-d. %-m. %Y"),
+        awarded_at=awarded_at,
         stamps=get_list_of_images("stamps"),
         signatures=get_list_of_images("signatures"),
     )
