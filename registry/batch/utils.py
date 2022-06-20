@@ -59,6 +59,52 @@ def repair_line_part_by_part(line):  # noqa: C901 FIXME
     last_name, rest = get_part_of_line(rest)
     if not last_name:
         errors.append("chybí příjmení")
+    if "," in last_name:
+        last_name_only, degree = last_name.split(",")
+        degree.strip()
+        print(last_name)
+        print(degree)
+        if not degree:
+            last_name = last_name_only
+            errors.append("titul neuveden")
+        if degree in ["Bc.", "BC."]:
+            first_name = "Bc. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["Mgr.", "Mgr", "MGR"]:
+            first_name = "Mgr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["Ing.", " Ing.", "Ing", "ING.", "ING"]:
+            first_name = "Ing. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["MUDr.", "Mudr.", "MuDr."]:
+            first_name = "MUDr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["JUDr.", "Judr."]:
+            first_name = "JUDr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["PhDr.", "PHDR."]:
+            first_name = "PhDr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["PharmDr.", "PHARMDR."]:
+            first_name = "PharmDr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["PaedDr.", "PaeDr."]:
+            first_name = "PaedDr. " + first_name
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        if degree in ["RNDr.", "RNDR."]:
+            degree = "RNDr."
+            first_name = f"{degree} {first_name}"
+            last_name = last_name_only
+            errors.append("titul přesunut před jméno")
+        errors.append("obsahuje titul")
 
     address, rest = get_part_of_line(rest)
     if not address:
