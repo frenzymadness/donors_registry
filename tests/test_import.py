@@ -292,3 +292,71 @@ class TestImport:
         assert Batch.query.count() == existing_batches
         # We don't want the data repair form to show up
         assert "Řádky s chybami" not in res
+
+    @pytest.mark.parametrize(
+        ("input_line", "expected_first_name", "expected_last_name"),
+        (
+            (
+                "205225295;TOMÁŠ;VESELÁ,dr;HAMERSKÁ 810;VELKÉ HAMRY;31777;985;69",
+                "Dr. TOMÁŠ",
+                "VESELÁ",
+            ),
+            (
+                "0352152680;LUBOMÍR;ŠIMEK,BCA.;HUSOVA 2;IVANOVICE NA HANÉ;69710;409;1",
+                "BcA. LUBOMÍR",
+                "ŠIMEK",
+            ),
+            (
+                "1860231538;VÁCLAV;MAREŠOVÁ    rndr;RYCHVALDSKÁ 11;RÝMAŘOV;11252;180;6",
+                "RNDr. VÁCLAV",
+                "MAREŠOVÁ",
+            ),
+            (
+                "431229128;MARTIN;DVOŘÁK ing.MGR.;SKALICE 451;MILETÍN;99473;515;3",
+                "Mgr. Ing. MARTIN",
+                "DVOŘÁK",
+            ),
+            (
+                "0112072730;DANIEL;DOLEŽAL,bca,phdr;ROŽNOVSKÁ 1;PŘEŠTICE;54847;157;14",
+                "BcA. PhDr. DANIEL",
+                "DOLEŽAL",
+            ),
+            (
+                "6458313785;JAN;MARKOVÁ mudr;DOLNÍ BEČVA 340;PŘIMDA;08321;571;14",
+                "MUDr. JAN",
+                "MARKOVÁ",
+            ),
+            (
+                "6558232494;JAN;POLÁKOVÁ,MVDR.;REKREAČNÍ 685;LIBEREC;83535;708;16",
+                "MVDr. JAN",
+                "POLÁKOVÁ",
+            ),
+            (
+                "160718283;VOJTĚCH;URBAN MGA.;KOZLOVICE 247;HARTMANICE;13986;192;121",
+                "MgA. VOJTĚCH",
+                "URBAN",
+            ),
+            (
+                "0255231647;MILAN;ČERMÁK ing.arch.;MIKULŮVKA 290;KOJETÍN;61964;922;45",
+                "Ing. arch. MILAN",
+                "ČERMÁK",
+            ),
+        ),
+    )
+    def test_import_degrees(
+        self, input_line, expected_first_name, expected_last_name, user, testapp
+    ):
+        login(user, testapp)
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["input_data"] = input_line
+        form.fields["donation_center_id"][0].select(1)
+        res = form.submit().follow()
+        assert "Import proběhl úspěšně" in res
+        assert res.status_code == 200
+
+        rodne_cislo = input_line.split(";")[0]
+        donor = DonorsOverview.query.get(rodne_cislo)
+
+        assert donor.first_name == expected_first_name
+        assert donor.last_name == expected_last_name

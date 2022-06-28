@@ -106,3 +106,46 @@ class DataRequired(OriginalDataRequired):
     def __init__(self, *args, **kwargs):
         super(OriginalDataRequired, self).__init__(*args, **kwargs)
         self.message = "Toto pole je povinné!"
+
+
+# Based on https://eprehledy.cz/ceske_tituly.php
+degrees = {
+    r"\Wbca\W?": "BcA.",
+    r"\Wicdr\W?": "ICDr.",
+    r"\Wing\. ?arch\W?": "Ing. arch.",
+    r"\Wjudr\W?": "JUDr.",
+    r"\Wmddr\W?": "MDDr.",
+    r"\Wmga\W?": "MgA.",
+    r"\Wmgr\W?": "Mgr.",
+    r"\Wmsdr\W?": "MSDr.",
+    r"\Wmudr\W?": "MUDr.",
+    r"\Wmvdr\W?": "MVDr.",
+    r"\Wpaed?dr\W?": "PaedDr.",
+    r"\Wpharmdr\W?": "PharmDr.",
+    r"\Wphdr\W?": "PhDr.",
+    r"\Wphmr\W?": "PhMr.",
+    r"\Wrcdr\W?": "RCDr.",
+    r"\Wrtdr\W?": "RTDr.",
+    r"\Wrndr\W?": "RNDr.",
+    r"\Wrsdr\W?": "RSDr.",
+    r"\Wthdr\W?": "ThDr.",
+    r"\Wthlic\W?": "ThLic.",
+    # These three are at the very bottom on purpose
+    # because they overlap with some degrees above
+    # and we should detect the ones above first.
+    r"\Wbc\W?": "Bc.",
+    r"\Wdr\W?": "Dr.",
+    r"\Wing\W?": "Ing.",
+}
+
+
+def split_degrees(last_name):
+    detected_degrees = []
+    for regex, correct_form in degrees.items():
+        result = re.search(regex, last_name, re.IGNORECASE)
+        if result:
+            detected_degrees.append(correct_form)
+            parts = last_name.split(result.group())
+            last_name = " ".join((p.strip() for p in parts))
+
+    return last_name.strip().rstrip(",").strip(), " ".join(detected_degrees)

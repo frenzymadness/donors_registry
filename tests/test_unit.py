@@ -3,7 +3,7 @@ from flask import url_for
 from wtforms.validators import ValidationError
 
 from registry.donor.models import DonorsOverview
-from registry.utils import NumericValidator
+from registry.utils import NumericValidator, split_degrees
 
 from .helpers import FakeForm, login
 
@@ -145,3 +145,106 @@ class TestCapitalizer:
                 assert "OSTRAVA" not in res
                 assert "Lipová 33" in res
                 assert "Ostrava" in res
+
+
+class TestDegreeSplitter:
+    @pytest.mark.parametrize(
+        ("input", "expected_degrees", "expected_last_name"),
+        (
+            # Test data based on real data from production database
+            ("surname -", "", "surname -"),
+            ("surname,", "", "surname"),
+            ("surname    bc.", "Bc.", "surname"),
+            ("surname  bc", "Bc.", "surname"),
+            ("surname  bc.", "Bc.", "surname"),
+            ("surname bc", "Bc.", "surname"),
+            ("surname bc.", "Bc.", "surname"),
+            ("surname,bc", "Bc.", "surname"),
+            ("surname,bc.", "Bc.", "surname"),
+            ("surname,Bc.", "Bc.", "surname"),
+            ("surname    BC.", "Bc.", "surname"),
+            ("surname  BC", "Bc.", "surname"),
+            ("surname  BC.", "Bc.", "surname"),
+            ("surname BC", "Bc.", "surname"),
+            ("surname BC.", "Bc.", "surname"),
+            ("surname   dis.", "", "surname   dis."),
+            ("surname  dis", "", "surname  dis"),
+            ("surname  dis.", "", "surname  dis."),
+            ("surname dis", "", "surname dis"),
+            ("surname dis.", "", "surname dis."),
+            ("surname,dis", "", "surname,dis"),
+            ("surname,dis.", "", "surname,dis."),
+            ("surname  DIS", "", "surname  DIS"),
+            ("surname  DIS.", "", "surname  DIS."),
+            ("surname DIS.", "", "surname DIS."),
+            ("surname dis.bc.", "Bc.", "surname dis"),
+            ("surname    ing.", "Ing.", "surname"),
+            ("surname   ing", "Ing.", "surname"),
+            ("surname   ing.", "Ing.", "surname"),
+            ("surname  ing", "Ing.", "surname"),
+            ("surname  ing.", "Ing.", "surname"),
+            ("surname ing", "Ing.", "surname"),
+            ("surname ing.", "Ing.", "surname"),
+            ("surname, ing.", "Ing.", "surname"),
+            ("surname,ing", "Ing.", "surname"),
+            ("surname,ing.", "Ing.", "surname"),
+            ("surname ,Ing.", "Ing.", "surname"),
+            ("surname,Ing.", "Ing.", "surname"),
+            ("surname   ING.", "Ing.", "surname"),
+            ("surname  ING", "Ing.", "surname"),
+            ("surname  ING.", "Ing.", "surname"),
+            ("surname ING", "Ing.", "surname"),
+            ("surname ING.", "Ing.", "surname"),
+            ("surname ing.mgr.", "Mgr. Ing.", "surname"),
+            ("surname,ing.phdr.", "PhDr. Ing.", "surname"),
+            ("surname judr", "JUDr.", "surname"),
+            ("surname,judr.", "JUDr.", "surname"),
+            ("surname,mba.", "", "surname,mba."),
+            ("surname  mgr", "Mgr.", "surname"),
+            ("surname  mgr.", "Mgr.", "surname"),
+            ("surname mgr", "Mgr.", "surname"),
+            ("surname mgr.", "Mgr.", "surname"),
+            ("surname,mgr", "Mgr.", "surname"),
+            ("surname,mgr.", "Mgr.", "surname"),
+            ("surname,Mgr.", "Mgr.", "surname"),
+            ("surname   MGR", "Mgr.", "surname"),
+            ("surname  MGR", "Mgr.", "surname"),
+            ("surname  MGR.", "Mgr.", "surname"),
+            ("surname MGR", "Mgr.", "surname"),
+            ("surname MGR.", "Mgr.", "surname"),
+            ("surname  mgr.phd.", "Mgr.", "surname phd."),
+            ("surname,msc.", "", "surname,msc."),
+            ("surname mudr", "MUDr.", "surname"),
+            ("surname mudr.", "MUDr.", "surname"),
+            ("surname,mudr.", "MUDr.", "surname"),
+            ("surname MUDR.", "MUDr.", "surname"),
+            ("surname  mvdr.", "MVDr.", "surname"),
+            ("surname paeddr.", "PaedDr.", "surname"),
+            ("surname,paeddr.", "PaedDr.", "surname"),
+            ("surname PAEDDR.", "PaedDr.", "surname"),
+            ("surname,pharmdr.", "PharmDr.", "surname"),
+            ("surname ph.d.", "", "surname ph.d."),
+            ("surname,phdr.", "PhDr.", "surname"),
+            ("surname rndr.", "RNDr.", "surname"),
+            ("surname,rndr.", "RNDr.", "surname"),
+            # Incorrect degrees we can fix
+            ("surname paedr.", "PaedDr.", "surname"),
+            ("surname,paedr.", "PaedDr.", "surname"),
+            ("surname PAEDR.", "PaedDr.", "surname"),
+            ("surname ing.arch", "Ing. arch.", "surname"),
+            ("surname ing. arch.", "Ing. arch.", "surname"),
+            # What if a degree is in the middle of the name?
+            ("Kipling", "", "Kipling"),
+            ("Mgrágová", "", "Mgrágová"),
+            ("Sambca", "", "Sambca"),
+            ("Mudrc", "", "Mudrc"),
+            ("Kipling phmr", "PhMr.", "Kipling"),
+            ("Mgrágová,bCa.", "BcA.", "Mgrágová"),
+            ("Sambca,mddr", "MDDr.", "Sambca"),
+            ("Mudrc rtdr.", "RTDr.", "Mudrc"),
+        ),
+    )
+    def test_split_degree(self, input, expected_degrees, expected_last_name):
+        last_name, detected_degrees = split_degrees(input)
+        assert detected_degrees == expected_degrees
+        assert last_name == expected_last_name
