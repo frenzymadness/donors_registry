@@ -2,7 +2,7 @@ from sqlalchemy import collate
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import capitalize, format_postal_code
+from registry.utils import capitalize, format_postal_code, split_degrees
 
 
 class Batch(db.Model):
@@ -504,6 +504,29 @@ FROM (
 """  # nosec
 
         db.session.execute(full_query, params)
+        db.session.commit()
+
+        # Code moving degrees from last_name to first_name.
+        if rodne_cislo:
+            donors_with_degrees = (DonorsOverview.query.get(rodne_cislo),)
+        else:
+            # Because only 4 % of donors have a degree, it makes
+            # sense to pre-select them via this query.
+            donors_with_degrees = DonorsOverview.query.filter(
+                db.or_(
+                    DonorsOverview.last_name.contains(" "),
+                    DonorsOverview.last_name.contains("."),
+                    DonorsOverview.last_name.contains(","),
+                )
+            ).all()
+
+        for donor in donors_with_degrees:
+            last_name, degrees = split_degrees(donor.last_name)
+            if degrees:
+                donor.first_name = degrees + " " + donor.first_name
+                donor.last_name = last_name
+                db.session.add(donor)
+
         db.session.commit()
 
 
