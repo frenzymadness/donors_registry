@@ -313,7 +313,7 @@ class TestImport:
             ),
             (
                 "431229128;MARTIN;DVOŘÁK ing.MGR.;SKALICE 451;MILETÍN;99473;515;3",
-                "Mgr. Ing. MARTIN",
+                "Ing. Mgr. MARTIN",
                 "DVOŘÁK",
             ),
             (
