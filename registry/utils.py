@@ -140,12 +140,24 @@ degrees = {
 
 
 def split_degrees(last_name):
+    original_last_name = last_name
     detected_degrees = []
+    order_by_indexes = []
     for regex, correct_form in degrees.items():
         result = re.search(regex, last_name, re.IGNORECASE)
         if result:
             detected_degrees.append(correct_form)
             parts = last_name.split(result.group())
             last_name = " ".join((p.strip() for p in parts))
+            # To be able to order degrees as they were in the original
+            # input, we have to get their possition from the original input.
+            result = re.search(regex, original_last_name, re.IGNORECASE)
+            order_by_indexes.append(result.span()[0])
 
-    return last_name.strip().rstrip(",").strip(), " ".join(detected_degrees)
+    last_name_prepared = last_name.strip().rstrip(",").strip()
+    degrees_sorted = sorted(
+        detected_degrees,
+        key=lambda degree: order_by_indexes[detected_degrees.index(degree)],
+    )
+
+    return last_name_prepared, " ".join(degrees_sorted)

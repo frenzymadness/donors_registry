@@ -195,8 +195,6 @@ class TestDegreeSplitter:
             ("surname  ING.", "Ing.", "surname"),
             ("surname ING", "Ing.", "surname"),
             ("surname ING.", "Ing.", "surname"),
-            ("surname ing.mgr.", "Mgr. Ing.", "surname"),
-            ("surname,ing.phdr.", "PhDr. Ing.", "surname"),
             ("surname judr", "JUDr.", "surname"),
             ("surname,judr.", "JUDr.", "surname"),
             ("surname,mba.", "", "surname,mba."),
@@ -242,6 +240,12 @@ class TestDegreeSplitter:
             ("Mgrágová,bCa.", "BcA.", "Mgrágová"),
             ("Sambca,mddr", "MDDr.", "Sambca"),
             ("Mudrc rtdr.", "RTDr.", "Mudrc"),
+            # The order of the result has to respect
+            # the order of the input. No arbitrary sorting here.
+            ("surname ing.mgr.", "Ing. Mgr.", "surname"),
+            ("surname mgr.ing.", "Mgr. Ing.", "surname"),
+            ("surname,ing.phdr.", "Ing. PhDr.", "surname"),
+            ("surname,phdr.ing", "PhDr. Ing.", "surname"),
         ),
     )
     def test_split_degree(self, input, expected_degrees, expected_last_name):
