@@ -8,60 +8,96 @@
 <html lang="cs">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Štítky na obálky</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/award_document.css') }}"> -->
     <style>
-body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background-color: grey; /* #FAFAFA */
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 16pt;
-}
+        @page {
+            size: A4;
+            margin: 0;
+        }
 
-.page {
-    width: 210mm;
-    height: 297mm;
-    margin: 10mm auto;
-    background: white;
-}
+        :root {
+            /* rozměr jednoho štítku */
+            --label-width: 105mm;
+            --label-height: 37mm;
 
-.label {
-    width: 105mm;
-    height: 37mm;
-    float: left;
-}
+            /* počet štítků */
+            --labels-in-column: 8; /* ve sloupci */
+            --labels-in-row: 2; /* na řádek */
 
-p {
-    margin: 4mm auto auto 5mm;
-}
+            /* odsazení bloku štítků */
+            --top-offset: 0mm; /* shora */
+            --left-offset: 0mm; /* zleva */
+            --bottom-offset: 0mm; /* ze spodu */
+            --right-offset: 0mm; /* zprava */
 
-@page {
-    size: A4;
-    margin: 0;
-}
+            /* mezery mezi štítky */
+            --label-gap-horizontal: 0mm; /* mezi sloupci */
+            --label-gap-vertical: 0mm; /* mezi radky */
 
-@media print {
-    html, body {
-        width: 210mm;
-        height: 297mm;
-    }
-    .page {
-        margin: 0;
-        border: initial;
-        border-radius: initial;
-        width: initial;
-        min-height: initial;
-        box-shadow: initial;
-        background: initial;
-        page-break-after: always;
-    }
-}
+            /* odsazení obsahu od kraje štítku */
+            --label-horizontal-space: 6mm; /* vpravo a vlevo */
+            --label-vertical-space: 5mm; /* nahoře a dole */
 
+            /* mezera mezi řádky */
+            --paragraph-space: 1.5mm;
+        }
+
+        *,
+        ::before,
+        ::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: black;
+            font-family: "Arial", "Helvetica", sans-serif;
+        }
+
+        .page {
+            display: grid;
+            grid-template-rows: repeat(var(--labels-in-column), var(--label-height));
+            grid-template-columns: repeat(var(--labels-in-row), var(--label-width));
+            row-gap: var(--label-gap-vertical);
+            column-gap: var(--label-gap-horizontal);
+
+            padding-top: var(--top-offset);
+            padding-bottom: var(--left-offset);
+            padding-left: var(--bottom-offset);
+            padding-right: var(--right-offset);
+        }
+
+        .label {
+            padding: var(--label-vertical-space) var(--label-horizontal-space);
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            gap: var(--paragraph-space);
+        }
+
+        p {
+            margin: 0;
+            line-height: 1.2;
+        }
+
+        /* debug */
+        /* .page {
+            outline: 1px solid red;
+        }
+
+        .label {
+            outline: 1px dotted black;
+        } */
+
+        @media print {
+            .page,
+            .label {
+                outline: none;
+            }
+        }
     </style>
 </head>
 <body>
