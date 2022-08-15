@@ -15,10 +15,11 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Tox tests
       id: test
-      uses: fedora-python/tox-github-action@master
+      uses: frenzymadness/tox-github-action@workdir
       with:
         tox_env: ${{ matrix.tox_env }}
         dnf_install: pkgconfig(libffi) glibc-langpack-cs libicu-devel sqlite-devel
+        workdir: "migrations"
     strategy:
       matrix:
         tox_env: [py37, py38, py39, py310, lint]
