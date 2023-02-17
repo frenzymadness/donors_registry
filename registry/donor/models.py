@@ -1,4 +1,5 @@
 from sqlalchemy import collate
+from sqlalchemy.sql import text
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
@@ -503,7 +504,7 @@ FROM (
         ON "donors_override"."rodne_cislo" = "records"."rodne_cislo";
 """  # nosec
 
-        db.session.execute(full_query, params)
+        db.session.execute(text(full_query), params)
         db.session.commit()
 
         # Code moving degrees from last_name to first_name.
