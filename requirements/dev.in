@@ -5,6 +5,7 @@
 tox
 pytest
 WebTest
+
 # Used to compare calculations we do in SQL with a different approach
 pandas
 
