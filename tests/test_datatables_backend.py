@@ -62,8 +62,8 @@ class TestDataTablesBackend:
         while True:
             first_rodne_cislo, second_rodne_cislo = sample_of_rc(2)
             if not (
-                IgnoredDonors.query.get(first_rodne_cislo)
-                or IgnoredDonors.query.get(second_rodne_cislo)
+                db.session.get(IgnoredDonors, first_rodne_cislo)
+                or db.session.get(IgnoredDonors, second_rodne_cislo)
             ):
                 break
 
@@ -198,7 +198,7 @@ class TestDataTablesBackend:
         }
 
         login(user, testapp)
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         # Set some random awarded_at to some awarded medals
         db.session.execute(
             text(

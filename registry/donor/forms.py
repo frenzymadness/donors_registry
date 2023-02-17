@@ -15,6 +15,7 @@ from registry.donor.models import (
     IgnoredDonors,
     Medals,
 )
+from registry.extensions import db
 from registry.utils import DataRequired, NumericValidator
 
 
@@ -23,8 +24,8 @@ class RemoveMedalForm(FlaskForm):
     medal_id = HiddenField(validators=[DataRequired()])
 
     def validate(self, **kwargs):
-        self.awarded_medal = AwardedMedals.query.get(
-            (self.rodne_cislo.data, self.medal_id.data)
+        self.awarded_medal = db.session.get(
+            AwardedMedals, (self.rodne_cislo.data, self.medal_id.data)
         )
         return self.awarded_medal is not None
 
@@ -47,7 +48,7 @@ class AwardMedalForm(FlaskForm):
         setattr(self, "rodne_cislo_" + rodne_cislo, rodne_cislo_input)
 
     def validate(self, **kwargs):
-        self.medal = Medals.query.get(self.medal_id.data)
+        self.medal = db.session.get(Medals, self.medal_id.data)
 
         if self.medal is None:
             flash("Odeslána nevalidní data.", "danger")
@@ -55,7 +56,7 @@ class AwardMedalForm(FlaskForm):
 
         self.overviews = {}
         for rodne_cislo in self.rodna_cisla:
-            do = DonorsOverview.query.get(rodne_cislo)
+            do = db.session.get(DonorsOverview, rodne_cislo)
             if do:
                 self.overviews[rodne_cislo] = do
             else:
@@ -79,7 +80,7 @@ class RemoveFromIgnoredForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
 
     def validate(self, **kwargs):
-        self.ignored_donor = IgnoredDonors.query.get(self.rodne_cislo.data)
+        self.ignored_donor = db.session.get(IgnoredDonors, self.rodne_cislo.data)
         return self.ignored_donor is not None
 
 
@@ -93,7 +94,7 @@ class DonorsOverrideForm(FlaskForm):
     kod_pojistovny = StringField("Pojišťovna", validators=[NumericValidator(3)])
 
     def init_fields(self, rodne_cislo):
-        override = DonorsOverride.query.get(rodne_cislo)
+        override = db.session.get(DonorsOverride, rodne_cislo)
 
         if override is not None:
             for field in DonorsOverview.basic_fields:
@@ -116,7 +117,7 @@ class PrintEnvelopeLabelsForm(FlaskForm):
     skip = IntegerField(validators=[DataRequired()])
 
     def validate(self, **kwargs):
-        self.medal = Medals.query.get(self.medal_id.data)
+        self.medal = db.session.get(Medals, self.medal_id.data)
 
         if self.medal is None:
             flash("Odeslána nevalidní data.", "danger")

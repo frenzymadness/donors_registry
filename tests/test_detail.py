@@ -13,6 +13,7 @@ from registry.donor.models import (
     Note,
     Record,
 )
+from registry.extensions import db
 from registry.list.models import Medals
 
 from .fixtures import sample_of_rc, skip_if_ignored
@@ -90,7 +91,7 @@ class TestDetail:
 class TestAwardDocument:
     @pytest.mark.parametrize("rodne_cislo", ("391105000", "9701037137", "151008110"))
     def test_award_doc_for_man(self, user, testapp, rodne_cislo):
-        overview = DonorsOverview.query.get(rodne_cislo)
+        overview = db.session.get(DonorsOverview, rodne_cislo)
         medals = Medals.query.all()
         login(user, testapp)
         for medal in medals:
@@ -114,7 +115,7 @@ class TestAwardDocument:
     @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
     def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
         rodne_cislo = "095404947"
-        overview = DonorsOverview.query.get(rodne_cislo)
+        overview = db.session.get(DonorsOverview, rodne_cislo)
         medals = Medals.query.all()
         login(user, testapp)
         for medal in medals:
@@ -182,7 +183,7 @@ class TestAwardDocument:
 
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_award_prep_documents(self, user, testapp, medal_id):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         medal_kr3 = Medals.query.filter(Medals.slug == "kr3").first_or_404()
         today = datetime.now().strftime("%-d. %-m. %Y") if medal < medal_kr3 else ""
         login(user, testapp)
@@ -197,7 +198,7 @@ class TestAwardDocument:
 class TestEnvelopeLabels:
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_envelope_labels(self, user, testapp, medal_id):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         labels = page.forms["printEnvelopeLabelsForm"].submit()
@@ -215,7 +216,7 @@ class TestEnvelopeLabels:
         assert labels_count == eligible_donors
 
     def test_envelope_labels_detail(self, user, testapp):
-        medal = Medals.query.get(1)
+        medal = db.session.get(Medals, 1)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         labels = page.forms["printEnvelopeLabelsForm"].submit()
@@ -234,7 +235,7 @@ class TestEnvelopeLabels:
     @pytest.mark.parametrize("skip", (1, 3, 9, 13))
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_envelope_labels_skip(self, user, testapp, medal_id, skip):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
@@ -260,7 +261,7 @@ class TestEnvelopeLabels:
 
     @pytest.mark.parametrize("skip", (-1, -33, 99, 16))
     def test_envelope_labels_invalid_skip(self, user, testapp, skip):
-        medal = Medals.query.get(1)
+        medal = db.session.get(Medals, 1)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
@@ -269,7 +270,7 @@ class TestEnvelopeLabels:
         assert "Vynechat lze 0 až 15 štítků." in labels.text
 
     def test_envelope_labels_empty_skip(self, user, testapp):
-        medal = Medals.query.get(1)
+        medal = db.session.get(Medals, 1)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = ""
@@ -295,7 +296,7 @@ class TestEnvelopeLabels:
 
     @pytest.mark.parametrize("medal_id", (-1, -33, 99, 16))
     def test_envelope_labels_invalid_medal(self, user, testapp, medal_id):
-        medal = Medals.query.get(1)
+        medal = db.session.get(Medals, 1)
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["medal_id"][0].value = medal_id

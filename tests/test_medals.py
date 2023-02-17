@@ -11,6 +11,7 @@ from registry.donor.models import (
     IgnoredDonors,
     Medals,
 )
+from registry.extensions import db
 
 from .fixtures import sample_of_rc, skip_if_ignored
 from .helpers import login
@@ -20,7 +21,7 @@ class TestMedals:
     # TODO: Find a better way to parametrize this
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_award_medal(self, user, testapp, medal_id):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         awarded = AwardedMedals.query.count()
         awarded_do = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
@@ -78,7 +79,7 @@ class TestMedals:
     # TODO: Find a better way to parametrize this
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_remove_medal(self, user, testapp, medal_id):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         do = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 1
         ).first()
@@ -100,14 +101,14 @@ class TestMedals:
         # Medal is not there anymore
         assert detail.status_code == 200
         assert "Medaile byla úspěšně odebrána" in detail
-        do = DonorsOverview.query.get(do.rodne_cislo)
+        do = db.session.get(DonorsOverview, do.rodne_cislo)
         assert getattr(do, "awarded_medal_" + medal.slug) is False
-        assert AwardedMedals.query.get((do.rodne_cislo, medal.id)) is None
+        assert db.session.get(AwardedMedals, (do.rodne_cislo, medal.id)) is None
 
     # TODO: Find a better way to parametrize this
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_award_one_medal(self, user, testapp, medal_id):
-        medal = Medals.query.get(medal_id)
+        medal = db.session.get(Medals, medal_id)
         do = DonorsOverview.query.filter(
             getattr(DonorsOverview, "awarded_medal_" + medal.slug) == 0
         ).first()
@@ -127,9 +128,9 @@ class TestMedals:
         # Medal is awarded
         assert detail.status_code == 200
         assert "Medaile udělena." in detail
-        do = DonorsOverview.query.get(do.rodne_cislo)
+        do = db.session.get(DonorsOverview, do.rodne_cislo)
         assert getattr(do, "awarded_medal_" + medal.slug) is True
-        awarded_medal = AwardedMedals.query.get((do.rodne_cislo, medal.id))
+        awarded_medal = db.session.get(AwardedMedals, (do.rodne_cislo, medal.id))
         assert awarded_medal is not None
         assert awarded_medal.awarded_at.date() == datetime.now().date()
 
@@ -147,7 +148,7 @@ class TestMedals:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_eligibility(self, user, testapp, db, rodne_cislo):
         skip_if_ignored(rodne_cislo)
-        do = DonorsOverview.query.get(rodne_cislo)
+        do = db.session.get(DonorsOverview, rodne_cislo)
         medals = Medals.query.all()
         AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo).delete()
         db.session.commit()
@@ -219,6 +220,6 @@ class TestMedals:
         ),
     )
     def test_medal_sorting(self, operator, medal, other_medal):
-        medal = Medals.query.get(medal)
-        other_medal = Medals.query.get(other_medal)
+        medal = db.session.get(Medals, medal)
+        other_medal = db.session.get(Medals, other_medal)
         assert operator(medal, other_medal)
