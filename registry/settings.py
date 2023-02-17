@@ -10,8 +10,7 @@ from environs import Env
 env = Env()
 env.read_env()  # reads .env file first
 
-ENV = env.str("FLASK_ENV", default="production")
-DEBUG = ENV == "development"
+DEBUG = env.str("FLASK_DEBUG", default="0")
 SQLALCHEMY_DATABASE_URI = (
     "sqlite:///database.sqlite" if DEBUG else env.str("DATABASE_URL")
 )
