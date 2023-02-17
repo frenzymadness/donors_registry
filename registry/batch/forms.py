@@ -29,7 +29,7 @@ class ImportForm(FlaskForm):
         self.valid_lines_content, self.invalid_lines_content = None, None
         self.invalid_lines_errors.data = ""
 
-    def validate(self):
+    def validate(self, **kwargs):
         """Validate the form."""
         initial_validation = super(ImportForm, self).validate()
         if not initial_validation:
@@ -82,6 +82,6 @@ class ImportForm(FlaskForm):
 class DeleteBatchForm(FlaskForm):
     batch_id = HiddenField(validators=[DataRequired()])
 
-    def validate(self):
+    def validate(self, **kwargs):
         self.batch = Batch.query.get(self.batch_id.data)
         return self.batch is not None

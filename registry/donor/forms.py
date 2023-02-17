@@ -22,7 +22,7 @@ class RemoveMedalForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
     medal_id = HiddenField(validators=[DataRequired()])
 
-    def validate(self):
+    def validate(self, **kwargs):
         self.awarded_medal = AwardedMedals.query.get(
             (self.rodne_cislo.data, self.medal_id.data)
         )
@@ -46,7 +46,7 @@ class AwardMedalForm(FlaskForm):
         rodne_cislo_input.data = rodne_cislo
         setattr(self, "rodne_cislo_" + rodne_cislo, rodne_cislo_input)
 
-    def validate(self):
+    def validate(self, **kwargs):
         self.medal = Medals.query.get(self.medal_id.data)
 
         if self.medal is None:
@@ -78,7 +78,7 @@ class IgnoreDonorForm(FlaskForm):
 class RemoveFromIgnoredForm(FlaskForm):
     rodne_cislo = HiddenField(validators=[DataRequired()])
 
-    def validate(self):
+    def validate(self, **kwargs):
         self.ignored_donor = IgnoredDonors.query.get(self.rodne_cislo.data)
         return self.ignored_donor is not None
 
@@ -115,7 +115,7 @@ class PrintEnvelopeLabelsForm(FlaskForm):
     medal_id = HiddenField(validators=[DataRequired()])
     skip = IntegerField(validators=[DataRequired()])
 
-    def validate(self):
+    def validate(self, **kwargs):
         self.medal = Medals.query.get(self.medal_id.data)
 
         if self.medal is None:
