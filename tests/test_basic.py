@@ -86,7 +86,10 @@ class TestErrorInterface:
     @pytest.mark.parametrize(("endpoint, kwargs"), testcases_401)
     def test_pages_401(self, testapp, endpoint, kwargs):
         """Test pages which requires login."""
-        res = testapp.get(url_for(endpoint, **kwargs)).follow(status=401)
+        # Make sure we are not logged in
+        testapp.get(url_for("public.logout"))
+
+        res = testapp.get(url_for(endpoint, **kwargs)).maybe_follow(status=401)
 
         assert res.status_code == 401
         assert (
