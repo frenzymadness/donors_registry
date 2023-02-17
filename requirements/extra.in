@@ -1,0 +1,11 @@
+# Extra functionalities for developers
+-r dev.txt
+
+# Debugging
+ipdb
+
+# Progress bar
+tqdm
+
+# Pre-commit lint
+pre-commit
