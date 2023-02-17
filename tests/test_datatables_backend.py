@@ -5,6 +5,7 @@ from operator import ge, le
 import pytest
 from flask import url_for
 from sqlalchemy import and_, extract
+from sqlalchemy.sql import text
 
 from registry.donor.models import (
     AwardedMedals,
@@ -200,13 +201,17 @@ class TestDataTablesBackend:
         medal = Medals.query.get(medal_id)
         # Set some random awarded_at to some awarded medals
         db.session.execute(
-            "UPDATE awarded_medals SET awarded_at = :awarded_at "
-            "WHERE rodne_cislo LIKE :rc_start;",
+            text(
+                "UPDATE awarded_medals SET awarded_at = :awarded_at "
+                "WHERE rodne_cislo LIKE :rc_start;"
+            ),
             params={"awarded_at": "2000-12-12 13:13:13", "rc_start": "8%"},
         )
         db.session.execute(
-            "UPDATE awarded_medals SET awarded_at = :awarded_at "
-            "WHERE rodne_cislo LIKE :rc_start;",
+            text(
+                "UPDATE awarded_medals SET awarded_at = :awarded_at "
+                "WHERE rodne_cislo LIKE :rc_start;"
+            ),
             params={"awarded_at": "2020-12-12 13:13:13", "rc_start": "9%"},
         )
         db.session.commit()
