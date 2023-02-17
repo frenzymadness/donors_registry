@@ -109,7 +109,7 @@ def sample_of_rc(amount=100):
 
 
 def skip_if_ignored(rodne_cislo):
-    if IgnoredDonors.query.get(rodne_cislo):
+    if _db.session.get(IgnoredDonors, rodne_cislo):
         skip("Donor is ignored")
 
 

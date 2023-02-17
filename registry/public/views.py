@@ -12,7 +12,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import and_
 
 from registry.donor.models import AwardedMedals, Batch, DonorsOverview, Record
-from registry.extensions import login_manager
+from registry.extensions import db, login_manager
 from registry.list.models import Medals
 from registry.public.forms import LoginForm
 from registry.user.models import User
@@ -24,7 +24,7 @@ blueprint = Blueprint("public", __name__, static_folder="../static")
 @login_manager.user_loader
 def load_user(user_id):
     """Load user by ID."""
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))  # pragma: no cover
 
 
 @blueprint.get("/")

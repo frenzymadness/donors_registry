@@ -144,9 +144,9 @@ def detail(rc):
     remove_medal_form = RemoveMedalForm()
     award_medal_form = AwardMedalForm()
     award_medal_form.add_one_rodne_cislo(rc)
-    overview = DonorsOverview.query.get(rc)
+    overview = db.session.get(DonorsOverview, rc)
     if not overview:
-        if IgnoredDonors.query.get(rc):
+        if db.session.get(IgnoredDonors, rc):
             flash("Dárce je ignorován a proto není jeho detail k dispozici.", "danger")
             return redirect(url_for("donor.show_ignored"))
         return abort(404)
@@ -178,7 +178,7 @@ def detail(rc):
 @blueprint.get("/detail/<rc>/award_document/<medal_slug>/")
 @login_required
 def render_award_document(rc, medal_slug):
-    donor = DonorsOverview.query.get_or_404(rc)
+    donor = db.get_or_404(DonorsOverview, rc)
     medal = Medals.query.filter_by(slug=medal_slug).first_or_404()
     awarded_medal = AwardedMedals.query.filter(
         AwardedMedals.rodne_cislo == donor.rodne_cislo,
@@ -330,7 +330,7 @@ def award_medal():
 @login_required
 def save_note():
     note_form = NoteForm()
-    note = Note.query.get(note_form.rodne_cislo.data)
+    note = db.session.get(Note, note_form.rodne_cislo.data)
     if note:
         note.note = note_form.note.data
     else:
@@ -358,7 +358,7 @@ def show_ignored():
 def ignore_donor():
     ignore_form = IgnoreDonorForm()
     if ignore_form.validate_on_submit():
-        if not IgnoredDonors.query.get(ignore_form.rodne_cislo.data):
+        if not db.session.get(IgnoredDonors, ignore_form.rodne_cislo.data):
             ignored = IgnoredDonors(
                 rodne_cislo=ignore_form.rodne_cislo.data,
                 reason=ignore_form.reason.data,
@@ -408,7 +408,7 @@ def save_override():
             flash("Výjimka uložena", "success")
         else:
             # Delete the override
-            override = DonorsOverride.query.get(form.rodne_cislo.data)
+            override = db.session.get(DonorsOverride, form.rodne_cislo.data)
             if override is not None:
                 db.session.delete(override)
                 db.session.commit()

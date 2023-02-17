@@ -170,8 +170,8 @@ class TestDatabase:
         Test that foreign keys works as expected.
         This is mainly needed for SQLite where foreing keys are not checked by default
         """
-        record = Record.query.get(1)
-        batch = Batch.query.get(record.batch_id)
+        record = db.session.get(Record, 1)
+        batch = db.session.get(Batch, record.batch_id)
         # Deleting a batch with associated record should not be possible
         db.session.delete(batch)
         with pytest.raises(IntegrityError):

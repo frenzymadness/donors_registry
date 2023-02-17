@@ -215,7 +215,7 @@ class DonorsOverview(db.Model):
     @classmethod
     def refresh_overview(cls, rodne_cislo=None):
         if rodne_cislo:
-            row = cls.query.get(rodne_cislo)
+            row = db.session.get(cls, rodne_cislo)
             if row is not None:
                 db.session.delete(row)
             record = Record.query.filter(
@@ -509,7 +509,7 @@ FROM (
 
         # Code moving degrees from last_name to first_name.
         if rodne_cislo:
-            donors_with_degrees = (DonorsOverview.query.get(rodne_cislo),)
+            donors_with_degrees = (db.session.get(DonorsOverview, rodne_cislo),)
         else:
             # Because only 4 % of donors have a degree, it makes
             # sense to pre-select them via this query.

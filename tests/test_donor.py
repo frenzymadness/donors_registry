@@ -9,6 +9,7 @@ from registry.donor.models import (
     DonorsOverview,
     IgnoredDonors,
 )
+from registry.extensions import db
 
 from .fixtures import sample_of_rc, skip_if_ignored
 from .helpers import login
@@ -47,7 +48,7 @@ class TestDonorsOverview:
         # Check of all other attributes
         last_import = last_imports.tail(1)
 
-        override = DonorsOverride.query.get(rodne_cislo)
+        override = db.session.get(DonorsOverride, rodne_cislo)
 
         for csv_column, attr in (
             ("JMENO", "first_name"),
@@ -149,7 +150,7 @@ class TestOverride:
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
 
-        old_data = DonorsOverview.query.get(rodne_cislo)
+        old_data = db.session.get(DonorsOverview, rodne_cislo)
 
         # Test save
         form = res.forms["donorsOverrideForm"]

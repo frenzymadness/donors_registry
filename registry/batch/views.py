@@ -93,7 +93,7 @@ def delete_batch():
 @blueprint.get("/batch_detail/<id>")
 @login_required
 def batch_detail(id):
-    batch = Batch.query.get_or_404(id)
+    batch = db.get_or_404(Batch, id)
     records = Record.query.filter(Record.batch_id == batch.id)
     delete_batch_form = DeleteBatchForm()
     return render_template(

@@ -4,6 +4,7 @@ import pytest
 from flask import url_for
 
 from registry.donor.models import Batch, DonorsOverview, Record
+from registry.extensions import db
 
 from .helpers import login
 
@@ -195,8 +196,8 @@ class TestImport:
         assert Record.query.count() == existing_records + new_records
         assert Batch.query.count() == existing_batches + 1
 
-        DonorsOverview.query.get("205225299").donation_count_total == 70
-        DonorsOverview.query.get("1860231599").donation_count_total == 6
+        db.session.get(DonorsOverview, "205225299").donation_count_total == 70
+        db.session.get(DonorsOverview, "1860231599").donation_count_total == 6
 
     def test_zero_donations(self, user, testapp):
         # three lines in the input file end with zero and should
@@ -356,7 +357,7 @@ class TestImport:
         assert res.status_code == 200
 
         rodne_cislo = input_line.split(";")[0]
-        donor = DonorsOverview.query.get(rodne_cislo)
+        donor = db.session.get(DonorsOverview, rodne_cislo)
 
         assert donor.first_name == expected_first_name
         assert donor.last_name == expected_last_name
