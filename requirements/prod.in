@@ -1,0 +1,28 @@
+# Everything needed in production
+
+# Flask
+Flask
+Werkzeug
+
+# Database
+Flask-SQLAlchemy
+SQLAlchemy
+sqlite-icu
+
+# Migrations
+Flask-Migrate
+
+# Forms
+email-validator
+Flask-WTF
+WTForms
+
+# Auth
+Flask-Login
+Flask-Bcrypt
+
+# Environment variable parsing
+environs
+
+# CLI interface
+click

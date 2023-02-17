@@ -1,0 +1,4 @@
+-r dev.txt
+
+# all checks are configured in .pre-commit-config.yaml
+pre-commit

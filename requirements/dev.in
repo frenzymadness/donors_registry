@@ -1,0 +1,15 @@
+# Everything the developer needs in addition to the production requirements
+-r prod.txt
+
+# Testing
+tox
+pytest
+WebTest
+# Used to compare calculations we do in SQL with a different approach
+pandas
+
+# Debug toolbar
+Flask-DebugToolbar
+
+# Test coverage
+coverage
