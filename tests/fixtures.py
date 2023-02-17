@@ -26,8 +26,8 @@ from .utils import (
 )
 
 TEST_RECORDS = 1000  # Number of test imports to use in test database
-BACKUP_DB_PATH = Path("registry") / "backup.sqlite"
-TEST_DB_PATH = Path("registry") / "test.sqlite"
+BACKUP_DB_PATH = Path("instance") / "backup.sqlite"
+TEST_DB_PATH = Path("instance") / "test.sqlite"
 
 
 @fixture(scope="session")
