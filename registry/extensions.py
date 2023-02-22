@@ -7,7 +7,6 @@ from sqlite3 import Connection as SQLite3Connection
 
 import sqlite_icu
 from flask_bcrypt import Bcrypt
-from flask_debugtoolbar import DebugToolbarExtension
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -20,7 +19,6 @@ csrf_protect = CSRFProtect()
 login_manager = LoginManager()
 db = SQLAlchemy()
 migrate = Migrate()
-debug_toolbar = DebugToolbarExtension()
 
 
 @event.listens_for(Engine, "connect")
