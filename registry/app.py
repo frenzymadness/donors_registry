@@ -10,7 +10,6 @@ from registry.extensions import (
     bcrypt,
     csrf_protect,
     db,
-    debug_toolbar,
     login_manager,
     migrate,
 )
@@ -77,8 +76,12 @@ def register_extensions(app):
     db.init_app(app)
     csrf_protect.init_app(app)
     login_manager.init_app(app)
-    debug_toolbar.init_app(app)
     migrate.init_app(app, db)
+    if app.debug:
+        from flask_debugtoolbar import DebugToolbarExtension
+
+        debug_toolbar = DebugToolbarExtension()
+        debug_toolbar.init_app(app)
     return None
 
 
