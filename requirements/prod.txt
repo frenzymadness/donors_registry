@@ -46,16 +46,16 @@ dnspython==2.3.0 \
 email-validator==2.0.0.post2 \
     --hash=sha256:1ff6e86044200c56ae23595695c54e9614f4a9551e0e393614f764860b3d7900 \
     --hash=sha256:2466ba57cda361fb7309fd3d5a225723c788ca4bbad32a0ebd5373b99730285c
-    # via -r requirements/prod.in
+    # via -r prod.in
 environs==9.5.0 \
     --hash=sha256:1e549569a3de49c05f856f40bce86979e7d5ffbbc4398e7f338574c220189124 \
     --hash=sha256:a76307b36fbe856bdca7ee9161e6c466fd7fcffc297109a118c59b54e27e30c9
-    # via -r requirements/prod.in
+    # via -r prod.in
 flask==2.3.2 \
     --hash=sha256:77fd4e1249d8c9923de34907236b747ced06e5467ecac1a7bb7115ae0e9670b0 \
     --hash=sha256:8c2f9abd47a9e8df7f0c3f091ce9497d011dc3b31effcf4c85a6e2b50f4114ef
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   flask-bcrypt
     #   flask-login
     #   flask-migrate
@@ -64,25 +64,25 @@ flask==2.3.2 \
 flask-bcrypt==1.0.1 \
     --hash=sha256:062fd991dc9118d05ac0583675507b9fe4670e44416c97e0e6819d03d01f808a \
     --hash=sha256:f07b66b811417ea64eb188ae6455b0b708a793d966e1a80ceec4a23bc42a4369
-    # via -r requirements/prod.in
+    # via -r prod.in
 flask-login==0.6.2 \
     --hash=sha256:1ef79843f5eddd0f143c2cd994c1b05ac83c0401dc6234c143495af9a939613f \
     --hash=sha256:c0a7baa9fdc448cdd3dd6f0939df72eec5177b2f7abe6cb82fc934d29caac9c3
-    # via -r requirements/prod.in
+    # via -r prod.in
 flask-migrate==4.0.4 \
     --hash=sha256:73293d40b10ac17736e715b377e7b7bde474cb8105165d77474df4c3619b10b3 \
     --hash=sha256:77580f27ab39bc68be4906a43c56d7674b45075bc4f883b1d0b985db5164d58f
-    # via -r requirements/prod.in
+    # via -r prod.in
 flask-sqlalchemy==3.0.5 \
     --hash=sha256:c5765e58ca145401b52106c0f46178569243c5da25556be2c231ecc60867c5b1 \
     --hash=sha256:cabb6600ddd819a9f859f36515bb1bd8e7dbf30206cc679d2b081dff9e383283
     # via
-    #   -r requirements/prod.in
+    #   -r prod.in
     #   flask-migrate
 flask-wtf==1.1.1 \
     --hash=sha256:41c4244e9ae626d63bed42ae4785b90667b885b1535d5a4095e1f63060d12aa9 \
     --hash=sha256:7887d6f1ebb3e17bf648647422f0944c9a469d0fcf63e3b66fb9a83037e38b2c
-    # via -r requirements/prod.in
+    # via -r prod.in
 greenlet==2.0.2 \
     --hash=sha256:03a8f4f3430c3b3ff8d10a2a86028c660355ab637cee9333d63d66b56f09d52a \
     --hash=sha256:0bf60faf0bc2468089bdc5edd10555bab6e85152191df713e2ab1fcc86382b5a \
@@ -294,16 +294,16 @@ sqlite-icu==1.0 \
     --hash=sha256:dabd7d1c5bd98f765c47ffda37c78c120c5cc3b36b88da0d6e0e8019dd2f08df \
     --hash=sha256:e3090c098f4b494e3115074391b80417f25f909ca8b3f0525ba6d4dcae5d5cdc \
     --hash=sha256:edc354ed90e356b6ffee4ca919440c2da2c84938bf1173207e08c13501d6255a
-    # via -r requirements/prod.in
+    # via -r prod.in
 typing-extensions==4.7.1 \
     --hash=sha256:440d5dd3af93b060174bf433bccd69b0babc3b15b1a8dca43789fd7f61514b36 \
     --hash=sha256:b75ddc264f0ba5615db7ba217daeb99701ad295353c45f9e95963337ceeeffb2
     # via
     #   alembic
     #   sqlalchemy
-werkzeug==2.3.6 \
-    --hash=sha256:935539fa1413afbb9195b24880778422ed620c0fc09670945185cce4d91a8890 \
-    --hash=sha256:98c774df2f91b05550078891dee5f0eb0cb797a522c757a2452b9cee5b202330
+werkzeug==2.3.8 \
+    --hash=sha256:554b257c74bbeb7a0d254160a4f8ffe185243f52a52035060b761ca62d977f03 \
+    --hash=sha256:bba1f19f8ec89d4d607a3bd62f1904bd2e609472d93cd85e9d4e178f472c3748
     # via
     #   flask
     #   flask-login
