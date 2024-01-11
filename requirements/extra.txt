@@ -8,7 +8,7 @@ alembic==1.12.1 \
     --hash=sha256:47d52e3dfb03666ed945becb723d6482e52190917fdb47071440cfdba05d92cb \
     --hash=sha256:bca5877e9678b454706347bc10b97cb7d67f300320fa5c3a94423e8266e2823f
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask-migrate
 asttokens==2.4.1 \
     --hash=sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24 \
@@ -33,26 +33,26 @@ bcrypt==4.1.1 \
     --hash=sha256:f33b385c3e80b5a26b3a5e148e6165f873c1c202423570fdf45fe34e00e5f3e5 \
     --hash=sha256:fb931cd004a7ad36a89789caf18a54c20287ec1cd62161265344b9c4554fdb2e
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask-bcrypt
 beautifulsoup4==4.12.2 \
     --hash=sha256:492bbc69dca35d12daac71c4db1bfff0c876c00ef4a2ffacce226d4638eb72da \
     --hash=sha256:bd2520ca0d9d7d12694a53d44ac482d181b4ec1888909b035a3dbf40d0f57d4a
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   webtest
 blinker==1.7.0 \
     --hash=sha256:c3f865d4d54db7abc53758a01601cf343fe55b84c1de4e3fa910e420b438d5b9 \
     --hash=sha256:e6820ff6fa4e4d1d8e2747c2283749c3f547e4fee112b98555cdcdae32996182
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask
     #   flask-debugtoolbar
 cachetools==5.3.2 \
     --hash=sha256:086ee420196f7b2ab9ca2db2520aca326318b68fe5ba8bc4d49cca91add450f2 \
     --hash=sha256:861f35a13a451f94e301ce2bec7cac63e881232ccce7ed67fab9b5df4d3beaa1
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
 cfgv==3.4.0 \
     --hash=sha256:b7265b1f29fd3316bfcd2b330d63d024f2bfd8bcb8b0272f8e19a504856c48f9 \
@@ -62,19 +62,19 @@ chardet==5.2.0 \
     --hash=sha256:1b3b6ff479a8c414bc3fa2c0852995695c4a026dcd6d0633b2dd092ca39c1cf7 \
     --hash=sha256:e1cf59446890a00105fe7b7912492ea04b6e6f06d4b742b2c788469e34c82970
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
 click==8.1.7 \
     --hash=sha256:ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28 \
     --hash=sha256:ca9853ad459e787e2192211578cc907e7594e294c7ccc834310722b41b9ca6de
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask
 colorama==0.4.6 \
     --hash=sha256:08695f5cb7ed6e0531a20572697297273c47b8cae5a63ffc6d6ed5c201be6e44 \
     --hash=sha256:4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
 coverage==7.3.2 \
     --hash=sha256:0cbf38419fb1a347aaf63481c00f0bdc86889d9fbf3f25109cf96c26b403fda1 \
@@ -129,7 +129,7 @@ coverage==7.3.2 \
     --hash=sha256:f94b734214ea6a36fe16e96a70d941af80ff3bfd716c141300d95ebc85339738 \
     --hash=sha256:fa28e909776dc69efb6ed975a63691bc8172b64ff357e663a1bb06ff3c9b589a \
     --hash=sha256:fe494faa90ce6381770746077243231e0b83ff3f17069d748f645617cefe19d4
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 decorator==5.1.1 \
     --hash=sha256:637996211036b6385ef91435e4fae22989472f9d571faba8927ba8253acbc330 \
     --hash=sha256:b8c3f85900b9dc423225913c5aace94729fe1fa9763b38939a95226f02d37186
@@ -140,27 +140,27 @@ distlib==0.3.7 \
     --hash=sha256:2e24928bc811348f0feb63014e97aaae3037f2cf48712d51ae61df7fd6075057 \
     --hash=sha256:9dafe54b34a028eafd95039d5e5d4851a13734540f1331060d31c9916e7147a8
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   virtualenv
 dnspython==2.4.2 \
     --hash=sha256:57c6fbaaeaaf39c891292012060beb141791735dbb4004798328fc2c467402d8 \
     --hash=sha256:8dcfae8c7460a2f84b4072e26f1c9f4101ca20c071649cb7c34e8b6a93d58984
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   email-validator
 email-validator==2.1.0.post1 \
     --hash=sha256:a4b0bd1cf55f073b924258d19321b1f3aa74b4b5a71a42c305575dba920e1a44 \
     --hash=sha256:c973053efbeddfef924dc0bd93f6e77a1ea7ee0fce935aea7103c7a3d6d2d637
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 environs==9.5.0 \
     --hash=sha256:1e549569a3de49c05f856f40bce86979e7d5ffbbc4398e7f338574c220189124 \
     --hash=sha256:a76307b36fbe856bdca7ee9161e6c466fd7fcffc297109a118c59b54e27e30c9
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 exceptiongroup==1.2.0 \
     --hash=sha256:4bfd3996ac73b41e9b9628b04e079f193850720ea5945fc96a08633c66912f14 \
     --hash=sha256:91f5c769735f051a4290d52edd0858999b57e5876e9f85937691bd4c9fa3ed68
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   ipython
     #   pytest
 executing==2.0.1 \
@@ -171,14 +171,14 @@ filelock==3.13.1 \
     --hash=sha256:521f5f56c50f8426f5e03ad3b281b490a87ef15bc6c526f168290f0c7148d44e \
     --hash=sha256:57dbda9b35157b05fb3e58ee91448612eb674172fab98ee235ccb0b5bee19a1c
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
     #   virtualenv
 flask==3.0.0 \
     --hash=sha256:21128f47e4e3b9d597a3e8521a329bf56909b690fcc3fa3e477725aa81367638 \
     --hash=sha256:cfadcdb638b609361d29ec22360d6070a77d7463dcb3ab08d2c2f2f168845f58
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask-bcrypt
     #   flask-debugtoolbar
     #   flask-login
@@ -188,29 +188,29 @@ flask==3.0.0 \
 flask-bcrypt==1.0.1 \
     --hash=sha256:062fd991dc9118d05ac0583675507b9fe4670e44416c97e0e6819d03d01f808a \
     --hash=sha256:f07b66b811417ea64eb188ae6455b0b708a793d966e1a80ceec4a23bc42a4369
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 flask-debugtoolbar==0.13.1 \
     --hash=sha256:0c26aa013a9813b8886857bf0ec24d28ab494114a264baf06c951cadc4dd0dae \
     --hash=sha256:491c737f321830c06a2835784acf1fc8488fd257a0ef318810b3b6bed5f600d5
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 flask-login==0.6.3 \
     --hash=sha256:5e23d14a607ef12806c699590b89d0f0e0d67baeec599d75947bf9c147330333 \
     --hash=sha256:849b25b82a436bf830a054e74214074af59097171562ab10bfa999e6b78aae5d
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 flask-migrate==4.0.5 \
     --hash=sha256:613a2df703998e78716cace68cd83972960834424457f5b67f56e74fff950aef \
     --hash=sha256:d3f437a8b5f3849d1bb1b60e1b818efc564c66e3fefe90b62e5db08db295e1b1
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 flask-sqlalchemy==3.1.1 \
     --hash=sha256:4ba4be7f419dc72f4efd8802d69974803c37259dd42f3913b0dcf75c9447e0a0 \
     --hash=sha256:e4b68bb881802dda1a7d878b2fc84c06d1ee57fb40b874d3dc97dabfa36b8312
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask-migrate
 flask-wtf==1.2.1 \
     --hash=sha256:8bb269eb9bb46b87e7c8233d7e7debdf1f8b74bf90cc1789988c29b37a97b695 \
     --hash=sha256:fa6793f2fb7e812e0fe9743b282118e581fb1b6c45d414b8af05e659bd653287
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 greenlet==3.0.1 \
     --hash=sha256:0a02d259510b3630f330c86557331a3b0e0c79dac3d166e449a39363beaae174 \
     --hash=sha256:0b6f9f8ca7093fd4433472fd99b5650f8a26dcd8ba410e14094c1e44cd3ceddd \
@@ -270,7 +270,7 @@ greenlet==3.0.1 \
     --hash=sha256:f89e21afe925fcfa655965ca8ea10f24773a1791400989ff32f467badfe4a064 \
     --hash=sha256:fa24255ae3c0ab67e613556375a4341af04a084bd58764731972bcbc8baeba36
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   sqlalchemy
 identify==2.5.32 \
     --hash=sha256:0b7656ef6cba81664b783352c73f8c24b39cf82f926f78f4550eda928e5e0545 \
@@ -280,18 +280,18 @@ idna==3.6 \
     --hash=sha256:9ecdbbd083b06798ae1e86adcbfe8ab1479cf864e4ee30fe4e46a003d12491ca \
     --hash=sha256:c05567e9c24a6b9faaa835c4821bad0590fbb9d5779e7caa6e1cc4978e7eb24f
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   email-validator
 iniconfig==2.0.0 \
     --hash=sha256:2d91e135bf72d31a410b17c16da610a82cb55f6b0477d1a902134b24a455b8b3 \
     --hash=sha256:b6a85871a79d2e3b22d2d1b94ac2824226a63c6b741c88f7ae975f18b6778374
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pytest
 ipdb==0.13.13 \
     --hash=sha256:45529994741c4ab6d2388bfa5d7b725c2cf7fe9deffabdb8a6113aa5ed449ed4 \
     --hash=sha256:e3ac6018ef05126d442af680aad863006ec19d02290561ac88b8b1c0b0cfc726
-    # via -r requirements/extra.in
+    # via -r extra.in
 ipython==8.18.1 \
     --hash=sha256:ca6f079bb33457c66e233e4580ebfc4128855b4cf6370dddd73842a9563e8a27 \
     --hash=sha256:e8267419d72d81955ec1177f8a29aaa90ac80ad647499201119e2f05e99aa397
@@ -300,7 +300,7 @@ itsdangerous==2.1.2 \
     --hash=sha256:2c2349112351b88699d8d4b6b075022c0808887cb7ad10069318a8b0bc88db44 \
     --hash=sha256:5dbbc68b317e5e42f327f9021763545dc3fc3bfe22e6deb96aaf1fc38874156a
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask
     #   flask-debugtoolbar
     #   flask-wtf
@@ -308,17 +308,17 @@ jedi==0.19.1 \
     --hash=sha256:cf0496f3651bc65d7174ac1b7d043eff454892c708a87d1b683e57b569927ffd \
     --hash=sha256:e983c654fe5c02867aef4cdfce5a2fbb4a50adc0af145f70504238f18ef5e7e0
     # via ipython
-jinja2==3.1.2 \
-    --hash=sha256:31351a702a408a9e7595a8fc6150fc3f43bb6bf7e319770cbc0db9df9437e852 \
-    --hash=sha256:6088930bfe239f0e6710546ab9c19c9ef35e29792895fed6e6e31a023a182a61
+jinja2==3.1.3 \
+    --hash=sha256:7d6d50dd97d52cbc355597bd845fabfbac3f551e1f99619e39a35ce8c370b5fa \
+    --hash=sha256:ac8bd6544d4bb2c9792bf3a159e80bba8fda7f07e81bc3aed565432d5925ba90
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask
 mako==1.3.0 \
     --hash=sha256:57d4e997349f1a92035aa25c17ace371a4213f2ca42f99bee9a602500cfd54d9 \
     --hash=sha256:e3a9d388fd00e87043edbe8792f45880ac0114e9c4adc69f6e9bfb2c55e3b11b
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   alembic
 markupsafe==2.1.3 \
     --hash=sha256:05fb21170423db021895e1ea1e1f3ab3adb85d1c2333cbc2310f2a26bc77272e \
@@ -382,7 +382,7 @@ markupsafe==2.1.3 \
     --hash=sha256:fec21693218efe39aa7f8599346e90c705afa52c5b31ae019b2e57e8f6542bb2 \
     --hash=sha256:ffcc3f7c66b5f5b7931a5aa68fc9cecc51e685ef90282f4a82f0f5e9b704ad11
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   jinja2
     #   mako
     #   werkzeug
@@ -391,7 +391,7 @@ marshmallow==3.20.1 \
     --hash=sha256:5d2371bbe42000f2b3fb5eaa065224df7d8f8597bc19a1bbfa5bfe7fba8da889 \
     --hash=sha256:684939db93e80ad3561392f47be0230743131560a41c5110684c16e21ade0a5c
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   environs
 matplotlib-inline==0.1.6 \
     --hash=sha256:f1f41aab5328aa5aaea9b16d083b128102f8712542f819fe7e6a420ff581b311 \
@@ -439,13 +439,13 @@ numpy==1.26.2 \
     --hash=sha256:f79b231bf5c16b1f39c7f4875e1ded36abee1591e98742b05d8a0fb55d8a3eec \
     --hash=sha256:fe6b44fb8fcdf7eda4ef4461b97b3f63c466b27ab151bec2366db8b197387841
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pandas
 packaging==23.2 \
     --hash=sha256:048fb0e9405036518eaaf48a55953c750c11e1a1b68e0dd1a9d62ed0c092cfc5 \
     --hash=sha256:8c491190033a9af7e1d931d0b5dacc2ef47509b34dd0de67ed209b5203fc88c7
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   marshmallow
     #   pyproject-api
     #   pytest
@@ -476,7 +476,7 @@ pandas==2.1.3 \
     --hash=sha256:fc77309da3b55732059e484a1efc0897f6149183c522390772d3561f9bf96c00 \
     --hash=sha256:fca5680368a5139d4920ae3dc993eb5106d49f814ff24018b64d8850a52c6ed2 \
     --hash=sha256:fcd76d67ca2d48f56e2db45833cf9d58f548f97f61eecd3fdc74268417632b8a
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 parso==0.8.3 \
     --hash=sha256:8c07be290bb59f03588915921e29e8a50002acaf2cdc5fa0e0114f91709fafa0 \
     --hash=sha256:c001d4636cd3aecdaf33cbb40aebb59b094be2a74c556778ef5576c175e19e75
@@ -489,20 +489,20 @@ platformdirs==4.0.0 \
     --hash=sha256:118c954d7e949b35437270383a3f2531e99dd93cf7ce4dc8340d3356d30f173b \
     --hash=sha256:cb633b2bcf10c51af60beb0ab06d2f1d69064b43abf4c185ca6b28865f3f9731
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
     #   virtualenv
 pluggy==1.3.0 \
     --hash=sha256:cf61ae8f126ac6f7c451172cf30e3e43d3ca77615509771b3a984a0730651e12 \
     --hash=sha256:d89c696a773f8bd377d18e5ecda92b7a3793cbe66c87060a6fb58c7b6e1061f7
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pytest
     #   tox
 pre-commit==3.5.0 \
     --hash=sha256:5804465c675b659b0862f07907f96295d490822a450c4c40e747d0b1c6ebcb32 \
     --hash=sha256:841dc9aef25daba9a0238cd27984041fa0467b4199fc4852e27950664919f660
-    # via -r requirements/extra.in
+    # via -r extra.in
 prompt-toolkit==3.0.41 \
     --hash=sha256:941367d97fc815548822aa26c2a269fdc4eb21e9ec05fc5d447cf09bad5d75f0 \
     --hash=sha256:f36fe301fafb7470e86aaf90f036eef600a3210be4decf461a5b1ca8403d3cb2
@@ -523,29 +523,29 @@ pyproject-api==1.6.1 \
     --hash=sha256:1817dc018adc0d1ff9ca1ed8c60e1623d5aaca40814b953af14a9cf9a5cae538 \
     --hash=sha256:4c0116d60476b0786c88692cf4e325a9814965e2469c5998b830bba16b183675
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   tox
 pytest==7.4.3 \
     --hash=sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac \
     --hash=sha256:d989d136982de4e3b29dabcc838ad581c64e8ed52c11fbe86ddebd9da0818cd5
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 python-dateutil==2.8.2 \
     --hash=sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86 \
     --hash=sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pandas
 python-dotenv==1.0.0 \
     --hash=sha256:a8df96034aae6d2d50a4ebe8216326c61c3eb64836776504fcca410e5937a3ba \
     --hash=sha256:f5971a9226b701070a4bf2c38c89e5a3f0d64de8debda981d1db98583009122a
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   environs
 pytz==2023.3.post1 \
     --hash=sha256:7b4fddbeb94a1eba4b557da24f19fdf9db575192544270a9101d8509f9f43d7b \
     --hash=sha256:ce42d816b81b68506614c11e8937d3aa9e41007ceb50bfdcb0749b921bf646c7
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pandas
 pyyaml==6.0.1 \
     --hash=sha256:04ac92ad1925b2cff1db0cfebffb6ffc43457495c9b3c39d3fcae417d7125dc5 \
@@ -603,14 +603,14 @@ six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
     --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   asttokens
     #   python-dateutil
 soupsieve==2.5 \
     --hash=sha256:5663d5a7b3bfaeee0bc4372e7fc48f9cff4940b3eec54a6451cc5299f1097690 \
     --hash=sha256:eaa337ff55a1579b6549dc679565eac1e3d000563bcb1c8ab0d0fefbc0c2cdc7
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   beautifulsoup4
 sqlalchemy==2.0.23 \
     --hash=sha256:0666031df46b9badba9bed00092a1ffa3aa063a5e68fa244acd9f08070e936d3 \
@@ -663,7 +663,7 @@ sqlalchemy==2.0.23 \
     --hash=sha256:f508ba8f89e0a5ecdfd3761f82dda2a3d7b678a626967608f4273e0dba8f07ac \
     --hash=sha256:fd54601ef9cc455a0c61e5245f690c8a3ad67ddb03d3b91c361d076def0b4c60
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   alembic
     #   flask-sqlalchemy
 sqlite-icu==1.0 \
@@ -684,7 +684,7 @@ sqlite-icu==1.0 \
     --hash=sha256:dabd7d1c5bd98f765c47ffda37c78c120c5cc3b36b88da0d6e0e8019dd2f08df \
     --hash=sha256:e3090c098f4b494e3115074391b80417f25f909ca8b3f0525ba6d4dcae5d5cdc \
     --hash=sha256:edc354ed90e356b6ffee4ca919440c2da2c84938bf1173207e08c13501d6255a
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 stack-data==0.6.3 \
     --hash=sha256:836a778de4fec4dcd1dcd89ed8abff8a221f58308462e1c4aa2a3cf30148f0b9 \
     --hash=sha256:d5558e0c25a4cb0853cddad3d77da9891a08cb85dd9f9f91b9f8cd66e511e695
@@ -693,7 +693,7 @@ tomli==2.0.1 \
     --hash=sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc \
     --hash=sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   ipdb
     #   pyproject-api
     #   pytest
@@ -701,11 +701,11 @@ tomli==2.0.1 \
 tox==4.11.4 \
     --hash=sha256:2adb83d68f27116812b69aa36676a8d6a52249cb0d173649de0e7d0c2e3e7229 \
     --hash=sha256:73a7240778fabf305aeb05ab8ea26e575e042ab5a18d71d0ed13e343a51d6ce1
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 tqdm==4.66.1 \
     --hash=sha256:d302b3c5b53d47bce91fea46679d9c3c6508cf6332229aa1e7d8653723793386 \
     --hash=sha256:d88e651f9db8d8551a62556d3cff9e3034274ca5d66e93197cf2490e2dcb69c7
-    # via -r requirements/extra.in
+    # via -r extra.in
 traitlets==5.14.0 \
     --hash=sha256:f14949d23829023013c47df20b4a76ccd1a85effb786dc060f34de7948361b33 \
     --hash=sha256:fcdaa8ac49c04dfa0ed3ee3384ef6dfdb5d6f3741502be247279407679296772
@@ -716,27 +716,27 @@ typing-extensions==4.8.0 \
     --hash=sha256:8f92fc8806f9a6b641eaa5318da32b44d401efaac0f6678c9bc448ba3605faa0 \
     --hash=sha256:df8e4339e9cb77357558cbdbceca33c303714cf861d1eef15e1070055ae8b7ef
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   alembic
     #   sqlalchemy
 tzdata==2023.3 \
     --hash=sha256:11ef1e08e54acb0d4f95bdb1be05da659673de4acbd21bf9c69e94cc5e907a3a \
     --hash=sha256:7e65763eef3120314099b6939b5546db7adce1e7d6f2e179e3df563c70511eda
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pandas
 virtualenv==20.24.7 \
     --hash=sha256:69050ffb42419c91f6c1284a7b24e0475d793447e35929b488bf6a0aade39353 \
     --hash=sha256:a18b3fd0314ca59a2e9f4b556819ed07183b3e9a3702ecfe213f593d44f7b3fd
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   pre-commit
     #   tox
 waitress==2.1.2 \
     --hash=sha256:7500c9625927c8ec60f54377d590f67b30c8e70ef4b8894214ac6e4cad233d2a \
     --hash=sha256:780a4082c5fbc0fde6a2fcfe5e26e6efc1e8f425730863c04085769781f51eba
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   webtest
 wcwidth==0.2.12 \
     --hash=sha256:f01c104efdf57971bcb756f054dd58ddec5204dd15fa31d6503ea57947d97c02 \
@@ -746,17 +746,17 @@ webob==1.8.7 \
     --hash=sha256:73aae30359291c14fa3b956f8b5ca31960e420c28c1bec002547fb04928cf89b \
     --hash=sha256:b64ef5141be559cfade448f044fa45c2260351edcb6a8ef6b7e00c7dcef0c323
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   webtest
 webtest==3.0.0 \
     --hash=sha256:2a001a9efa40d2a7e5d9cd8d1527c75f41814eb6afce2c3d207402547b1e5ead \
     --hash=sha256:54bd969725838d9861a9fa27f8d971f79d275d94ae255f5c501f53bb6d9929eb
-    # via -r requirements/dev.txt
+    # via -r dev.txt
 werkzeug==3.0.1 \
     --hash=sha256:507e811ecea72b18a404947aded4b3390e1db8f826b494d76550ef45bb3b1dcc \
     --hash=sha256:90a285dc0e42ad56b34e696398b8122ee4c681833fb35b8334a095d82c56da10
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask
     #   flask-debugtoolbar
     #   flask-login
@@ -764,7 +764,7 @@ wtforms==3.1.1 \
     --hash=sha256:5e51df8af9a60f6beead75efa10975e97768825a82146a65c7cbf5b915990620 \
     --hash=sha256:ae7c54b29806c70f7bce8eb9f24afceb10ca5c32af3d9f04f74d2f66ccc5c7e0
     # via
-    #   -r requirements/dev.txt
+    #   -r dev.txt
     #   flask-wtf
 
 # WARNING: The following packages were not pinned, but pip requires them to be
