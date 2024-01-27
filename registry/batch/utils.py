@@ -1,3 +1,6 @@
+import re
+
+
 def get_part_of_line(line, delimiter=";"):
     try:
         del_index = line.index(delimiter)
@@ -79,8 +82,14 @@ def repair_line_part_by_part(line):  # noqa: C901 FIXME
         errors.append("chybí pojišťovna, nahrazena nulami")
 
     donation_count, rest = get_part_of_line(rest)
-    if not donation_count or not donation_count.isnumeric():
-        errors.append("počet odběrů není číselný")
+    if not donation_count.isnumeric():
+        if m := re.match(r"(^\d+)\+(\d+)$", donation_count):
+            d1, d2 = m.groups()
+            s = int(d1) + int(d2)
+            errors.append(f"vstup {donation_count} sečten = {s}")
+            donation_count = str(s)
+        else:
+            errors.append("nevalidní počet odběrů")
 
     repaired_line = ";".join(
         [

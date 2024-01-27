@@ -161,3 +161,28 @@ def split_degrees(last_name):
     )
 
     return last_name_prepared, " ".join(degrees_sorted)
+
+
+def record_as_input_data(record, donation_count=None, sum_with_last=False):
+    """Takes Record or DonorOverview and prepares it
+    as new input data"""
+
+    fields = [
+        "rodne_cislo",
+        "first_name",
+        "last_name",
+        "address",
+        "city",
+        "postal_code",
+        "kod_pojistovny",
+        "donation_count",
+    ]
+    values = [str(getattr(record, field)) for field in fields]
+    if donation_count:
+        if sum_with_last:
+            values[-1] = f"{values[-1]}+{donation_count}"
+        else:
+            values[-1] = donation_count
+    line = ";".join(values)
+    line += "\r\n"
+    return line

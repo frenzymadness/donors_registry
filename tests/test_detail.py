@@ -9,6 +9,7 @@ from sqlalchemy import and_
 from registry.donor.models import (
     AwardedMedals,
     Batch,
+    DonationCenter,
     DonorsOverview,
     Note,
     Record,
@@ -60,32 +61,52 @@ class TestDetail:
         assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
         assert Note.query.count() == existing_notes + 1
 
-    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_manual_import_prepare(self, user, testapp, rodne_cislo):
         skip_if_ignored(rodne_cislo)
-        last_record = (
-            Record.query.join(Batch)
-            .filter(Record.rodne_cislo == rodne_cislo)
-            .order_by(Batch.imported_at.desc())
-            .first()
-        )
         login(user, testapp)
-        detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
-        import_page = detail.click(description="Připravit manuální import")
-        import_form = import_page.forms[0]
-        assert import_form.fields["donation_center_id"][0].value == "-1"
-        input_data = import_form.fields["input_data"][0].value
-        for field in (
-            "rodne_cislo",
-            "first_name",
-            "last_name",
-            "address",
-            "city",
-            "postal_code",
-            "kod_pojistovny",
-        ):
-            assert getattr(last_record, field) + ";" in input_data
-        assert ";_POČET_" in input_data
+
+        donation_centers = DonationCenter.query.all()
+
+        for dc in donation_centers + ["manual"]:
+            dc_db_id = dc.id if dc != "manual" else None
+            dc_id = dc.id if dc != "manual" else -1
+            last_record = (
+                Record.query.join(Batch)
+                .filter(Record.rodne_cislo == rodne_cislo)
+                .filter(Batch.donation_center_id == dc_db_id)
+                .order_by(Batch.imported_at.desc())
+                .first()
+            )
+            if last_record is None:
+                last_record = (
+                    Record.query.join(Batch)
+                    .filter(Record.rodne_cislo == rodne_cislo)
+                    .order_by(Batch.imported_at.desc())
+                    .first()
+                )
+                expected_eol = ";_POČET_"
+            else:
+                expected_eol = f";{last_record.donation_count}+_POČET_"
+
+            detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+            manual_import_form = detail.forms["manualImportForm"]
+            manual_import_form.fields["donation_center"][0].select(dc_id)
+            import_page = manual_import_form.submit()
+            import_form = import_page.forms[0]
+            assert import_form.fields["donation_center_id"][0].value == str(dc_id)
+            input_data = import_form.fields["input_data"][0].value
+            for field in (
+                "rodne_cislo",
+                "first_name",
+                "last_name",
+                "address",
+                "city",
+                "postal_code",
+                "kod_pojistovny",
+            ):
+                assert getattr(last_record, field) + ";" in input_data
+            assert expected_eol in input_data
 
 
 class TestAwardDocument:
