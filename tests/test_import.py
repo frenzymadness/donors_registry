@@ -60,6 +60,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit()
         assert res.status_code == 200
@@ -88,6 +89,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = input_data
         # No matter how many times we submit the form because it contains
         # invalid records so they never be imported
@@ -113,6 +115,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit()
         assert res.status_code == 200
@@ -188,6 +191,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit().follow()
         assert "Import proběhl úspěšně" in res
@@ -213,6 +217,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit().follow()
         assert "Import proběhl úspěšně" in res
@@ -229,6 +234,7 @@ class TestImport:
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = ""
         res = form.submit()
 
@@ -240,6 +246,7 @@ class TestImport:
         existing_batches = Batch.query.count()
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = "invalid"
         res = form.submit()
 
@@ -267,6 +274,7 @@ class TestImport:
 
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = "1;a;b;c;d;00000;000;\n2;a;b;c;d;00000;000;0"
         res = form.submit()
 
@@ -281,6 +289,7 @@ class TestImport:
 
         res = testapp.get(url_for("batch.import_data"))
         form = res.form
+        form["donation_center_id"] = 1
         form["input_data"] = "1;a;b;c;d;00000;000;\ninvalid"
         res = form.submit()
 
