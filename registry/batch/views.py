@@ -8,7 +8,7 @@ from werkzeug.wrappers import Response
 
 from registry.donor.models import Batch, DonorsOverview, Record
 from registry.extensions import db
-from registry.utils import flash_errors
+from registry.utils import flash_errors, record_as_input_data
 
 from .forms import DeleteBatchForm, ImportForm
 
@@ -21,15 +21,38 @@ blueprint = Blueprint("batch", __name__, static_folder="../static")
 def import_data(rodne_cislo=None):
     import_form = ImportForm()
     if rodne_cislo:
-        import_form.donation_center_id.default = -1
+        donation_center_id = request.args.get("donation_center")
+        import_form.donation_center_id.default = donation_center_id
+        # Special case for manual imports - empty value in db
+        if donation_center_id == "-1":
+            donation_center_db_id = None
+        else:
+            donation_center_db_id = donation_center_id
         import_form.process()
         last_record = (
             Record.query.join(Batch)
             .filter(Record.rodne_cislo == rodne_cislo)
+            .filter(Batch.donation_center_id == donation_center_db_id)
             .order_by(Batch.imported_at.desc())
-            .first_or_404()
+            .first()
         )
-        import_form.input_data.data = last_record.as_original(donation_count="_POČET_")
+        if last_record is not None:
+            import_form.input_data.data = record_as_input_data(
+                last_record, donation_count="_POČET_", sum_with_last=True
+            )
+        else:
+            # No last record for the given donation center
+            # take the last one and start with zero.
+            last_record = (
+                Record.query.join(Batch)
+                .filter(Record.rodne_cislo == rodne_cislo)
+                .order_by(Batch.imported_at.desc())
+                .first()
+            )
+            import_form.input_data.data = record_as_input_data(
+                last_record, donation_count="_POČET_"
+            )
+
     return render_template("batch/import.html", form=import_form)
 
 
@@ -109,7 +132,7 @@ def batch_detail(id):
 def download_batch(id):
     content = StringIO()
     for record in Record.query.filter(Record.batch_id == id):
-        content.write(record.as_original())
+        content.write(record_as_input_data(record))
 
     content.seek(0)
 

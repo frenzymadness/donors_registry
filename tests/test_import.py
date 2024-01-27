@@ -370,3 +370,74 @@ class TestImport:
 
         assert donor.first_name == expected_first_name
         assert donor.last_name == expected_last_name
+
+    @pytest.mark.parametrize(
+        ("expr", "result"),
+        (
+            ("1+9", 10),
+            ("9+1", 10),
+            ("10+10", 20),
+            ("1+0", 1),
+            ("0+1", 1),
+            ("50+50", 100),
+        ),
+    )
+    def test_import_with_sum_valid(self, user, testapp, expr, result):
+        login(user, testapp)
+
+        existing_batches = Batch.query.count()
+
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["donation_center_id"] = 1
+        form["input_data"] = f"111111111;a;b;c;d;00000;000;{expr}"
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert Batch.query.count() == existing_batches
+        assert "Řádky s chybami" in res
+
+        form = res.form
+        assert form["invalid_lines"].value == f"111111111;a;b;c;d;00000;000;{result}\n"
+        assert form["invalid_lines_errors"].value == f"vstup {expr} sečten = {result}\n"
+        res = form.submit().follow()
+
+        assert res.status_code == 200
+        assert Batch.query.count() == existing_batches + 1
+
+    @pytest.mark.parametrize(
+        ("expr"),
+        (
+            "+9",
+            "9+",
+            "10-10",
+            "1-0",
+            "-1",
+            "50+_POČET_",
+        ),
+    )
+    def test_import_with_sum_invalid(self, user, testapp, expr):
+        login(user, testapp)
+
+        existing_batches = Batch.query.count()
+
+        res = testapp.get(url_for("batch.import_data"))
+        form = res.form
+        form["donation_center_id"] = 1
+        form["input_data"] = f"111111111;a;b;c;d;00000;000;{expr}"
+        res = form.submit()
+
+        assert res.status_code == 200
+        assert Batch.query.count() == existing_batches
+        assert "Řádky s chybami" in res
+
+        for _ in range(2):
+            form = res.form
+            assert (
+                form["invalid_lines"].value == f"111111111;a;b;c;d;00000;000;{expr}\n"
+            )
+            assert form["invalid_lines_errors"].value == "nevalidní počet odběrů\n"
+            res = form.submit()
+
+            assert res.status_code == 200
+            assert Batch.query.count() == existing_batches

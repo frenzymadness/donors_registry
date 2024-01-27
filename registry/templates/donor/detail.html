@@ -233,10 +233,23 @@
 </form>
 {% endwith %}
 
+<h2>Manuální import</h2>
+
+<div class="form-row">
+    <div class="form-group col-md-3">
+        <form action="{{ url_for('batch.import_data', rodne_cislo=overview.rodne_cislo) }}" method="get" id="manualImportForm">
+            <input type="submit" class="btn btn-primary" value="Manuální import se součtem pro">
+            <select name="donation_center" id="donation_center" class="form-control">
+                {% for donation_center in donation_centers %}
+                <option value="{{ donation_center.id }}">{{ donation_center.title }}</option>
+                {% endfor %}
+                <option value="-1">Manuální import nebo data odjinud</option>
+            </select>
+        </form>
+    </div>
+</div>
 
 <h2>Historie importů</h2>
-
-<a href="{{ url_for('batch.import_data', rodne_cislo=overview.rodne_cislo) }}" class="btn btn-primary">Připravit manuální import</a>
 
 <table id="records" class="table table-striped table-hovered table-hover">
     <thead class="thead-dark">
