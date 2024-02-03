@@ -238,13 +238,14 @@
 <div class="form-row">
     <div class="form-group col-md-3">
         <form action="{{ url_for('batch.import_data', rodne_cislo=overview.rodne_cislo) }}" method="get" id="manualImportForm">
-            <input type="submit" class="btn btn-primary" value="Manuální import se součtem pro">
+            <label for="donation_center">Individuální import z:</label>
             <select name="donation_center" id="donation_center" class="form-control">
                 {% for donation_center in donation_centers %}
                 <option value="{{ donation_center.id }}">{{ donation_center.title }}</option>
                 {% endfor %}
                 <option value="-1">Manuální import nebo data odjinud</option>
             </select>
+            <input type="submit" class="btn btn-primary" value="Připravit">
         </form>
     </div>
 </div>
