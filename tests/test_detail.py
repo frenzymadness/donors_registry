@@ -261,7 +261,7 @@ class TestConfirmationdDocument:
             assert awarded_medal.medal.title in doc
 
     @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
-    def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
+    def test_confirmation_doc_for_woman(self, user, testapp, rodne_cislo):
         overview = db.session.get(DonorsOverview, rodne_cislo)
         login(user, testapp)
         doc = testapp.get(url_for("donor.render_confirmation_document", rc=rodne_cislo))
