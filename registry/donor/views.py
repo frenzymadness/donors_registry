@@ -209,11 +209,20 @@ def render_award_document(rc, medal_slug):
 @login_required
 def render_confirmation_document(rc):
     donor = db.get_or_404(DonorsOverview, rc)
+    awarded_medals_list = []
+    awarded_medals = (
+        AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rc)
+        .order_by(AwardedMedals.medal_id.asc())
+        .all()
+    )
+    for awarded_medal in awarded_medals:
+        awarded_medals_list.append(awarded_medal.medal.title)
 
     return render_template(
         "donor/confirmation_document.html",
         donor=donor,
         date=datetime.now().strftime("%-d. %-m. %Y"),
+        awarded_medals=", ".join(awarded_medals_list),
         stamps=get_list_of_images("stamps"),
         signatures=get_list_of_images("signatures"),
     )

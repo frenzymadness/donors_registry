@@ -51,6 +51,8 @@ def create_app(config_object="registry.settings"):
             "p.": "pí",
             "ocenit jeho hluboce": "ocenit její hluboce",
             "využijete jeho příkladu": "využijete jejího příkladu",
+            "Dárce": "Dárkyně",
+            "držitelem": "držitelkou",
         }
         if rodne_cislo[2] in ("5", "6", "7", "8"):
             return word_map[input]
