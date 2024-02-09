@@ -205,6 +205,20 @@ def render_award_document(rc, medal_slug):
     )
 
 
+@blueprint.get("/detail/<rc>/confirmation_document/")
+@login_required
+def render_confirmation_document(rc):
+    donor = db.get_or_404(DonorsOverview, rc)
+
+    return render_template(
+        "donor/confirmation_document.html",
+        donor=donor,
+        date=datetime.now().strftime("%-d. %-m. %Y"),
+        stamps=get_list_of_images("stamps"),
+        signatures=get_list_of_images("signatures"),
+    )
+
+
 @blueprint.get("/award_prep/documents/<medal_slug>/")
 @login_required
 def render_award_documents_for_award_prep(medal_slug):

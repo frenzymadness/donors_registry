@@ -37,7 +37,12 @@ main p {
     text-align: justify;
 }
 
-p:nth-of-type(3) {
+.contact-info {
+    font-size: 10pt;
+    text-align: center;
+}
+
+.centered {
     margin-top: 50px;
     text-align: center;
 }
@@ -64,7 +69,7 @@ p:nth-of-type(3) {
     position: relative;
 }
 
-.donor-name {
+.emphasized {
     font-size: 13pt;
     font-weight: bold;
     margin: 60px;

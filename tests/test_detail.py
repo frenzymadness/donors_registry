@@ -235,6 +235,32 @@ class TestAwardDocument:
         assert rows == documents.text.count(f"Ve Frýdku-Místku, dne {today}")
 
 
+class TestConfirmationdDocument:
+    @pytest.mark.parametrize("rodne_cislo", ("391105000", "9701037137", "151008110"))
+    def test_confirmation_doc_for_man(self, user, testapp, rodne_cislo):
+        overview = db.session.get(DonorsOverview, rodne_cislo)
+        login(user, testapp)
+        doc = testapp.get(url_for("donor.render_confirmation_document", rc=rodne_cislo))
+
+        assert f"{rodne_cislo[:6]}/{rodne_cislo[6:]}" in doc
+        assert f"p. {overview.first_name} {overview.last_name}" in doc
+        assert f" {overview.donation_count_total} bezpříspěvkových odběrů" in doc
+        assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
+        assert re.search(r"<img src=\"/static/signatures/.*\.png\"", doc.text)
+
+    @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
+    def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
+        overview = db.session.get(DonorsOverview, rodne_cislo)
+        login(user, testapp)
+        doc = testapp.get(url_for("donor.render_confirmation_document", rc=rodne_cislo))
+
+        assert f"{rodne_cislo[:6]}/{rodne_cislo[6:]}" in doc
+        assert f"pí {overview.first_name} {overview.last_name}" in doc
+        assert f" {overview.donation_count_total} bezpříspěvkových odběrů" in doc
+        assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
+        assert re.search(r"<img src=\"/static/signatures/.*\.png\"", doc.text)
+
+
 class TestEnvelopeLabels:
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_envelope_labels(self, user, testapp, medal_id):
