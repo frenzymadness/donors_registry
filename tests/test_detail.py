@@ -135,7 +135,6 @@ class TestAwardDocument:
 
     @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
     def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
-        rodne_cislo = "095404947"
         overview = db.session.get(DonorsOverview, rodne_cislo)
         medals = Medals.query.all()
         login(user, testapp)
