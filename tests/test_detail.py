@@ -202,6 +202,25 @@ class TestAwardDocument:
 
         assert "Ve Frýdku-Místku, dne 17. 11. 1989" in doc
 
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_award_doc_today(self, user, testapp, db, rodne_cislo):
+        """Test that if today is set in request arguments,
+        document always content today's date"""
+        today = datetime.now().strftime("%-d. %-m. %Y")
+        login(user, testapp)
+        medals = Medals.query.all()
+        for medal in medals:
+            doc = testapp.get(
+                url_for(
+                    "donor.render_award_document",
+                    rc=rodne_cislo,
+                    medal_slug=medal.slug,
+                    today=1,
+                )
+            )
+
+            assert f"Ve Frýdku-Místku, dne {today}" in doc
+
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_award_prep_documents(self, user, testapp, medal_id):
         medal = db.session.get(Medals, medal_id)

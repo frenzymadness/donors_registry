@@ -184,9 +184,15 @@ def render_award_document(rc, medal_slug):
         AwardedMedals.rodne_cislo == donor.rodne_cislo,
         AwardedMedals.medal_id == medal.id,
     ).first()
-    if awarded_medal and awarded_medal.awarded_at:
+    if "today" in request.args:
+        # Today date requested
+        awarded_at = datetime.now()
+    elif awarded_medal and awarded_medal.awarded_at:
+        # Medal is awarded and it's not in the old system.
+        # If it is, we don't know the date.
         awarded_at = awarded_medal.awarded_at
     else:
+        # Unknown date (medal awarded in old system)
         awarded_at = datetime.now()
 
     return render_template(

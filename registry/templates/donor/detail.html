@@ -111,22 +111,6 @@
                         </form>
                     {% endwith %}
                 </div>
-                <div class="col-7">
-                    {{ medal.title }}
-                </div>
-                <div class="col-1">
-                    <span data-toggle="modal"
-                        data-target="#titleModal"
-                        title="
-                        {%- if awarded_medals[medal.id].awarded_at is not none -%}
-                        Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
-                        {%- else -%}
-                        Medaile udělena ve starém systému
-                        {%- endif -%}
-                        ">
-                            📅
-                        </span>
-                </div>
                 {% else %}
                 <div class="col-2">
                     {% with form=award_medal_form %}
@@ -147,22 +131,48 @@
                             {% endif %}
                         </form>
                     {% endwith %}
+                </div>
+                {% endif %}
+                <div class="col-6">
+                    {{ medal.title }}
+                </div>
+                {% if medal.id in awarded_medals.keys() %}
+                    <div class="col-1">
+                        <span data-toggle="modal"
+                            data-target="#titleModal"
+                            title="
+                            {%- if awarded_medals[medal.id].awarded_at is not none -%}
+                            Medaile udělena {{ awarded_medals[medal.id].awarded_at | format_time }}
+                            {%- else -%}
+                            Medaile udělena ve starém systému
+                            {%- endif -%}
+                            ">
+                                📅
+                            </span>
                     </div>
-                    <div class="col-7">
-                        {{ medal.title }}
-                    </div>
+                {% else %}
                     <div class="col-1"></div>
                 {% endif %}
-
                 <div class="col-1">
                     <a href="{{ url_for('donor.render_award_document',
                                         rc=overview.rodne_cislo,
                                         medal_slug=medal.slug) }}"
-                        class="btn btn-sm btn-outline-secondary"
+                        class="btn btn-sm"
                         role="button"
                         aria-pressed="true"
                         target="_blank">
                         🖨️
+                    </a>
+                </div>
+                <div class="col-1">
+                    <a href="{{ url_for('donor.render_award_document',
+                                        rc=overview.rodne_cislo,
+                                        medal_slug=medal.slug, today=1) }}"
+                        class="btn btn-sm"
+                        role="button"
+                        aria-pressed="true"
+                        target="_blank">
+                        📠
                     </a>
                 </div>
                 </div>
