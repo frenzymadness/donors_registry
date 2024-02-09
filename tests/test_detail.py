@@ -247,6 +247,19 @@ class TestConfirmationdDocument:
         assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
         assert re.search(r"<img src=\"/static/signatures/.*\.png\"", doc.text)
 
+        awarded_medals = (
+            AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo)
+            .order_by(AwardedMedals.medal_id.asc())
+            .all()
+        )
+        if len(awarded_medals):
+            assert "Dárce je držitelem" in doc
+        else:
+            assert "Dárce je držitelem" not in doc
+
+        for awarded_medal in awarded_medals:
+            assert awarded_medal.medal.title in doc
+
     @pytest.mark.parametrize("rodne_cislo", ("0457098862", "0552277759", "0160031652"))
     def test_award_doc_for_woman(self, user, testapp, rodne_cislo):
         overview = db.session.get(DonorsOverview, rodne_cislo)
@@ -258,6 +271,19 @@ class TestConfirmationdDocument:
         assert f" {overview.donation_count_total} bezpříspěvkových odběrů" in doc
         assert re.search(r"<img src=\"/static/stamps/.*\.png\"", doc.text)
         assert re.search(r"<img src=\"/static/signatures/.*\.png\"", doc.text)
+
+        awarded_medals = (
+            AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo)
+            .order_by(AwardedMedals.medal_id.asc())
+            .all()
+        )
+        if len(awarded_medals):
+            assert "Dárkyně je držitelkou" in doc
+        else:
+            assert "Dárkyně je držitelkou" not in doc
+
+        for awarded_medal in awarded_medals:
+            assert awarded_medal.medal.title in doc
 
 
 class TestEnvelopeLabels:

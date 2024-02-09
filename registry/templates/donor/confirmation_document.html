@@ -28,6 +28,11 @@
                 {{ donor.postal_code }}, {{ donor.city }} je evidován u Oblastního spolku Českého červeného kříže ve
                 Frýdku-Místku jako bezpříspěvkový dárce krve a v naší evidenci má {{ donor.donation_count_total }} bezpříspěvkových odběrů k {{ date }}.
             </p>
+            {% if awarded_medals %}
+            <p>
+                {{ "Dárce" | translate(donor.rodne_cislo) }} je {{ "držitelem" | translate(donor.rodne_cislo )}} následujících ocenění: {{ awarded_medals }}
+            </p>
+            {% endif %}
         </main>
 
         <footer class="flex-container">
