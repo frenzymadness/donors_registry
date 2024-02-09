@@ -27,11 +27,11 @@
                 jejich humánního vztahu ke spoluobčanům. Patří jim dík nejen těch, kterým
                 pomohli navrátit zdraví, ale celé naší společnosti.
             </p>
-            <p>
+            <p class="centered">
                 S potěšením Vám sdělujeme, že mezi vyznamenanými {{ medal.title_instr }}
                 je {{ "pracovník" | translate(donor.rodne_cislo) }} Vašeho podniku
             </p>
-            <p class="donor-name">
+            <p class="emphasized">
                 {{ "p." | translate(donor.rodne_cislo) }} {{ donor.first_name|capitalize }} {{ donor.last_name|capitalize }},
                 r. č.
                 {{ [donor.rodne_cislo[:6], donor.rodne_cislo[6:]] | join('/') }}

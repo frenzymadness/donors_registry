@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darování krve - potvrzení</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/award_document.css')}}">
+</head>
+<body>
+    <div class="page">
+        <header>
+            <img src="{{ url_for('static', filename='cesky-cerveny-kriz.min.svg')}}" alt="Logo ČK" id="logoCK">
+        </header>
+
+        <main>
+            <h1>
+                Oblastní spolek Českého červeného kříže Frýdek-Místek
+            </h1>
+            <p class="contact-info">
+                1. máje 2318, 738 12, Frýdek-Místek, 777 332 518, 777 332 520, frydekmistek@cervenykriz.eu
+            </p>
+            <p class="emphasized">
+                Věc: potvrzení
+            </p>
+            <p>
+                Potvrzujeme tímto, že {{ "p." | translate(donor.rodne_cislo) }} {{ donor.first_name|capitalize }} {{ donor.last_name|capitalize }},  r.č. {{ [donor.rodne_cislo[:6], donor.rodne_cislo[6:]] | join('/') }} bytem {{ donor.address }},
+                {{ donor.postal_code }}, {{ donor.city }} je evidován u Oblastního spolku Českého červeného kříže ve
+                Frýdku-Místku jako bezpříspěvkový dárce krve a v naší evidenci má {{ donor.donation_count_total }} bezpříspěvkových odběrů k {{ date }}.
+            </p>
+        </main>
+
+        <footer class="flex-container">
+            <aside>
+                Ve Frýdku-Místku, dne {{ date }}
+            </aside>
+            <aside>
+
+                <ul>
+                    <li>
+                        <img src="{{ stamps | random_choice }}" alt="razítko" id="stamp">
+                    </li>
+                    <li>
+                        <img src="{{ signatures | random_choice }}" alt="podpis" id="signature">
+                    </li>
+                    <li>Ing. Lumír Balhar</li>
+                    <li>Předseda Oblastní výkonné rady</li>
+                    <li>Českého červeného kříže Frýdek-Místek</li>
+                </ul>
+            </aside>
+        </footer>
+    </div>
+</body>
+</html>
