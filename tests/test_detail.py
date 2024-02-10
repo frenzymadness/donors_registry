@@ -1,9 +1,11 @@
 import re
 from datetime import datetime
 from math import ceil
+from tempfile import NamedTemporaryFile
 
 import pytest
 from flask import url_for
+from openpyxl import load_workbook
 from sqlalchemy import and_
 
 from registry.donor.models import (
@@ -394,3 +396,32 @@ class TestEnvelopeLabels:
         labels = page.forms["printEnvelopeLabelsForm"].submit().follow()
 
         assert "Odeslána nevalidní data." in labels.text
+
+
+class TestAwardPrepExport:
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    def test_award_prep_xlsx_table(self, user, testapp, medal_id):
+        medal = db.session.get(Medals, medal_id)
+        donation_centers = DonationCenter.query.all()
+        dc_names = [dc.title for dc in donation_centers]
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        table_data = page.click(description="Stáhnout tabulku pro odběrná místa").body
+        with NamedTemporaryFile(suffix=".xlsx") as tmp:
+            tmp.write(table_data)
+            workbook = load_workbook(tmp.name)
+
+        for sheetname in workbook.sheetnames:
+            assert "roztridit" == sheetname or sheetname in dc_names
+            assert workbook[sheetname]["A1"].value == "Jméno"
+            assert workbook[sheetname]["B1"].value == "Příjmení"
+
+            for x in range(2, 11):
+                first_name = workbook[sheetname][f"A{x}"].value
+                if first_name:
+                    assert f"<td>{first_name}</td>" in page
+                else:
+                    break
+                last_name = workbook[sheetname][f"B{x}"].value
+                assert f"<td>{first_name}</td>" in page
+                assert f"<td>{last_name}</td>" in page

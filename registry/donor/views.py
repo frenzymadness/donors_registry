@@ -1,6 +1,8 @@
 import json
 from datetime import datetime
+from io import BytesIO
 from itertools import chain
+from tempfile import NamedTemporaryFile
 
 from flask import (
     Blueprint,
@@ -13,11 +15,14 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 from sqlalchemy import and_, collate, extract
+from werkzeug.wrappers import Response
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import flash_errors, get_list_of_images
+from registry.utils import donor_as_row, flash_errors, get_list_of_images
 
 from .forms import (
     AwardMedalForm,
@@ -329,6 +334,68 @@ def award_prep(medal_slug):
         award_medal_form=award_medal_form,
         override_column_names=json.dumps(DonorsOverview.basic_fields),
         print_envelope_labels_form=print_envelope_labels_form,
+    )
+
+
+@blueprint.get("/award_prep_download_table/<medal_slug>")
+@login_required
+def award_prep_download_table(medal_slug):
+    medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
+    donors = DonorsOverview.query.filter(
+        and_(
+            DonorsOverview.donation_count_total >= medal.minimum_donations,
+            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+        )
+    ).all()
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "roztridit"
+    donation_centers = DonationCenter.query.order_by(DonationCenter.slug.desc()).all()
+    for dc in donation_centers:
+        wb.create_sheet(dc.title)
+
+    for sheetname in wb.sheetnames:
+        wb[sheetname].append(
+            [
+                "Jméno",
+                "Příjmení",
+                "Datum narození",
+                "Adresa",
+                "Město",
+                "PSČ",
+                "Pojišťovna",
+                "Odběrná místa",
+            ]
+        )
+
+    for donor in donors:
+        row = donor_as_row(donor)
+        dcs = row[-1]
+        row[-1] = ", ".join(dcs)
+        if len(dcs) == 1:
+            wb[dcs[0]].append(row)
+        else:
+            wb["roztridit"].append(row)
+
+    for sheetname in wb.sheetnames:
+        column_letters = tuple(
+            get_column_letter(col_number + 1)
+            for col_number in range(wb[sheetname].max_column)
+        )
+        for column_letter in column_letters:
+            wb[sheetname].column_dimensions[column_letter].bestFit = True
+
+    with NamedTemporaryFile() as tmp:
+        wb.save(tmp.name)
+        content = BytesIO(tmp.read())
+
+    return Response(
+        content,
+        headers={
+            "Content-Disposition": f"attachment; filename=darci_k_oceneni_{medal.slug}.xlsx",  # noqa
+            "Content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # noqa
+        },
     )
 
 

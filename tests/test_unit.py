@@ -3,8 +3,15 @@ from flask import url_for
 from wtforms.validators import ValidationError
 
 from registry.donor.models import DonorsOverview
-from registry.utils import NumericValidator, split_degrees
+from registry.list.models import DonationCenter
+from registry.utils import (
+    NumericValidator,
+    date_of_birth_from_rc,
+    donor_as_row,
+    split_degrees,
+)
 
+from .fixtures import sample_of_rc
 from .helpers import FakeForm, login
 
 
@@ -252,3 +259,52 @@ class TestDegreeSplitter:
         last_name, detected_degrees = split_degrees(input)
         assert detected_degrees == expected_degrees
         assert last_name == expected_last_name
+
+
+class TestUnit:
+    @pytest.mark.parametrize(
+        ("rodne_cislo", "expected"),
+        (
+            ("885512/1234", "12. 5. 1988"),
+            ("970331/5678", "31. 3. 1997"),
+            ("045624/9876", "24. 6. 2004"),
+            ("801210/3456", "10. 12. 1980"),
+            ("631015/8765", "15. 10. 1963"),
+            ("890820/2345", "20. 8. 1989"),
+            ("741201/6543", "1. 12. 1974"),
+            ("521113/4321", "13. 11. 1952"),
+            ("380712/7890", "12. 7. 1938"),
+            ("071224/8765", "24. 12. 1907"),
+            ("670502/5678", "2. 5. 1967"),
+            ("931213/3456", "13. 12. 1993"),
+            ("200824/6543", "24. 8. 1920"),
+            ("580716/2345", "16. 7. 1958"),
+            ("490608/4321", "8. 6. 1949"),
+            ("060307/7890", "7. 3. 2006"),
+            ("810401/8765", "1. 4. 1981"),
+            ("410918/5678", "18. 9. 1941"),
+            ("730520/3456", "20. 5. 1973"),
+            ("350714/6543", "14. 7. 1935"),
+        ),
+    )
+    def test_date_of_birth_from_rc(self, rodne_cislo, expected):
+        assert date_of_birth_from_rc(rodne_cislo) == expected
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
+    def test_donor_as_row(self, rodne_cislo):
+        donor = DonorsOverview.query.get(rodne_cislo)
+        row = donor_as_row(donor)
+
+        donation_centers = DonationCenter.query.order_by(
+            DonationCenter.slug.desc()
+        ).all()
+
+        assert donor.first_name == row[0]
+        assert donor.last_name == row[1]
+        assert donor.address == row[3]
+
+        for dc in donation_centers:
+            if getattr(donor, f"donation_count_{dc.slug}") > 0:
+                assert dc.title in row[-1]
+            else:
+                assert dc.title not in row[-1]
