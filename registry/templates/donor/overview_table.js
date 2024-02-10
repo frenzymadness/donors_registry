@@ -61,6 +61,7 @@ $(document).ready( function () {
             extend: 'excel',
             text: 'Stáhnout tabulku',
             title: '',
+            filename: 'export',
         }],
         "dom": "Blfrtip",
     });
