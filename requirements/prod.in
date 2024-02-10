@@ -20,3 +20,6 @@ Flask-Bcrypt
 
 # Environment variable parsing
 environs
+
+# Manipulating with XLSX files
+openpyxl
