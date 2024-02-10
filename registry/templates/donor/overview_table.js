@@ -56,6 +56,12 @@ $(document).ready( function () {
                 {"data": "{{ column_class }}"},
             {%- endfor %}
         ],
-        "columnDefs": columnDefs
+        "columnDefs": columnDefs,
+        "buttons": [{
+            extend: 'excel',
+            text: 'Stáhnout tabulku',
+            title: '',
+        }],
+        "dom": "Blfrtip",
     });
 } );
