@@ -12,6 +12,14 @@
     <div>Vynechat prvních {{ form.skip(value=0, size=2, min=0, max=15) }} štítků.</div>
 </form>
 {% endwith %}
+<div>
+    <a href="{{ url_for('donor.award_prep_download_table', medal_slug=medal.slug) }}"
+        class="btn btn-primary"
+        role="button"
+        target="_blank">
+        Stáhnout tabulku pro odběrná místa
+    </a>
+</div>
 {% with form=award_medal_form %}
 <form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST" class="form-inline" role="form">
     {{ form.csrf_token }}

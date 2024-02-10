@@ -2,6 +2,7 @@
 import os
 import re
 from contextlib import contextmanager
+from datetime import datetime
 from glob import glob
 from pathlib import Path
 
@@ -10,7 +11,7 @@ from markupsafe import Markup
 from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
-from registry.list.models import Medals
+from registry.list.models import DonationCenter, Medals
 
 
 def capitalize(string):
@@ -186,3 +187,46 @@ def record_as_input_data(record, donation_count=None, sum_with_last=False):
     line = ";".join(values)
     line += "\r\n"
     return line
+
+
+def date_of_birth_from_rc(rodne_cislo):
+    first, second, third, *rest = [
+        rodne_cislo[i : i + 2] for i in range(0, len(rodne_cislo), 2)
+    ]
+
+    if int(first) < datetime.now().year - 2000 - 17:
+        year = f"20{first}"
+    else:
+        year = f"19{first}"
+
+    month = int(second)
+    if second[0] in ("2", "3", "5", "6", "7", "8"):
+        month -= int(f"{second[0]}0")
+
+    day = int(third)
+
+    return f"{day}. {month}. {year}"
+
+
+def donor_as_row(donor):
+    """Takes donor and returns line with:
+    name;surname;date of birth;address;city;postal_code;kod_pojistovny;donation_centers
+    """
+    donation_centers = DonationCenter.query.order_by(DonationCenter.slug.desc()).all()
+    dcs_list = []
+    for dc in donation_centers:
+        if getattr(donor, f"donation_count_{dc.slug}") > 0:
+            dcs_list.append(dc.title)
+
+    result = [
+        donor.first_name,
+        donor.last_name,
+        date_of_birth_from_rc(donor.rodne_cislo),
+        donor.address,
+        donor.city,
+        donor.postal_code,
+        donor.kod_pojistovny,
+        dcs_list,
+    ]
+
+    return result
