@@ -1,9 +1,16 @@
+import re
+
 from sqlalchemy import collate
 from sqlalchemy.sql import text
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import capitalize, format_postal_code, split_degrees
+from registry.utils import (
+    EMAIL_RE,
+    capitalize,
+    format_postal_code,
+    split_degrees,
+)
 
 
 class Batch(db.Model):
@@ -517,6 +524,12 @@ class Note(db.Model):
     __tablename__ = "notes"
     rodne_cislo = db.Column(db.String(10), primary_key=True)
     note = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"<Note for {self.rodne_cislo}: {self.note}>"
+
+    def get_emails_from_note(self):
+        return re.findall(EMAIL_RE, self.note)
 
 
 class DonorsOverride(db.Model):

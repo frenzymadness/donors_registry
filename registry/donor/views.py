@@ -163,6 +163,9 @@ def detail(rc):
     note_form = NoteForm()
     if overview.note:
         note_form.note.data = overview.note.note
+        emails = overview.note.get_emails_from_note()
+    else:
+        emails = None
     donors_override_form = DonorsOverrideForm()
     donors_override_form.init_fields(rc)
 
@@ -176,6 +179,7 @@ def detail(rc):
         remove_medal_form=remove_medal_form,
         award_medal_form=award_medal_form,
         note_form=note_form,
+        emails=emails,
         donors_override_form=donors_override_form,
     )
 

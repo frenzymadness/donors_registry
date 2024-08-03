@@ -67,6 +67,14 @@
             <div class="row">
                 Pojišťovna: {{ overview.kod_pojistovny }}
             </div>
+            {% if emails %}
+                <div class="row">
+                    E-mail:
+                    {% for email in emails %}
+                        <a href="mailto:{{ email }}">{{ email }}</a>
+                    {% endfor %}
+                </div>
+            {% endif %}
         </div>
     </div>
 

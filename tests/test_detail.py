@@ -63,6 +63,32 @@ class TestDetail:
         assert "Lorem ipsum dolor sit amet,</textarea>" in res.text
         assert Note.query.count() == existing_notes + 1
 
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
+    def test_emails_in_notes(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        # No e-mail in the note
+        assert "E-mail:" not in res.text
+        assert '<a href="mailto:' not in res.text
+        # Add first e-mail
+        form = res.forms["noteForm"]
+        form.fields["note"][0].value += "\nfoo@example.com"
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        assert "E-mail:" in res.text
+        assert '<a href="mailto:foo@example.com">foo@example.com</a>' in res.text
+        # Add second e-mail
+        form = res.forms["noteForm"]
+        form.fields["note"][0].value += "\nbar@example.com"
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        assert "E-mail:" in res.text
+        assert '<a href="mailto:foo@example.com">foo@example.com</a>' in res.text
+        assert '<a href="mailto:bar@example.com">bar@example.com</a>' in res.text
+
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_manual_import_prepare(self, user, testapp, rodne_cislo):
         skip_if_ignored(rodne_cislo)
