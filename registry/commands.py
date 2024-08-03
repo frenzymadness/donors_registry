@@ -1,11 +1,16 @@
 """Commands for CLI"""
+import csv
+import re
+from collections import Counter
+
 import click
 from flask import current_app
 from flask.cli import with_appcontext
 
-from registry.donor.models import DonorsOverview
+from registry.donor.models import DonorsOverview, Note
 from registry.extensions import db
 from registry.user.models import User
+from registry.utils import EMAIL_RE
 from tests.utils import (
     test_data_ignored,
     test_data_medals,
@@ -46,3 +51,57 @@ def install_test_data(limit):
 def refresh_overview():
     """Refresh DonorsOverview table."""
     DonorsOverview.refresh_overview()
+
+
+@click.command("import-emails")
+@click.argument("csv_file")
+@with_appcontext
+def import_emails(csv_file):
+    """Import e-mails from CVS file to donors' notes"""
+    current_app.config["SQLALCHEMY_ECHO"] = False
+    counter = Counter()
+
+    with open(csv_file, encoding="utf-8") as file:
+        reader = csv.reader(file)
+
+        for row in reader:
+            name, surname, rodne_cislo, email = row
+
+            if not email:
+                continue
+
+            # Fix most common typos in e-mails
+            if " " in email or "," in email:
+                email = email.replace(" ", "")
+                email = email.replace(",", ".")
+
+            if not re.match(EMAIL_RE, email):
+                print("Invalid e-mail:", email)
+                counter["invalid emails"] += 1
+                continue
+
+            donor = DonorsOverview.query.get(rodne_cislo)
+
+            if not donor:
+                continue
+
+            note = Note.query.get(rodne_cislo)
+
+            if note:
+                if email in note.note:
+                    print("E-mail:", email, "already in the note for", rodne_cislo)
+                    counter["already in the db"] += 1
+                else:
+                    note.note += "\n" + email
+                    db.session.add(note)
+                    print("E-mail:", email, "added for", rodne_cislo)
+                    counter["added to existing notes"] += 1
+            else:
+                note = Note(rodne_cislo=rodne_cislo, note=email)
+                db.session.add(note)
+                print("New note for", rodne_cislo, "created with", email)
+                counter["new notes created"] += 1
+
+    db.session.commit()
+
+    print(counter)
