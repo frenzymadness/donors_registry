@@ -13,6 +13,8 @@ from wtforms.validators import ValidationError
 
 from registry.list.models import DonationCenter, Medals
 
+EMAIL_RE = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+
 
 def capitalize(string):
     def get_replacement(match):
