@@ -8,6 +8,7 @@ from werkzeug.wrappers import Response
 
 from registry.donor.models import Batch, DonorsOverview, Record
 from registry.extensions import db
+from registry.list.models import DonationCenter
 from registry.utils import flash_errors, record_as_input_data
 
 from .forms import DeleteBatchForm, ImportForm
@@ -22,6 +23,7 @@ def import_data(rodne_cislo=None):
     import_form = ImportForm()
     if rodne_cislo:
         donation_center_id = request.args.get("donation_center")
+        donation_center = DonationCenter.query.get(donation_center_id)
         import_form.donation_center_id.default = donation_center_id
         # Special case for manual imports - empty value in db
         if donation_center_id == "-1":
@@ -36,7 +38,9 @@ def import_data(rodne_cislo=None):
             .order_by(Batch.imported_at.desc())
             .first()
         )
-        if last_record is not None:
+        if last_record is not None and (
+            donation_center_db_id is None or donation_center.import_increments
+        ):
             import_form.input_data.data = record_as_input_data(
                 last_record, donation_count="_POČET_", sum_with_last=True
             )

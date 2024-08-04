@@ -1,5 +1,7 @@
 from functools import total_ordering
 
+from sqlalchemy.sql.expression import literal
+
 from registry.extensions import db
 
 
@@ -8,6 +10,9 @@ class DonationCenter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String, unique=True, nullable=False)
     title = db.Column(db.String, nullable=False)
+    import_increments = db.Column(
+        db.Boolean, default=False, server_default=literal(False)
+    )
 
     def __repr__(self):
         return f"<DonationCenter({self.slug!r})>"
