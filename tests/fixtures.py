@@ -2,8 +2,9 @@
 """Defines fixtures available to all tests."""
 
 import logging
+from itertools import cycle
 from pathlib import Path
-from random import sample
+from random import sample, shuffle
 from shutil import copy
 from tempfile import NamedTemporaryFile
 
@@ -104,8 +105,14 @@ def test_data_df():
 
 def sample_of_rc(amount=100):
     """Yields random sample of RC from test data"""
-    for rc in sample(list(get_test_data_df(TEST_RECORDS).RC.unique()), amount):
-        yield rc
+    test_data = get_test_data_df(TEST_RECORDS)
+    dcs = test_data.MISTO_ODBERU.unique()
+    shuffle(dcs)
+    dcs = cycle(dcs)
+
+    for _ in range(amount):
+        dc = next(dcs)
+        yield sample(list(test_data[test_data.MISTO_ODBERU == dc].RC.unique()), 1)[0]
 
 
 def skip_if_ignored(rodne_cislo):
