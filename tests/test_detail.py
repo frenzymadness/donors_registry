@@ -99,6 +99,7 @@ class TestDetail:
         for dc in donation_centers + ["manual"]:
             dc_db_id = dc.id if dc != "manual" else None
             dc_id = dc.id if dc != "manual" else -1
+            import_increments = dc.import_increments if dc != "manual" else True
             last_record = (
                 Record.query.join(Batch)
                 .filter(Record.rodne_cislo == rodne_cislo)
@@ -106,7 +107,7 @@ class TestDetail:
                 .order_by(Batch.imported_at.desc())
                 .first()
             )
-            if last_record is None:
+            if last_record is None or not import_increments:
                 last_record = (
                     Record.query.join(Batch)
                     .filter(Record.rodne_cislo == rodne_cislo)
