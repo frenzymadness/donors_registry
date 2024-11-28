@@ -64,5 +64,9 @@ $(document).ready( function () {
             filename: 'export',
         }],
         "dom": "Blfrtip",
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            [10, 25, 50, 100, 'All']
+        ],
     });
 } );
