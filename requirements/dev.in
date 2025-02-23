@@ -5,6 +5,10 @@
 tox
 pytest
 WebTest
+# This is here just to pin it to specific version and override this issue:
+# ERROR: In --require-hashes mode, all requirements must have their versions pinned with ==. These do not:
+#    legacy-cgi>=2.6 from https://files.pythonhosted.org/packages/4c/cd/54d1fd92d7f6aca9523d8583052e00b273bdfe28aa7fd54a3a5759dab05e/legacy_cgi-2.6.2-py3-none-any.whl (from webob==1.8.9->-r requirements/dev.txt (line 694))
+legacy-cgi
 
 # Used to compare calculations we do in SQL with a different approach
 pandas
