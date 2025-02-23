@@ -2,7 +2,6 @@
 import os
 import re
 from contextlib import contextmanager
-from datetime import datetime
 from glob import glob
 from pathlib import Path
 
@@ -196,7 +195,9 @@ def date_of_birth_from_rc(rodne_cislo):
         rodne_cislo[i : i + 2] for i in range(0, len(rodne_cislo), 2)
     ]
 
-    if int(first) < datetime.now().year - 2000 - 17:
+    # YYMMDD/XXXX is a valid format since 1954.
+    # If it's shorter, it's more likely from 1900s than 2000s.
+    if len(rodne_cislo) == 11 and int(first) < 54:
         year = f"20{first}"
     else:
         year = f"19{first}"
