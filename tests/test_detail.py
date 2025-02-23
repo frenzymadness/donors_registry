@@ -424,6 +424,33 @@ class TestEnvelopeLabels:
 
         assert "Odeslána nevalidní data." in labels.text
 
+    def test_envelope_detail(self, user, testapp):
+        medal = db.session.get(Medals, 1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        labels = page.forms["printEnvelopeForm"].submit()
+        eligible_donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).all()
+
+        for donor in eligible_donors:
+            assert f"{donor.first_name} {donor.last_name}" in labels.text
+            assert f"{donor.address}" in labels.text
+            assert f"{donor.postal_code} {donor.city}" in labels.text
+
+    @pytest.mark.parametrize("medal_id", (-1, -33, 99, 16))
+    def test_envelope_invalid_medal(self, user, testapp, medal_id):
+        medal = db.session.get(Medals, 1)
+        login(user, testapp)
+        page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
+        page.forms["printEnvelopeForm"].fields["medal_id"][0].value = medal_id
+        labels = page.forms["printEnvelopeForm"].submit().follow()
+
+        assert "Odeslána nevalidní data." in labels.text
+
 
 class TestAwardPrepExport:
     @pytest.mark.parametrize("medal_id", range(1, 8))

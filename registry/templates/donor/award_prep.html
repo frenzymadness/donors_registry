@@ -12,6 +12,13 @@
     <div>Vynechat prvních {{ form.skip(value=0, size=2, min=0, max=15) }} štítků.</div>
 </form>
 {% endwith %}
+{% with form=print_envelope_labels_form %}
+<form id="printEnvelopeForm" action="{{ url_for('donor.render_envelope') }}" method="POST" class="form-inline" role="form" target="_blank">
+    {{ form.csrf_token }}
+    {{ form.medal_id(value=medal.id) }}
+    <input type="submit" class="btn btn-primary" value="Tisk obálek">
+</form>
+{% endwith %}
 <div>
     <a href="{{ url_for('donor.award_prep_download_table', medal_slug=medal.slug) }}"
         class="btn btn-primary"
