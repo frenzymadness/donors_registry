@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obálky DL</title>
+    <style>
+        @page {
+            size: 220mm 110mm;
+            margin: 0;
+        }
+
+        *,
+        *::after,
+        *::before {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: white;
+            color: black;
+            font-family: "Arial", "Helvetica", sans-serif;
+        }
+
+        .envelope {
+            width: 220mm;
+            height: 110mm;
+            padding: 10mm;
+            break-after: page;
+            position: relative;
+        }
+
+        .address {
+            font-size: 14pt;
+            line-height: 1.5;
+            position: absolute;
+            left: 70%;
+            top: 70%;
+            transform: translate(-70%, -70%);
+            text-align: left;
+        }
+
+        .sender {
+            font-size: 10pt;
+            position: absolute;
+            top: 10mm;
+            left: 10mm;
+        }
+
+        /* debug */
+        /* .envelope {
+            outline: 1px solid red;
+        }
+
+        .sender {
+            outline: 1px solid blue;
+        }
+
+        .address {
+            outline: 1px solid green;
+        } */
+
+        @media print {
+            .envelope, .sender, .address {outline: none;}
+        }
+    </style>
+</head>
+<body>
+    {% for donor in donors %}
+    <div class="envelope">
+        <div class="sender">
+            Úřad oblastního spolku Českého červeného kříže Frýdek-Místek<br>
+            1. máje 2318<br>
+            738 01 Frýdek-Místek
+        </div>
+        <div class="address">
+            {{ donor.first_name}} {{ donor.last_name }}<br>
+            {{ donor.address }}<br>
+            {{ donor.postal_code }} {{donor.city}}
+        </div>
+    </div>
+    {% endfor %}
+</body>
+</html>

@@ -304,6 +304,31 @@ def render_envelope_labels():
     return redirect(request.referrer)
 
 
+@blueprint.post("/award_prep/envelope")
+@login_required
+def render_envelope():
+    print_envelope_labels_form = PrintEnvelopeLabelsForm()
+    if print_envelope_labels_form.validate_on_submit():
+        medal = print_envelope_labels_form.medal
+        donors = (
+            DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.donation_count_total >= medal.minimum_donations,
+                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+                )
+            )
+            .order_by(collate(DonorsOverview.last_name, "czech").asc())
+            .all()
+        )
+
+        return render_template(
+            "donor/envelope_DL.html",
+            donors=donors,
+        )
+
+    return redirect(request.referrer)
+
+
 @blueprint.post("/remove_medal")
 @login_required
 def remove_medal():
