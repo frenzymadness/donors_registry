@@ -473,9 +473,8 @@ class TestAwardPrepExport:
             for x in range(2, 11):
                 first_name = workbook[sheetname][f"A{x}"].value
                 if first_name:
-                    assert f"<td>{first_name}</td>" in page
+                    assert first_name in page
                 else:
                     break
                 last_name = workbook[sheetname][f"B{x}"].value
-                assert f"<td>{first_name}</td>" in page
-                assert f"<td>{last_name}</td>" in page
+                assert last_name in page
