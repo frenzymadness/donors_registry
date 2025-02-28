@@ -1,7 +1,10 @@
 """Helper utilities and decorators."""
+
 import os
 import re
+import smtplib
 from contextlib import contextmanager
+from email.message import EmailMessage
 from glob import glob
 from pathlib import Path
 
@@ -11,6 +14,13 @@ from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
 from registry.list.models import DonationCenter, Medals
+from registry.settings import (
+    EMAIL_SENDER,
+    SMTP_LOGIN,
+    SMTP_PASSWORD,
+    SMTP_PORT,
+    SMTP_SERVER,
+)
 
 EMAIL_RE = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
 
@@ -24,6 +34,10 @@ def capitalize(string):
             return word
 
     return re.sub(r"\w{2,}", get_replacement, string)
+
+
+def capitalize_first(string):
+    return string[0].upper() + string[1:] if string else string
 
 
 def format_postal_code(code: str):
@@ -233,3 +247,35 @@ def donor_as_row(donor):
     ]
 
     return result
+
+
+def send_email_with_award_doc(to, award_doc_content, medal):
+    msg = EmailMessage()
+    msg["From"] = EMAIL_SENDER
+    msg["To"] = to
+    msg["Cc"] = EMAIL_SENDER
+    msg["Subject"] = "Ocenění za darování krve a krevních složek"
+
+    msg.set_content(
+        f"Vážení,\n\n"
+        f"v letošním roce jste získali {capitalize_first(medal.title_acc)} za {medal.minimum_donations} bezpříspěvkových odběrů krve.\n\n"
+        f"Český červený kříž Vám děkuje za tento vysoce lidský a humánní čin.\n\n"
+        f"Zasíláme Vám potvrzení o ocenění pro Vašeho zaměstnavatele, případně zdravotní pojišťovnu.\n\n"
+        f"{capitalize_first(medal.title_acc)}, si prosím vyzvedněte na odběrném místě, kde darujete krev či plazmu.\n\n"
+        f"Děkujeme.\n"
+        f"S pozdravem\n"
+        f"Bc. Michaela Liebelová\n"
+        f"Ředitelka Úřadu Oblastního spolku ČČK FM\n"
+    )
+
+    msg.add_attachment(
+        award_doc_content,
+        maintype="application",
+        subtype="pdf",
+        filename="Potvrzení o udělení medaile.pdf",
+    )
+
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+        server.starttls()
+        server.login(SMTP_LOGIN, SMTP_PASSWORD)
+        server.send_message(msg)

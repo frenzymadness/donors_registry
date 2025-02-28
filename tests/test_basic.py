@@ -82,6 +82,7 @@ class TestErrorInterface:
         ("donor.render_award_documents_for_award_prep", {"medal_slug": "br"}),
         ("donor.render_envelope_labels", {}),
         ("donor.render_envelope", {}),
+        ("donor.email_award_document", {"rc": "6707280822", "medal_slug": "br"}),
     ]
 
     @pytest.mark.parametrize(("endpoint, kwargs"), testcases_401)

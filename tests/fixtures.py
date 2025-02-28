@@ -7,6 +7,7 @@ from pathlib import Path
 from random import sample, shuffle
 from shutil import copy
 from tempfile import NamedTemporaryFile
+from unittest.mock import MagicMock, patch
 
 from flask_migrate import Migrate, upgrade
 from pytest import fixture, skip
@@ -126,3 +127,11 @@ def empty_stamp_png():
         dir="registry/static/stamps", suffix=".png"
     ), NamedTemporaryFile(dir="registry/static/signatures", suffix=".png"):
         yield
+
+
+@fixture
+def mock_smtp():
+    with patch("smtplib.SMTP", autospec=True) as mock_smtp_class:
+        mock_instance = mock_smtp_class.return_value
+        mock_instance.send_message = MagicMock()
+        yield mock_instance
