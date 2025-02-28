@@ -15,6 +15,7 @@ from flask import (
     url_for,
 )
 from flask_login import login_required
+from flask_weasyprint import CSS, HTML
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 from sqlalchemy import and_, collate, extract
@@ -22,7 +23,12 @@ from werkzeug.wrappers import Response
 
 from registry.extensions import db
 from registry.list.models import DonationCenter, Medals
-from registry.utils import donor_as_row, flash_errors, get_list_of_images
+from registry.utils import (
+    donor_as_row,
+    flash_errors,
+    get_list_of_images,
+    send_email_with_award_doc,
+)
 
 from .forms import (
     AwardMedalForm,
@@ -212,6 +218,51 @@ def render_award_document(rc, medal_slug):
         stamps=get_list_of_images("stamps"),
         signatures=get_list_of_images("signatures"),
     )
+
+
+@blueprint.get("/detail/<rc>/email_award_document/<medal_slug>")
+@login_required
+def email_award_document(rc, medal_slug):
+    note = Note.query.get(rc)
+    emails = None
+    if note:
+        emails = note.get_emails_from_note()
+
+    if not emails:
+        flash("Dárce nemá v poznámce žádný e-mail.", "danger")
+        return redirect(url_for("donor.detail", rc=rc))
+
+    donor = db.get_or_404(DonorsOverview, rc)
+    medal = Medals.query.filter_by(slug=medal_slug).first_or_404()
+    awarded_medal = AwardedMedals.query.filter(
+        AwardedMedals.rodne_cislo == donor.rodne_cislo,
+        AwardedMedals.medal_id == medal.id,
+    ).first()
+
+    if awarded_medal and awarded_medal.awarded_at:
+        # Medal is awarded and it's not in the old system.
+        # If it is, we don't know the date.
+        awarded_at = awarded_medal.awarded_at
+    else:
+        # Unknown date (medal awarded in old system)
+        awarded_at = datetime.now()
+
+    award_document_html = render_template(
+        "donor/award_document.html",
+        donors=(donor,),
+        medal=medal,
+        awarded_at=awarded_at.strftime("%-d. %-m. %Y"),
+        stamps=get_list_of_images("stamps"),
+        signatures=get_list_of_images("signatures"),
+    )
+
+    css = CSS(url=url_for("static", filename="css/award_document.css", _external=True))
+    pdf_content = HTML(string=award_document_html).write_pdf(stylesheets=[css])
+
+    send_email_with_award_doc(to=emails, award_doc_content=pdf_content, medal=medal)
+
+    flash("E-mail odeslán.", "success")
+    return redirect(url_for("donor.detail", rc=rc))
 
 
 @blueprint.get("/detail/<rc>/confirmation_document/")

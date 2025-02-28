@@ -1,5 +1,5 @@
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import ceil
 from tempfile import NamedTemporaryFile
 
@@ -261,6 +261,86 @@ class TestAwardDocument:
 
         assert rows == documents.text.count('<div class="page">')
         assert rows == documents.text.count(f"Ve Frýdku-Místku, dne {today}")
+
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(3))
+    def test_email_award_document_no_email(self, user, testapp, rodne_cislo):
+        skip_if_ignored(rodne_cislo)
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        # Make sure the note is empty
+        form = res.forms["noteForm"]
+        form.fields["note"][0].value = ""
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        # There should be no buttons to send e-mails now
+        assert "/email_award_document/" not in res
+        assert "📧" not in res
+        # If called somehow anyway, proper error is displayed
+        res = testapp.get(
+            url_for("donor.email_award_document", rc=rodne_cislo, medal_slug="st")
+        ).follow()
+        assert "Dárce nemá v poznámce žádný e-mail." in res
+
+    @pytest.mark.parametrize(
+        "note,expected_to",
+        [
+            ("foo@bar.baz", "foo@bar.baz"),
+            ("foo@bar.baz\nboss@example.com", "foo@bar.baz, boss@example.com"),
+            ("Some random text foo@bar.baz", "foo@bar.baz"),
+            ("foo@bar.baz and some random note", "foo@bar.baz"),
+            (
+                "heading email@example.com heading 2 email2@example.com",
+                "email@example.com, email2@example.com",
+            ),
+        ],
+    )
+    @pytest.mark.parametrize("medal_id", range(1, 8))
+    @pytest.mark.parametrize("rodne_cislo", sample_of_rc(2))
+    def test_email_award_document(
+        self, user, testapp, note, expected_to, medal_id, rodne_cislo, mock_smtp
+    ):
+        skip_if_ignored(rodne_cislo)
+        medal = db.session.get(Medals, medal_id)
+        # Make sure at least some medals are already awarded
+        awarded_medals = (
+            AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo)
+            .order_by(AwardedMedals.medal_id.asc())
+            .all()
+        )
+        if len(awarded_medals) == 0 and medal_id % 2 == 0:
+            am = AwardedMedals(
+                rodne_cislo=rodne_cislo,
+                medal_id=medal_id,
+                awarded_at=datetime.now() - timedelta(weeks=1),
+            )
+            db.session.add(am)
+            db.session.commit()
+            DonorsOverview.refresh_overview()
+        login(user, testapp)
+        res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
+        # Make sure there is one e-mail in the note
+        form = res.forms["noteForm"]
+        form.fields["note"][0].value = note
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Poznámka uložena." in res
+        # There should be buttons to send e-mails present
+        assert "/email_award_document/" in res
+        assert "📧" in res
+        # Click on the button
+        res = res.click(
+            description="📧", href=f"/email_award_document/{medal.slug}"
+        ).follow()
+        assert "E-mail odeslán." in res
+        # Assert proper mail has been sent
+        ctx_mngr = mock_smtp.__enter__.return_value
+        ctx_mngr.login.assert_called_once()
+        ctx_mngr.send_message.assert_called_once()
+        message = ctx_mngr.send_message.call_args[0][0]
+        assert message["to"] == expected_to
+        assert message["cc"] == "darcikrve@cckfm.cz"
+        assert message["subject"] == "Ocenění za darování krve a krevních složek"
 
 
 class TestConfirmationdDocument:

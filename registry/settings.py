@@ -5,6 +5,7 @@ Most configuration is set via environment variables.
 For local development, use a .env file to set
 environment variables.
 """
+
 from environs import Env
 
 env = Env()
@@ -22,3 +23,9 @@ DEBUG_TB_INTERCEPT_REDIRECTS = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 PERMANENT_SESSION_LIFETIME = 1800
 SESSION_REFRESH_EACH_REQUEST = True
+
+SMTP_SERVER = env.str("SMTP_SERVER")
+SMTP_PORT = env.int("SMTP_PORT")
+SMTP_LOGIN = env.str("SMTP_LOGIN")
+SMTP_PASSWORD = env.str("SMTP_PASSWORD")
+EMAIL_SENDER = env.str("EMAIL_SENDER")
