@@ -251,10 +251,10 @@ def send_email_with_award_doc(to, award_doc_content, medal, config):
 
     msg.set_content(
         f"Vážení,\n\n"
-        f"v letošním roce jste získali {capitalize_first(medal.title_acc)} za {medal.minimum_donations} bezpříspěvkových odběrů krve.\n\n"
+        f"v letošním roce jste získali {capitalize_first(medal.title_acc)} za {medal.minimum_donations} bezpříspěvkových odběrů krve.\n\n"  # noqa: E501
         f"Český červený kříž Vám děkuje za tento vysoce lidský a humánní čin.\n\n"
-        f"Zasíláme Vám potvrzení o ocenění pro Vašeho zaměstnavatele, případně zdravotní pojišťovnu.\n\n"
-        f"{capitalize_first(medal.title_acc)}, si prosím vyzvedněte na odběrném místě, kde darujete krev či plazmu.\n\n"
+        f"Zasíláme Vám potvrzení o ocenění pro Vašeho zaměstnavatele, případně zdravotní pojišťovnu.\n\n"  # noqa: E501
+        f"{capitalize_first(medal.title_acc)}, si prosím vyzvedněte na odběrném místě, kde darujete krev či plazmu.\n\n"  # noqa: E501
         f"Děkujeme.\n"
         f"S pozdravem\n"
         f"Bc. Michaela Liebelová\n"
