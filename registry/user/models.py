@@ -1,4 +1,5 @@
 """User models."""
+
 import datetime as dt
 
 from flask_login import UserMixin

@@ -1,4 +1,5 @@
 """Public section, including homepage and signup."""
+
 from flask import (
     Blueprint,
     flash,

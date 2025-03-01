@@ -66,9 +66,11 @@ def import_data_post():
     import_form = ImportForm(request.form)
     if import_form.validate_on_submit():
         batch = Batch(
-            donation_center_id=import_form.donation_center_id.data
-            if import_form.donation_center_id.data != "-1"
-            else None,
+            donation_center_id=(
+                import_form.donation_center_id.data
+                if import_form.donation_center_id.data != "-1"
+                else None
+            ),
             imported_at=datetime.now(),
         )
         db.session.add(batch)
