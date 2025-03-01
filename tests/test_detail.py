@@ -339,7 +339,7 @@ class TestAwardDocument:
         ctx_mngr.send_message.assert_called_once()
         message = ctx_mngr.send_message.call_args[0][0]
         assert message["to"] == expected_to
-        assert message["cc"] == "darcikrve@cckfm.cz"
+        assert message["cc"] == "foo@example.com"
         assert message["subject"] == "Ocenění za darování krve a krevních složek"
 
 

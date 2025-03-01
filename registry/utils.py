@@ -14,13 +14,6 @@ from wtforms.validators import DataRequired as OriginalDataRequired
 from wtforms.validators import ValidationError
 
 from registry.list.models import DonationCenter, Medals
-from registry.settings import (
-    EMAIL_SENDER,
-    SMTP_LOGIN,
-    SMTP_PASSWORD,
-    SMTP_PORT,
-    SMTP_SERVER,
-)
 
 EMAIL_RE = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
 
@@ -249,11 +242,11 @@ def donor_as_row(donor):
     return result
 
 
-def send_email_with_award_doc(to, award_doc_content, medal):
+def send_email_with_award_doc(to, award_doc_content, medal, config):
     msg = EmailMessage()
-    msg["From"] = EMAIL_SENDER
+    msg["From"] = config["EMAIL_SENDER"]
     msg["To"] = to
-    msg["Cc"] = EMAIL_SENDER
+    msg["Cc"] = config["EMAIL_SENDER"]
     msg["Subject"] = "Ocenění za darování krve a krevních složek"
 
     msg.set_content(
@@ -275,7 +268,7 @@ def send_email_with_award_doc(to, award_doc_content, medal):
         filename="Potvrzení o udělení medaile.pdf",
     )
 
-    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+    with smtplib.SMTP(config["SMTP_SERVER"], config["SMTP_PORT"]) as server:
         server.starttls()
-        server.login(SMTP_LOGIN, SMTP_PASSWORD)
+        server.login(config["SMTP_LOGIN"], config["SMTP_PASSWORD"])
         server.send_message(msg)
