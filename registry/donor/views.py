@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 from flask import (
     Blueprint,
     abort,
+    current_app,
     flash,
     jsonify,
     redirect,
@@ -259,7 +260,9 @@ def email_award_document(rc, medal_slug):
     css = CSS(url=url_for("static", filename="css/award_document.css", _external=True))
     pdf_content = HTML(string=award_document_html).write_pdf(stylesheets=[css])
 
-    send_email_with_award_doc(to=emails, award_doc_content=pdf_content, medal=medal)
+    send_email_with_award_doc(
+        to=emails, award_doc_content=pdf_content, medal=medal, config=current_app.config
+    )
 
     flash("E-mail odeslán.", "success")
     return redirect(url_for("donor.detail", rc=rc))

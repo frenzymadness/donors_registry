@@ -10,3 +10,9 @@ DEBUG_TB_ENABLED = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 WTF_CSRF_ENABLED = False  # Allows form testing
 SQLALCHEMY_ECHO = False
+
+EMAIL_SENDER = "foo@example.com"
+SMTP_LOGIN = "foo@example.com"
+SMTP_PASSWORD = "fooPassWord"
+SMTP_PORT = 993
+SMTP_SERVER = "smtp.example.com"
