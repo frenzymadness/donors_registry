@@ -1,4 +1,5 @@
 """Commands for CLI"""
+
 import csv
 import re
 from collections import Counter

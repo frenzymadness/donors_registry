@@ -2,6 +2,7 @@
 Extensions module. Each extension is initialized in the app factory located
 in app.py.
 """
+
 import locale
 from sqlite3 import Connection as SQLite3Connection
 
