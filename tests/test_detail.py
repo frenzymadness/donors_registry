@@ -341,6 +341,20 @@ class TestAwardDocument:
         assert message["to"] == expected_to
         assert message["cc"] == "foo@example.com"
         assert message["subject"] == "Ocenění za darování krve a krevních složek"
+        for part in message.walk():
+            content_type = part.get_content_type()
+            content_disposition = str(part.get("Content-Disposition"))
+            if content_type == "text/plain" and "attachment" not in content_disposition:
+                charset = part.get_content_charset() or "utf-8"
+                content = part.get_payload(decode=True).decode(
+                    charset, errors="replace"
+                )
+                if medal.slug in ("br", "st"):
+                    assert "si prosím vyzvedněte" in content
+                elif medal.slug in ("zl", "kr3"):
+                    assert "se uskuteční na podzim v Třinci a Frýdku-Místku" in content
+                elif medal.slug in ("kr2", "kr1", "plk"):
+                    assert "Pozvánku na slavnostní oceňování obdržíte" in content
 
 
 class TestConfirmationdDocument:
