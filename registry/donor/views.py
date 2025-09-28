@@ -448,14 +448,17 @@ def award_prep_download_table(medal_slug):
                 "Město",
                 "PSČ",
                 "Pojišťovna",
+                "E-mail",
                 "Odběrná místa",
             ]
         )
 
     for donor in donors:
+        emails = donor.note.get_emails_from_note() if donor.note else ""
         row = donor_as_row(donor)
-        dcs = row[-1]
-        row[-1] = ", ".join(dcs)
+        dcs = row.pop()
+        row.append(", ".join(emails))
+        row.append(", ".join(dcs))
         if len(dcs) == 1:
             wb[dcs[0]].append(row)
         else:
