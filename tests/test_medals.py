@@ -89,14 +89,8 @@ class TestMedals:
         detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
         # Medal is there
         assert detail.status_code == 200
-        # Find the right form to remove it
-        for index, form in detail.forms.items():
-            if form.id == "awardMedalForm":
-                continue
-            if form.fields["medal_id"][0].value == str(medal.id):
-                break
-        else:
-            assert False, "Cannot find the right form for the medal"
+        form = detail.forms[f"removeMedalForm_{medal.id}"]
+        assert form.fields["medal_id"][0].value == str(medal.id)
         detail = form.submit().follow()
         # Medal is not there anymore
         assert detail.status_code == 200
@@ -116,14 +110,8 @@ class TestMedals:
         detail = testapp.get(url_for("donor.detail", rc=do.rodne_cislo))
         # Medal is there
         assert detail.status_code == 200
-        # Find the right form to award it
-        for index, form in detail.forms.items():
-            if form.id == "removeMedalForm":
-                continue
-            if form.fields["medal_id"][0].value == str(medal.id):
-                break
-        else:
-            assert False, "Cannot find the right form for the medal"
+        form = detail.forms[f"awardMedalForm_{medal.id}"]
+        assert form.fields["medal_id"][0].value == str(medal.id)
         detail = form.submit().follow()
         # Medal is awarded
         assert detail.status_code == 200
@@ -197,10 +185,7 @@ class TestMedals:
             .rodne_cislo
         )
         detail = testapp.get(url_for("donor.detail", rc=rodne_cislo))
-        # Find the right form to remove it
-        for index, form in detail.forms.items():
-            if form.id == "removeMedalForm":
-                break
+        form = detail.forms["removeMedalForm_1"]
         form.fields["medal_id"][0].value = "999"
         detail = form.submit().follow()
         assert "Při odebrání medaile došlo k chybě." in detail

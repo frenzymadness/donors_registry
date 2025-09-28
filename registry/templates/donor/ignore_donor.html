@@ -29,11 +29,11 @@
             <td>{{ donor.ignored_since|format_time }}</td>
             <td>
                 {% with form=unignore_form %}
-                <form id="unignoreDonorForm" action="{{ url_for('donor.unignore_donor') }}" method="POST"
+                <form id="unignoreDonorForm_{{ donor.rodne_cislo }}" action="{{ url_for('donor.unignore_donor') }}" method="POST"
                     class="form-inline" role="form">
                     <div class="form-group">
                         {{ form.csrf_token }}
-                        {{ form.rodne_cislo(value=donor.rodne_cislo) }}
+                        {{ form.rodne_cislo(value=donor.rodne_cislo, id="rodne_cislo_" ~ donor.rodne_cislo) }}
                         <input type="submit" class="btn btn-sm btn-danger" value="🗑">
                     </div>
                 </form>

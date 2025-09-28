@@ -113,15 +113,15 @@
                 {% if medal.id in awarded_medals.keys() %}
                 <div class="col-2">
                     {% with form=remove_medal_form %}
-                        <form id="removeMedalForm"
+                        <form id="removeMedalForm_{{ medal.id }}"
                             action="{{ url_for('donor.remove_medal') }}"
                             method="POST"
                             class="form-inline"
                             role="form">
 
                             {{ form.csrf_token }}
-                            {{ form.rodne_cislo(value=overview.rodne_cislo) }}
-                            {{ form.medal_id(value=medal.id) }}
+                            {{ form.rodne_cislo(value=overview.rodne_cislo, id="rodne_cislo_" ~ overview.rodne_cislo) }}
+                            {{ form.medal_id(value=medal.id, id="medal_id_" ~ medal.id) }}
                             <input type="submit" class="btn btn-sm btn-outline-danger" value="🗑" title="Odebrat medaili">
 
                         </form>
@@ -130,7 +130,7 @@
                 {% else %}
                 <div class="col-2">
                     {% with form=award_medal_form %}
-                        <form id="awardMedalForm"
+                        <form id="awardMedalForm_{{ medal.id }}"
                             action="{{ url_for('donor.award_medal') }}"
                             method="POST"
                             class="form-inline"
@@ -138,7 +138,7 @@
 
                             {{ form.csrf_token }}
                             {{ form["rodne_cislo_" + overview.rodne_cislo](value=overview.rodne_cislo) }}
-                            {{ form.medal_id(value=medal.id) }}
+                            {{ form.medal_id(value=medal.id, id="medal_id_" ~ medal.id) }}
 
                             {% if medal.minimum_donations > overview.donation_count_total %}
                                 <input type="submit" class="btn btn-sm btn-outline-warning" value="✔" title="Udělit medaili (Nemá nárok)">
