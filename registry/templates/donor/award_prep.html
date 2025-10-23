@@ -27,6 +27,27 @@
         Stáhnout tabulku pro odběrná místa
     </a>
 </div>
+<div>
+    <a href="mailto:darci@cckfm.cz
+    ?cc=predseda@cckfm.cz
+    &bcc={{all_emails|join(',')}}
+    &subject={{'Pozvánka na slavnostní ocenění dárců krve a krevních složek'|urlencode}}
+    &body={{'Dobrý den,
+
+    v příloze naleznete pozvánku ke slavnostnímu ocenění bezpříspěvkových dárců krve a krevních složek.
+    Prosíme o potvrzení účasti odpovědí na tento e-mail.
+
+    Děkujeme za Vaši pomoc a těšíme se na setkání!
+
+    S úctou
+    Hana Kaňová
+    Český červený kříž – Frýdek-Místek'|urlencode}}"
+        class="btn btn-primary"
+        role="button"
+        target="_blank">
+        Odeslat hromadný e-mail
+    </a>
+</div>
 {% with form=award_medal_form %}
 <form id="awardMedalForm" action="{{ url_for('donor.award_medal') }}" method="POST" class="form-inline" role="form">
     {{ form.csrf_token }}
