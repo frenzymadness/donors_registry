@@ -410,6 +410,13 @@ def award_prep(medal_slug):
     award_medal_form = AwardMedalForm()
     award_medal_form.add_checkboxes([d.rodne_cislo for d in donors])
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
+
+    all_emails = list()
+    for donor in donors:
+        if donor.note:
+            if emails := donor.note.get_emails_from_note():
+                all_emails.extend(emails)
+
     return render_template(
         "donor/award_prep.html",
         medal=medal,
@@ -417,6 +424,7 @@ def award_prep(medal_slug):
         award_medal_form=award_medal_form,
         override_column_names=json.dumps(DonorsOverview.basic_fields),
         print_envelope_labels_form=print_envelope_labels_form,
+        all_emails=all_emails,
     )
 
 
