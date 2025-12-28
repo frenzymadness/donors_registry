@@ -21,7 +21,7 @@ jobs:
         dnf_install: pkgconfig(libffi) glibc-langpack-cs libicu-devel sqlite-devel pango
     strategy:
       matrix:
-        tox_env: [py310, py311, py312, py313, lint]
+        tox_env: [py313, lint]
 
     # Use GitHub's Linux Docker host
     runs-on: ubuntu-latest
