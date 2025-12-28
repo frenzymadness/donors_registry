@@ -156,7 +156,7 @@ def download_batch(id):
 
 @blueprint.post("/prepare_data_from_trinec")
 @login_required
-def prepare_data_from_trinec():
+def prepare_data_from_trinec():  # noqa: C901
     """Process data from Třinec Excel file."""
     if "trinec_file" not in request.files:
         flash("Nebyl vybrán žádný soubor", "danger")
@@ -237,7 +237,9 @@ def prepare_data_from_trinec():
         import_form.donation_center_id.data = "3"  # Třinec
 
         flash(
-            f"Soubor byl úspěšně načten. Nalezeno {len(input_lines)} řádků. ", "success"
+            f"Soubor byl úspěšně načten. Nalezeno {len(input_lines)} řádků."
+            f" ({len(data_rows) - len(input_lines)} řádků vynecháno)",
+            "success",
         )
 
         # Render the import template with pre-filled form
