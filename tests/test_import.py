@@ -441,3 +441,214 @@ class TestImport:
 
             assert res.status_code == 200
             assert Batch.query.count() == existing_batches
+
+    @pytest.mark.parametrize(
+        "filename,valid_lines,skipped_lines",
+        (
+            ("trinec_import_valid_tb.xlsx", 6, 1),
+            ("trinec_import_valid_pb.xlsx", 4, 1),
+            ("trinec_import_skip_lines.xlsx", 1, 6),
+        ),
+    )
+    def test_prepare_trinec_valid_file(
+        self, user, testapp, filename, valid_lines, skipped_lines
+    ):
+        """Test uploading valid Třinec Excel file"""
+        login(user, testapp)
+
+        # Load the test Excel file
+        file_path = Path("tests/data") / filename
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+
+        # Get the import page
+        res = testapp.get(url_for("batch.import_data"))
+
+        # Find and submit the Třinec form
+        # The form should be the second form on the page
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[("trinec_file", filename, file_content)],
+        )
+
+        # Should redirect back to import page with success message
+        assert res.status_code == 200
+        assert "Soubor byl úspěšně načten" in res
+        assert f"Nalezeno {valid_lines} řádků" in res
+        assert f"({skipped_lines} řádků vynecháno)" in res
+
+        # The form should be pre-filled with the data
+        form = res.forms["importForm"]
+        assert form["input_data"].value is not None
+        assert len(form["input_data"].value.splitlines()) == valid_lines
+
+        # Verify the data format is correct (semicolon-delimited)
+        lines = form["input_data"].value.splitlines()
+        assert "0407156596;DANIEL;DOLEŽAL" in lines[0]
+
+    def test_prepare_trinec_no_file(self, user, testapp):
+        """Test submitting Třinec form without file"""
+        login(user, testapp)
+
+        # Submit form without file
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+        ).follow()
+
+        assert res.status_code == 200
+        assert "Nebyl vybrán žádný soubor" in res
+
+    def test_prepare_trinec_empty_filename(self, user, testapp):
+        """Test submitting Třinec form with empty filename"""
+        login(user, testapp)
+
+        # Submit form with empty filename (file field present but no file selected)
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[("trinec_file", "", b"")],
+        ).follow()
+
+        assert res.status_code == 200
+        assert "Nebyl vybrán žádný soubor" in res
+
+    def test_prepare_trinec_general_exception(self, user, testapp):
+        """Test general exception handling in Třinec file processing"""
+        login(user, testapp)
+
+        # Create a file that will cause an error during processing
+        # Send a valid XLSX file structure but with corrupted content
+        # that will fail during openpyxl processing
+        corrupted_content = (
+            b"PK\x03\x04" + b"\x00" * 100  # Minimal ZIP header but corrupted
+        )
+
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[("trinec_file", "corrupted.xlsx", corrupted_content)],
+        ).follow()
+
+        assert res.status_code == 200
+        assert "Při zpracování souboru došlo k chybě" in res
+
+    def test_prepare_trinec_corrupted_table_header(self, user, testapp):
+        """Test submitting Excel file with corrupted table header"""
+        login(user, testapp)
+
+        # Load the test Excel file
+        file_path = Path("tests/data/trinec_import_corrupted_header.xlsx")
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+
+        # Submit the Třinec form
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[
+                (
+                    "trinec_file",
+                    "trinec_import_corrupted_header.xlsx",
+                    file_content,
+                )
+            ],
+        ).follow()
+
+        assert res.status_code == 200
+        assert "Při zpracování souboru došlo k chybě" in res
+        assert "Sloupce se nepodařilo rozpoznat" in res
+
+    @pytest.mark.parametrize(
+        "filename,valid_lines,skipped_lines",
+        (
+            ("trinec_import_valid_tb.xlsx", 6, 1),
+            ("trinec_import_valid_pb.xlsx", 4, 1),
+            ("trinec_import_skip_lines.xlsx", 1, 6),
+        ),
+    )
+    def test_prepare_trinec_full_workflow(
+        self, user, testapp, filename, valid_lines, skipped_lines
+    ):
+        """Test complete workflow: upload Třinec file and import data"""
+        login(user, testapp)
+
+        # Load the test Excel file
+        file_path = Path("tests/data/") / filename
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.count()
+
+        # Upload Třinec file
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[("trinec_file", "trinec_import.xlsx", file_content)],
+        )
+
+        assert res.status_code == 200
+        assert "Soubor byl úspěšně načten" in res
+
+        # Now submit the pre-filled form to actually import the data
+        form = res.forms["importForm"]
+        # The donation_center_id should be pre-set to 3 (Třinec) by the view
+        res = form.submit().follow()
+
+        # Check that import was successful
+        assert "Import proběhl úspěšně" in res
+        assert res.status_code == 200
+
+        # Verify records were created
+        assert Record.query.count() == existing_records + valid_lines
+        assert Batch.query.count() == existing_batches + 1
+
+        # Verify the batch is associated with Třinec (donation_center_id=3)
+        latest_batch = Batch.query.order_by(Batch.id.desc()).first()
+        assert latest_batch.donation_center_id == 3
+
+    def test_prepare_trinec_full_workflow_repairable_data(self, user, testapp):
+        """Test complete workflow with repairable data"""
+        login(user, testapp)
+
+        # Load the test Excel file
+        file_path = Path("tests/data/") / "trinec_import_repairable_data.xlsx"
+        with open(file_path, "rb") as f:
+            file_content = f.read()
+
+        existing_records = Record.query.count()
+        existing_batches = Batch.query.count()
+
+        # Upload Třinec file
+        res = testapp.post(
+            url_for("batch.prepare_data_from_trinec"),
+            upload_files=[
+                ("trinec_file", "trinec_import_repairable_data.xlsx", file_content)
+            ],
+        )
+
+        assert res.status_code == 200
+        assert "Soubor byl úspěšně načten" in res
+
+        # Now submit the pre-filled form to actually import the data
+        form = res.forms["importForm"]
+        # The donation_center_id should be pre-set to 3 (Třinec) by the view
+        res = form.submit()
+
+        form = res.forms["importForm"]
+
+        assert "chybí PSČ, nahrazeno nulami" in form["invalid_lines_errors"].value
+        assert (
+            "chybí pojišťovna, nahrazena nulami" in form["invalid_lines_errors"].value
+        )
+
+        # Now submit the pre-filled form again with the fixed data
+        res = form.submit().follow()
+
+        # Check that import was successful
+        assert "Import proběhl úspěšně" in res
+        assert res.status_code == 200
+
+        # Verify records were created
+        assert Record.query.count() == existing_records + 6
+        assert Batch.query.count() == existing_batches + 1
+
+        # Verify the batch is associated with Třinec (donation_center_id=3)
+        latest_batch = Batch.query.order_by(Batch.id.desc()).first()
+        assert latest_batch.donation_center_id == 3
