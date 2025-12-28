@@ -185,17 +185,24 @@ def prepare_data_from_trinec():
 
         workbook.close()
 
-        # Maps real column names in the Excel to expected names
-        column_map = {
-            "rodné číslo": get_close_matches("Rodné číslo", headers, n=1)[0],
-            "jméno": get_close_matches("Jméno", headers, n=1)[0],
-            "příjmení": get_close_matches("Příjmení", headers, n=1)[0],
-            "ulice": get_close_matches("TB ulice", headers, n=1)[0],
-            "město": get_close_matches("TB město", headers, n=1)[0],
-            "psč": get_close_matches("TB psč", headers, n=1)[0],
-            "pojišťovna": get_close_matches("Pojišť.", headers, n=1)[0],
-            "odběr": get_close_matches("Odběr poř.číslo", headers, n=1)[0],
-        }
+        try:
+            # Maps real column names in the Excel to expected names
+            column_map = {
+                "rodné číslo": get_close_matches("Rodné číslo", headers, n=1)[0],
+                "jméno": get_close_matches("Jméno", headers, n=1)[0],
+                "příjmení": get_close_matches("Příjmení", headers, n=1)[0],
+                "ulice": get_close_matches("TB ulice", headers, n=1)[0],
+                "město": get_close_matches("TB město", headers, n=1)[0],
+                "psč": get_close_matches("TB psč", headers, n=1)[0],
+                "pojišťovna": get_close_matches("Pojišť.", headers, n=1)[0],
+                "odběr": get_close_matches("Odběr poř.číslo", headers, n=1)[0],
+            }
+        except IndexError:
+            flash(
+                "Při zpracování souboru došlo k chybě: Sloupce se nepodařilo rozpoznat",
+                "danger",
+            )
+            return redirect(url_for("batch.import_data"))
 
         input_lines = []
         for row in data_rows:
