@@ -283,3 +283,9 @@ def send_email_with_award_doc(to, award_doc_content, medal, config):
         server.starttls()
         server.login(config["SMTP_LOGIN"], config["SMTP_PASSWORD"])
         server.send_message(msg)
+
+
+def get_empty_str_if_none(dictionary, key):
+    """Returns empty string if the value for the given key is None"""
+    value = dictionary.get(key, "")
+    return value if value is not None else ""

@@ -11,7 +11,11 @@ from werkzeug.wrappers import Response
 from registry.donor.models import Batch, DonorsOverview, Record
 from registry.extensions import db
 from registry.list.models import DonationCenter
-from registry.utils import flash_errors, record_as_input_data
+from registry.utils import (
+    flash_errors,
+    get_empty_str_if_none,
+    record_as_input_data,
+)
 
 from .forms import DeleteBatchForm, ImportForm
 
@@ -213,13 +217,13 @@ def prepare_data_from_trinec():
             line = ";".join(
                 [
                     str(rodne_cislo),
-                    str(row.get(column_map["jméno"], "")),
-                    str(row.get(column_map["příjmení"], "")),
-                    str(row.get(column_map["ulice"], "")),
-                    str(row.get(column_map["město"], "")),
-                    str(row.get(column_map["psč"], "")),
-                    str(row.get(column_map["pojišťovna"], "")),
-                    str(row.get(column_map["odběr"], "")),
+                    str(get_empty_str_if_none(row, column_map["jméno"])),
+                    str(get_empty_str_if_none(row, column_map["příjmení"])),
+                    str(get_empty_str_if_none(row, column_map["ulice"])),
+                    str(get_empty_str_if_none(row, column_map["město"])),
+                    str(get_empty_str_if_none(row, column_map["psč"])),
+                    str(get_empty_str_if_none(row, column_map["pojišťovna"])),
+                    str(get_empty_str_if_none(row, column_map["odběr"])),
                 ]
             )
             input_lines.append(line)
