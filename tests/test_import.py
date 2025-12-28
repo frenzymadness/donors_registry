@@ -27,7 +27,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["input_data"] = input_data
         form.fields["donation_center_id"][0].select(donation_center_id)
         res = form.submit().follow()
@@ -59,12 +59,12 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit()
         assert res.status_code == 200
-        form = res.form
+        form = res.forms["importForm"]
         # There is one valid line
         assert len(form["valid_lines"].value.splitlines()) == 1
         # And the rest are invalid lines
@@ -88,7 +88,7 @@ class TestImport:
         existing_batches = Batch.query.count()
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = input_data
         # No matter how many times we submit the form because it contains
@@ -96,7 +96,7 @@ class TestImport:
         for _ in range(5):
             res = form.submit()
             assert res.status_code == 200
-            form = res.form
+            form = res.forms["importForm"]
             assert len(form["valid_lines"].value.splitlines()) == 0
             # And the rest are invalid lines
             assert len(form["invalid_lines"].value.splitlines()) == 9
@@ -114,12 +114,12 @@ class TestImport:
         existing_batches = Batch.query.count()
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit()
         assert res.status_code == 200
-        form = res.form
+        form = res.forms["importForm"]
         assert len(form["valid_lines"].value.splitlines()) == 0
         assert len(form["invalid_lines"].value.splitlines()) == 5
         assert len(form["invalid_lines_errors"].value.splitlines()) == len(
@@ -143,7 +143,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["input_data"] = input_data
         form.fields["donation_center_id"][0].select(-1)
         assert (
@@ -166,7 +166,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form.fields["donation_center_id"][0].options.append(("666", False, "malicious"))
         form.fields["donation_center_id"][0].select(666)
         res = form.submit()
@@ -190,7 +190,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -216,7 +216,7 @@ class TestImport:
 
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = input_data
         res = form.submit().follow()
@@ -233,7 +233,7 @@ class TestImport:
         # Test regular empty input
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = ""
         res = form.submit()
@@ -245,12 +245,12 @@ class TestImport:
         # Test empty input for data repair form
         existing_batches = Batch.query.count()
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = "invalid"
         res = form.submit()
 
-        form = res.form
+        form = res.forms["importForm"]
         form["invalid_lines"] = ""
         res = form.submit()
 
@@ -273,7 +273,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = "1;a;b;c;d;00000;000;\n2;a;b;c;d;00000;000;0"
         res = form.submit()
@@ -288,12 +288,12 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = "1;a;b;c;d;00000;000;\ninvalid"
         res = form.submit()
 
-        form = res.form
+        form = res.forms["importForm"]
         form["invalid_lines"] = "1;a;b;c;d;00000;000;"
         res = form.submit()
 
@@ -358,7 +358,7 @@ class TestImport:
     ):
         login(user, testapp)
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["input_data"] = input_line
         form.fields["donation_center_id"][0].select(1)
         res = form.submit().follow()
@@ -388,7 +388,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = f"111111111;a;b;c;d;00000;000;{expr}"
         res = form.submit()
@@ -397,7 +397,7 @@ class TestImport:
         assert Batch.query.count() == existing_batches
         assert "Řádky s chybami" in res
 
-        form = res.form
+        form = res.forms["importForm"]
         assert form["invalid_lines"].value == f"111111111;a;b;c;d;00000;000;{result}\n"
         assert form["invalid_lines_errors"].value == f"vstup {expr} sečten = {result}\n"
         res = form.submit().follow()
@@ -422,7 +422,7 @@ class TestImport:
         existing_batches = Batch.query.count()
 
         res = testapp.get(url_for("batch.import_data"))
-        form = res.form
+        form = res.forms["importForm"]
         form["donation_center_id"] = 1
         form["input_data"] = f"111111111;a;b;c;d;00000;000;{expr}"
         res = form.submit()
@@ -432,7 +432,7 @@ class TestImport:
         assert "Řádky s chybami" in res
 
         for _ in range(2):
-            form = res.form
+            form = res.forms["importForm"]
             assert (
                 form["invalid_lines"].value == f"111111111;a;b;c;d;00000;000;{expr}\n"
             )
