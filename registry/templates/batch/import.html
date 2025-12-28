@@ -50,6 +50,18 @@
 </form>
 {% endwith %}
 
+<hr class="my-4">
+
+<h2>Import z Třince</h2>
+<form action="{{ url_for('batch.prepare_data_from_trinec') }}" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+        <label for="trinec_file">Soubor s daty z Třince (.xlsx):</label>
+        <input type="file" name="trinec_file" id="trinec_file" accept=".xlsx" class="form-control-file" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Připravit data z Třince</button>
+</form>
+
 {% endblock %}
 
 {% block js %}

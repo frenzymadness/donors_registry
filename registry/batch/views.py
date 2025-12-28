@@ -1,8 +1,10 @@
 from datetime import datetime
+from difflib import get_close_matches
 from io import StringIO
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import login_required
+from openpyxl import load_workbook
 from werkzeug.datastructures import Headers
 from werkzeug.wrappers import Response
 
@@ -146,3 +148,90 @@ def download_batch(id):
     headers.set("Content-Disposition", "attachment", filename="data.txt")
 
     return Response(content, mimetype="text/plain", headers=headers)
+
+
+@blueprint.post("/prepare_data_from_trinec")
+@login_required
+def prepare_data_from_trinec():
+    """Process data from Třinec Excel file."""
+    if "trinec_file" not in request.files:
+        flash("Nebyl vybrán žádný soubor", "danger")
+        return redirect(url_for("batch.import_data"))
+
+    file = request.files["trinec_file"]
+
+    if file.filename == "":
+        flash("Nebyl vybrán žádný soubor", "danger")
+        return redirect(url_for("batch.import_data"))
+
+    try:
+        # Load the workbook
+        workbook = load_workbook(filename=file, read_only=True)
+        sheet = workbook.active
+
+        # Read header row (first row)
+        rows_iter = sheet.iter_rows(values_only=True)
+        headers = [h.strip() for h in next(rows_iter) if h]
+
+        # Process data rows as dictionaries
+        data_rows = []
+        for row in rows_iter:
+            # Skip empty rows
+            if not any(row):
+                continue
+            # Create dictionary with headers as keys
+            row_dict = {headers[i]: row[i] for i in range(len(headers))}
+            data_rows.append(row_dict)
+
+        workbook.close()
+
+        # Maps real column names in the Excel to expected names
+        column_map = {
+            "rodné číslo": get_close_matches("Rodné číslo", headers, n=1)[0],
+            "jméno": get_close_matches("Jméno", headers, n=1)[0],
+            "příjmení": get_close_matches("Příjmení", headers, n=1)[0],
+            "ulice": get_close_matches("TB ulice", headers, n=1)[0],
+            "město": get_close_matches("TB město", headers, n=1)[0],
+            "psč": get_close_matches("TB psč", headers, n=1)[0],
+            "pojišťovna": get_close_matches("Pojišť.", headers, n=1)[0],
+            "odběr": get_close_matches("Odběr poř.číslo", headers, n=1)[0],
+        }
+
+        input_lines = []
+        for row in data_rows:
+            rodne_cislo = str(row.get(column_map["rodné číslo"]))
+            if not rodne_cislo.isnumeric():
+                continue
+            # Example mapping - adjust these column names to match your Excel file:
+            line = ";".join(
+                [
+                    str(rodne_cislo),
+                    str(row.get(column_map["jméno"], "")),
+                    str(row.get(column_map["příjmení"], "")),
+                    str(row.get(column_map["ulice"], "")),
+                    str(row.get(column_map["město"], "")),
+                    str(row.get(column_map["psč"], "")),
+                    str(row.get(column_map["pojišťovna"], "")),
+                    str(row.get(column_map["odběr"], "")),
+                ]
+            )
+            input_lines.append(line)
+
+        # Create the input data text
+        input_data_text = "\n".join(input_lines)
+
+        # Create and pre-populate the ImportForm
+        import_form = ImportForm()
+        import_form.input_data.data = input_data_text
+        import_form.donation_center_id.data = "3"  # Třinec
+
+        flash(
+            f"Soubor byl úspěšně načten. Nalezeno {len(input_lines)} řádků. ", "success"
+        )
+
+        # Render the import template with pre-filled form
+        return render_template("batch/import.html", form=import_form)
+
+    except Exception as e:  # noqa: B902
+        flash(f"Při zpracování souboru došlo k chybě: {str(e)}", "danger")
+        return redirect(url_for("batch.import_data"))
