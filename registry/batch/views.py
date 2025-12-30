@@ -3,12 +3,18 @@ from difflib import get_close_matches
 from io import StringIO
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 from openpyxl import load_workbook
 from werkzeug.datastructures import Headers
 from werkzeug.wrappers import Response
 
-from registry.donor.models import Batch, DonorsOverview, Note, Record
+from registry.donor.models import (
+    Batch,
+    ContactImportLog,
+    DonorsOverview,
+    Note,
+    Record,
+)
 from registry.extensions import db
 from registry.list.models import DonationCenter
 from registry.utils import (
@@ -328,6 +334,29 @@ def import_contacts_post():
 
         db.session.commit()
 
+        # Create audit log entry
+        # Determine the input data that was processed
+        if contact_form.valid_lines.data or contact_form.invalid_lines.data:
+            # Repeated import with fixed errors - use valid lines only
+            input_data_logged = contact_form.valid_lines.data
+        else:
+            # First import - use original input
+            input_data_logged = contact_form.input_data.data
+
+        audit_log = ContactImportLog(
+            imported_at=datetime.now(),
+            imported_by_user_id=current_user.id,
+            filename=contact_form.filename.data if contact_form.filename.data else None,
+            input_data=input_data_logged,
+            processed_lines_count=stats["total"],
+            created_notes_count=stats["new_notes"],
+            updated_notes_count=stats["total"] - stats["new_notes"],
+            emails_added_count=stats["emails_added"],
+            phones_added_count=stats["phones_added"],
+        )
+        db.session.add(audit_log)
+        db.session.commit()
+
         # Flash success message with statistics
         flash(
             f"Import kontaktů proběhl úspěšně. "
@@ -378,6 +407,7 @@ def prepare_contacts_from_file():
         # Create and pre-populate the form
         contact_form = ContactImportForm()
         contact_form.input_data.data = input_data_text
+        contact_form.filename.data = file.filename
 
         line_count = len(input_data_text.strip().splitlines())
         flash(
@@ -390,3 +420,11 @@ def prepare_contacts_from_file():
     except Exception as e:  # noqa: B902
         flash(f"Při zpracování souboru došlo k chybě: {str(e)}", "danger")
         return redirect(url_for("batch.import_contacts"))
+
+
+@blueprint.get("/contact_import_logs")
+@login_required
+def contact_import_logs():
+    """Display list of contact import audit logs."""
+    logs = ContactImportLog.query.order_by(ContactImportLog.imported_at.desc()).all()
+    return render_template("batch/contact_import_logs.html", logs=logs)

@@ -763,3 +763,185 @@ just-email@test.cz"""
         assert note is not None
         assert "jan.novak@seznam.cz" in note.note
         assert "602123456" in note.note
+
+
+class TestContactImportAuditLog:
+    """Test audit logging for contact imports."""
+
+    def test_audit_log_created_with_correct_statistics(self, user, testapp, db):
+        """Test that audit log is created with correct statistics after import."""
+        from registry.donor.models import ContactImportLog
+
+        login(user, testapp)
+
+        rc1, rc2, rc3 = sample_of_rc(3)
+
+        for rc in rc1, rc2, rc3:
+            delete_note_if_exists(rc)
+
+        # Create one existing note to test update statistics
+        existing_note = Note(rodne_cislo=rc1, note="Existing text")
+        db.session.add(existing_note)
+        db.session.commit()
+
+        # Get count of logs before import
+        logs_before = ContactImportLog.query.count()
+
+        # Perform import with 3 lines:
+        # - rc1: existing note, add email + phone (2 contacts added)
+        # - rc2: new note, add email only (1 contact added)
+        # - rc3: new note, add phone only (1 contact added)
+        res = testapp.get(url_for("batch.import_contacts"))
+        form = res.forms["contactImportForm"]
+        form[
+            "input_data"
+        ] = f"""{rc1} jan.novak@seznam.cz 602123456
+{rc2} marie.nova@gmail.com
+{rc3} +420734000000"""
+
+        res = form.submit().follow()
+        assert res.status_code == 200
+        assert "Import kontaktů proběhl úspěšně" in res
+
+        # Verify a new log entry was created
+        logs_after = ContactImportLog.query.count()
+        assert logs_after == logs_before + 1
+
+        # Get the latest log entry
+        log = ContactImportLog.query.order_by(
+            ContactImportLog.imported_at.desc()
+        ).first()
+        assert log is not None
+
+        # Verify statistics
+        assert log.processed_lines_count == 3
+        assert log.created_notes_count == 2  # rc2 and rc3 are new
+        assert log.updated_notes_count == 1  # rc1 is updated
+        assert log.emails_added_count == 2  # rc1 and rc2
+        assert log.phones_added_count == 2  # rc1 and rc3
+
+        # Verify user tracking
+        assert log.imported_by_user_id == user.id
+
+        # Verify input data was saved
+        assert log.input_data is not None
+        assert rc1 in log.input_data
+        assert "jan.novak@seznam.cz" in log.input_data
+
+        # Verify filename is None (pasted directly)
+        assert log.filename is None
+
+        # Verify the log appears on the view page
+        res = testapp.get(url_for("batch.contact_import_logs"))
+        assert res.status_code == 200
+
+        # Check that the log entry is displayed in the table
+        assert str(log.id) in res
+        assert user.email in res
+        assert "3" in res  # processed_lines_count
+        assert "2" in res  # created_notes_count or emails/phones count
+
+    def test_audit_log_with_filename_from_file_upload(self, user, testapp, tmp_path):
+        """Test that filename is recorded when file is uploaded."""
+        from registry.donor.models import ContactImportLog
+
+        login(user, testapp)
+
+        rc1, rc2, rc3 = sample_of_rc(3)
+
+        # Create temporary file with the data
+        temp_file = tmp_path / "test_contacts.txt"
+        temp_file.write_text(
+            f"{rc1} jan.novak@seznam.cz 602123456\n{rc2} marie.nova@gmail.com\n{rc3} +420734000000"
+        )
+
+        # Upload the file
+        res = testapp.get(url_for("batch.import_contacts"))
+        upload_form = res.forms[1]
+        upload_form["contact_file"] = (temp_file.name, temp_file.read_bytes())
+        res = upload_form.submit()
+        assert "Soubor byl úspěšně načten" in res
+
+        # Submit the import
+        form = res.forms["contactImportForm"]
+        res = form.submit().follow()
+        assert "Import kontaktů proběhl úspěšně" in res
+
+        # Get the latest log entry
+        log = ContactImportLog.query.order_by(
+            ContactImportLog.imported_at.desc()
+        ).first()
+        assert log is not None
+
+        # Verify filename was recorded
+        assert log.filename == "test_contacts.txt"
+
+        # Verify it appears on the view page
+        res = testapp.get(url_for("batch.contact_import_logs"))
+        assert "test_contacts.txt" in res
+
+    @pytest.mark.parametrize("rc", sample_of_rc(2))
+    def test_audit_log_with_duplicate_contacts_skipped(self, user, testapp, rc, db):
+        """Test that skipped duplicates are not counted in statistics."""
+        from registry.donor.models import ContactImportLog
+
+        login(user, testapp)
+
+        delete_note_if_exists(rc)
+
+        # Create existing note with contacts
+        note = Note(rodne_cislo=rc, note="jan.novak@seznam.cz\n602123456")
+        db.session.add(note)
+        db.session.commit()
+
+        # Try to import same contacts
+        res = testapp.get(url_for("batch.import_contacts"))
+        form = res.forms["contactImportForm"]
+        form["input_data"] = f"{rc} jan.novak@seznam.cz 602123456"
+        res = form.submit().follow()
+
+        # Get the latest log entry
+        log = ContactImportLog.query.order_by(
+            ContactImportLog.imported_at.desc()
+        ).first()
+        assert log is not None
+
+        # Verify statistics show 0 additions (all skipped)
+        assert log.processed_lines_count == 1
+        assert log.created_notes_count == 0
+        assert log.updated_notes_count == 1  # Note was "updated" but nothing changed
+        assert log.emails_added_count == 0  # Duplicate, skipped
+        assert log.phones_added_count == 0  # Duplicate, skipped
+
+    @pytest.mark.parametrize("rc", sample_of_rc(2))
+    def test_audit_log_view_displays_input_data_in_modal(self, user, testapp, rc):
+        """Test that input data can be viewed in modal on logs page."""
+        from registry.donor.models import ContactImportLog
+
+        login(user, testapp)
+
+        delete_note_if_exists(rc)
+
+        # Perform import
+        test_input = f"{rc} test@email.cz 602123456"
+        res = testapp.get(url_for("batch.import_contacts"))
+        form = res.forms["contactImportForm"]
+        form["input_data"] = test_input
+        res = form.submit().follow()
+
+        # Get the latest log entry
+        log = ContactImportLog.query.order_by(
+            ContactImportLog.imported_at.desc()
+        ).first()
+        assert log is not None
+
+        # Visit logs page
+        res = testapp.get(url_for("batch.contact_import_logs"))
+        assert res.status_code == 200
+
+        # Check that modal with input data exists
+        assert f"dataModal{log.id}" in res
+        assert test_input in res  # Input data should be in the modal
+
+        # Check that "Zobrazit" button exists
+        assert "Zobrazit" in res

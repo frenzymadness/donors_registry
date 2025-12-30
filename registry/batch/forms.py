@@ -97,6 +97,7 @@ class ContactImportForm(FlaskForm):
     valid_lines = TextAreaField("Bezchybné řádky")
     invalid_lines = TextAreaField("Řádky s chybami")
     invalid_lines_errors = TextAreaField("Chyby ve vstupních datech")
+    filename = HiddenField("Název souboru")
 
     def __init__(self, *args, **kwargs):
         super(ContactImportForm, self).__init__(*args, **kwargs)

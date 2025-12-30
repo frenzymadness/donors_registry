@@ -25,6 +25,7 @@
 {% with form=form %}
 <form id="contactImportForm" action="{{ url_for('batch.import_contacts_post') }}" method="POST">
     {{ form.csrf_token }}
+    {{ form.filename() }}
 
     {% if form.invalid_lines_errors.data %}
     <div class="form-group">

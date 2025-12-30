@@ -1,0 +1,88 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Přehled importů kontaktů</h1>
+
+<table id="contact_import_logs" class="table table-striped table-hovered table-hover">
+    <thead class="thead-dark">
+        <tr>
+            <th>ID</th>
+            <th>Importováno</th>
+            <th>Uživatel</th>
+            <th>Název souboru</th>
+            <th>Řádků</th>
+            <th>Nových poznámek</th>
+            <th>Upravených poznámek</th>
+            <th>E-mailů přidáno</th>
+            <th>Telefonů přidáno</th>
+            <th>Data</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.id }}</td>
+            <td data-sort="{{ log.imported_at }}">{{ log.imported_at|format_time }}</td>
+            <td>{{ log.imported_by_user.email }}</td>
+            <td>{{ log.filename or "—" }}</td>
+            <td>{{ log.processed_lines_count }}</td>
+            <td>{{ log.created_notes_count }}</td>
+            <td>{{ log.updated_notes_count }}</td>
+            <td>{{ log.emails_added_count }}</td>
+            <td>{{ log.phones_added_count }}</td>
+            <td>
+                <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#dataModal{{ log.id }}">
+                    Zobrazit
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modals for showing input data -->
+{% for log in logs %}
+<div class="modal fade" id="dataModal{{ log.id }}" tabindex="-1" role="dialog" aria-labelledby="dataModalLabel{{ log.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel{{ log.id }}">
+                    Importovaná data - {{ log.imported_at|format_time }}
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Zavřít">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <pre style="white-space: pre-wrap; word-wrap: break-word;">{{ log.input_data }}</pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Zavřít</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.fn.dataTable.ext.order.intl('cs-CZ');
+
+        $('#contact_import_logs').DataTable({
+            stateSave: true,
+            stateDuration: -1, // -1 means session storage in the current browser window
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.10.21/i18n/Czech.json'
+            },
+            lengthMenu: [
+                [10, 25, 50, 100, -1],
+                [10, 25, 50, 100, 'Všechny']
+            ],
+            order: [[0, 'desc']] // Sort by ID descending (newest first)
+        });
+    });
+</script>
+{% endblock %}
