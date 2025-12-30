@@ -11,6 +11,7 @@ from registry.donor.models import (
     DonorsOverride,
     DonorsOverview,
     IgnoredDonors,
+    Note,
     Record,
 )
 from registry.list.models import DonationCenter, Medals
@@ -218,4 +219,71 @@ def test_data_overrides(db, limit=25):
         setattr(override, field, random_value)
 
         db.session.add(override)
+    db.session.commit()
+
+
+def test_data_notes(db, limit=25):
+    emails = [
+        "jan.novak@example.com",
+        "petra.svobodova@testmail.cz",
+        "lukas.kralik@demo.org",
+        "martina.horakova@sample.net",
+        "pavel.dvorak@mailbox.cz",
+        "eva.machova@example.org",
+        "ondrej.benes@test.cz",
+        "klara.prochazkova@demo.com",
+        "michal.fiala@mail.net",
+        "jana.kucerova@example.cz",
+        "tomas.pokorny@sample.org",
+        "lenka.vesela@testmail.com",
+        "adam.simek@demo.cz",
+        "veronika.novotna@mailbox.org",
+        "daniel.marek@example.net",
+        "tereza.havlickova@test.cz",
+        "jakub.cerny@sample.com",
+        "monika.kolarova@mail.net",
+        "filip.pospisil@example.org",
+        "ivana.urbanova@testmail.cz",
+    ]
+
+    phone_numbers = [
+        "602345789",
+        "721 456 832",
+        "+420608912345",
+        "+420 739 845 216",
+        "00420775321498",
+        "602 789 654",
+        "+420 724963852",
+        "731258964",
+        "777 654 321",
+        "+420608 147 963",
+        "234567891",
+        "251 789 634",
+        "+420 312456987",
+        "385 741 296",
+        "00420 412 963 785",
+        "493852741",
+        "+420 541 789 632",
+        "376 258 941",
+        "+420284963157",
+        "00420 469852314",
+    ]
+
+    for index, rodne_cislo in tqdm(
+        enumerate(Record.query.with_entities(Record.rodne_cislo).distinct()),
+        desc="Donors notes",
+    ):
+        if index >= limit:
+            break
+
+        entries = []
+
+        if uniform(0, 1) < 0.5:
+            entries.append(choice(emails))
+
+        if uniform(0, 1) < 0.5:
+            entries.append(choice(phone_numbers))
+
+        note = "\n".join(entries)
+        db.session.add(Note(rodne_cislo=rodne_cislo[0], note=note))
     db.session.commit()

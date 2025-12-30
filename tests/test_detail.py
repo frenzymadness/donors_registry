@@ -41,6 +41,10 @@ class TestDetail:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_save_update_note(self, user, testapp, rodne_cislo):
         skip_if_ignored(rodne_cislo)
+        # Make sure no note exists for this RC
+        if note := Note.query.get(rodne_cislo) is not None:
+            db.session.delete(note)
+            db.session.commit()
         existing_notes = Note.query.count()
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
