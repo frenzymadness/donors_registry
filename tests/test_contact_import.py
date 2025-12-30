@@ -18,7 +18,7 @@ from registry.donor.models import Note
 from registry.extensions import db
 from registry.utils import EMAIL_RE, PHONE_RE, RC_RE, is_valid_rc
 
-from .fixtures import delete_note_if_exists, sample_of_rc
+from .fixtures import delete_note_if_exists, new_rc_if_ignored, sample_of_rc
 from .helpers import login
 
 
@@ -108,6 +108,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_valid_line_with_all_fields(self, rc):
         """Test parsing a line with RC, email, and phone."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} jan.novak@seznam.cz 602123456"
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -119,6 +120,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_valid_line_different_order(self, rc):
         """Test that order doesn't matter."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} jan.novak@seznam.cz 602123456"
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -130,6 +132,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_valid_line_with_slash_rc(self, rc):
         """Test RC with slash separator."""
+        rc = new_rc_if_ignored(rc)
         original_rc = rc
         rc = rc[:6] + "/" + rc[6:]
         line = f"{rc} test@email.cz +420 602 123 456"
@@ -143,6 +146,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_valid_line_email_only(self, rc):
         """Test line with only RC and email."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} marie.nova@gmail.com"
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -154,6 +158,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_valid_line_phone_only(self, rc):
         """Test line with only RC and phone."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} +420734000000"
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -165,6 +170,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_complex_line_with_extra_text(self, rc):
         """Test parsing complex line with extra text (like from export)."""
+        rc = new_rc_if_ignored(rc)
         line = f"DANIEL DOLEŽAL {rc} 2004-07-15 00:00:00 213 DOLNÍ LOMNÁ 203 73991 JABLUNKOV +420 734000000 a@seznam.cz 2025-10-03 00:00:00"
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -184,6 +190,7 @@ class TestParseContactLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_missing_contact_info(self, rc):
         """Test error when both email and phone are missing."""
+        rc = new_rc_if_ignored(rc)
         line = rc
         parsed_rc, email, phone, errors = parse_contact_line(line)
 
@@ -237,6 +244,9 @@ class TestValidateContactImportData:
     def test_valid_lines(self):
         """Test validation with all valid lines."""
         rc1, rc2, rc3 = sample_of_rc(3)
+        rc1 = new_rc_if_ignored(rc1)
+        rc2 = new_rc_if_ignored(rc2)
+        rc3 = new_rc_if_ignored(rc3)
         text = f"""{rc1} jan.novak@seznam.cz 602123456
 {rc2[:6] + "/" + rc2[6:]} marie.nova@gmail.com
 {rc3} +420734000000"""
@@ -249,6 +259,9 @@ class TestValidateContactImportData:
     def test_mixed_valid_invalid(self):
         """Test validation with mix of valid and invalid lines."""
         rc1, rc2, rc3 = sample_of_rc(3)
+        rc1 = new_rc_if_ignored(rc1)
+        rc2 = new_rc_if_ignored(rc2)
+        rc3 = new_rc_if_ignored(rc3)
         text = f"""{rc1} jan.novak@seznam.cz 602123456
 just-email@test.cz
 {rc2} +420734000000
@@ -268,6 +281,8 @@ multiple@email.cz and@email.cz {rc1}"""
     def test_empty_lines_skipped(self):
         """Test that empty lines are silently skipped."""
         rc1, rc2 = sample_of_rc(2)
+        rc1 = new_rc_if_ignored(rc1)
+        rc2 = new_rc_if_ignored(rc2)
         text = f"""{rc1} test@email.cz
 
 {rc2} +420734000000
@@ -295,6 +310,7 @@ class TestProcessContactImportLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_process_valid_line(self, rc):
         """Test processing a valid line returns structured data."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} jan.novak@seznam.cz 602123456"
         data = process_contact_import_line(line)
 
@@ -305,6 +321,7 @@ class TestProcessContactImportLine:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_process_line_with_missing_optional_fields(self, rc):
         """Test processing line with only some fields."""
+        rc = new_rc_if_ignored(rc)
         line = f"{rc} test@email.cz"
         data = process_contact_import_line(line)
 
@@ -386,6 +403,7 @@ class TestContactImportIntegration:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_simple_contact_import(self, user, testapp, rc):
         """Test importing a simple contact."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         # Navigate to import page
@@ -412,6 +430,7 @@ class TestContactImportIntegration:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_duplicate_detection(self, user, testapp, rc):
         """Test that duplicate contacts are not added."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         delete_note_if_exists(rc)
@@ -439,6 +458,7 @@ class TestContactImportIntegration:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_with_errors(self, user, testapp, rc):
         """Test import with invalid lines shows errors."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         res = testapp.get(url_for("batch.import_contacts"))
@@ -465,6 +485,7 @@ just-email@test.cz
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_creates_new_note(self, user, testapp, rc):
         """Test that import creates new note if none exists."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         delete_note_if_exists(rc)
@@ -485,6 +506,7 @@ just-email@test.cz
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_creates_new_note_with_phone(self, user, testapp, rc):
         """Test that import creates new note if none exists."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         delete_note_if_exists(rc)
@@ -505,6 +527,7 @@ just-email@test.cz
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_appends_to_existing_note(self, user, testapp, rc):
         """Test that new contacts are appended to existing note."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         delete_note_if_exists(rc)
@@ -531,6 +554,7 @@ just-email@test.cz
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_contact_import_empty_input(self, user, testapp, rc):
         """Test that empty input is ignored."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         note_before = Note.query.get(rc)
@@ -555,6 +579,7 @@ class TestNoteModelMethods:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_get_phones_from_note(self, db, rc):
         """Test extracting phone numbers from note."""
+        rc = new_rc_if_ignored(rc)
         delete_note_if_exists(rc)
 
         note = Note(
@@ -572,6 +597,7 @@ class TestNoteModelMethods:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_get_all_contacts(self, db, rc):
         """Test getting all contacts from note."""
+        rc = new_rc_if_ignored(rc)
         delete_note_if_exists(rc)
 
         note = Note(
@@ -712,6 +738,7 @@ class TestContactImportErrorFixRetry:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_import_with_errors_then_fix_and_retry(self, user, testapp, rc, db):
         """Test full workflow: submit invalid data, see errors, fix them, retry successfully."""
+        rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
         delete_note_if_exists(rc)
@@ -813,7 +840,9 @@ class TestContactImportAuditLog:
         login(user, testapp)
 
         rc1, rc2, rc3 = sample_of_rc(3)
-
+        rc1 = new_rc_if_ignored(rc1)
+        rc2 = new_rc_if_ignored(rc2)
+        rc3 = new_rc_if_ignored(rc3)
         for rc in rc1, rc2, rc3:
             delete_note_if_exists(rc)
 
@@ -886,7 +915,9 @@ class TestContactImportAuditLog:
         login(user, testapp)
 
         rc1, rc2, rc3 = sample_of_rc(3)
-
+        rc1 = new_rc_if_ignored(rc1)
+        rc2 = new_rc_if_ignored(rc2)
+        rc3 = new_rc_if_ignored(rc3)
         # Create temporary file with the data
         temp_file = tmp_path / "test_contacts.txt"
         temp_file.write_text(
@@ -925,6 +956,7 @@ class TestContactImportAuditLog:
 
         login(user, testapp)
 
+        rc = new_rc_if_ignored(rc)
         delete_note_if_exists(rc)
 
         # Create existing note with contacts
@@ -959,6 +991,7 @@ class TestContactImportAuditLog:
         login(user, testapp)
 
         delete_note_if_exists(rc)
+        rc = new_rc_if_ignored(rc)
 
         # Perform import
         test_input = f"{rc} test@email.cz 602123456"

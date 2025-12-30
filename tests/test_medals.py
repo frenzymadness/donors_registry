@@ -13,7 +13,7 @@ from registry.donor.models import (
 )
 from registry.extensions import db
 
-from .fixtures import sample_of_rc, skip_if_ignored
+from .fixtures import new_rc_if_ignored, sample_of_rc
 from .helpers import login
 
 
@@ -124,7 +124,7 @@ class TestMedals:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_amount(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         medal_amount = AwardedMedals.query.filter(
@@ -135,7 +135,7 @@ class TestMedals:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_medal_eligibility(self, user, testapp, db, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         do = db.session.get(DonorsOverview, rodne_cislo)
         medals = Medals.query.all()
         AwardedMedals.query.filter(AwardedMedals.rodne_cislo == rodne_cislo).delete()
