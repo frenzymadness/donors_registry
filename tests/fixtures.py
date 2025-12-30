@@ -15,7 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from webtest import TestApp
 
 from registry.app import create_app
-from registry.donor.models import DonorsOverview, IgnoredDonors
+from registry.donor.models import DonorsOverview, IgnoredDonors, Note
 from registry.extensions import db as _db
 from registry.user.models import User
 
@@ -137,3 +137,9 @@ def mock_smtp():
         mock_instance = mock_smtp_class.return_value
         mock_instance.send_message = MagicMock()
         yield mock_instance
+
+
+def delete_note_if_exists(rodne_cislo):
+    if (note := _db.session.get(Note, rodne_cislo)) is not None:
+        _db.session.delete(note)
+        _db.session.commit()

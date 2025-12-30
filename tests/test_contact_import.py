@@ -18,7 +18,7 @@ from registry.donor.models import Note
 from registry.extensions import db
 from registry.utils import EMAIL_RE, PHONE_RE, RC_RE, is_valid_rc
 
-from .fixtures import sample_of_rc
+from .fixtures import delete_note_if_exists, sample_of_rc
 from .helpers import login
 
 
@@ -414,7 +414,9 @@ class TestContactImportIntegration:
         """Test that duplicate contacts are not added."""
         login(user, testapp)
 
-        # Create existing note
+        delete_note_if_exists(rc)
+
+        # Create note
         note = Note(rodne_cislo=rc, note="jan.novak@seznam.cz\n602123456")
         db.session.add(note)
         db.session.commit()
@@ -465,10 +467,7 @@ just-email@test.cz
         """Test that import creates new note if none exists."""
         login(user, testapp)
 
-        # Verify no note exists
-        if note := Note.query.get(rc) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rc)
 
         res = testapp.get(url_for("batch.import_contacts"))
         form = res.forms["contactImportForm"]
@@ -488,10 +487,7 @@ just-email@test.cz
         """Test that import creates new note if none exists."""
         login(user, testapp)
 
-        # Verify no note exists
-        if note := Note.query.get(rc) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rc)
 
         res = testapp.get(url_for("batch.import_contacts"))
         form = res.forms["contactImportForm"]
@@ -511,9 +507,8 @@ just-email@test.cz
         """Test that new contacts are appended to existing note."""
         login(user, testapp)
 
-        # Create existing note
-        if Note.query.get(rc) is not None:
-            pytest.skip("Note already exists")
+        delete_note_if_exists(rc)
+
         note = Note(rodne_cislo=rc, note="Existing note text")
         db.session.add(note)
         db.session.commit()
@@ -560,9 +555,8 @@ class TestNoteModelMethods:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_get_phones_from_note(self, db, rc):
         """Test extracting phone numbers from note."""
-        if note := Note.query.get(rc) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rc)
+
         note = Note(
             rodne_cislo=rc,
             note="Kontakt: +420 602 123 456\nDalší: 734000000",
@@ -578,9 +572,8 @@ class TestNoteModelMethods:
     @pytest.mark.parametrize("rc", sample_of_rc(2))
     def test_get_all_contacts(self, db, rc):
         """Test getting all contacts from note."""
-        if note := Note.query.get(rc) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rc)
+
         note = Note(
             rodne_cislo=rc,
             note="Email: jan@email.cz\nTelefon: +420602123456\nDalší: marie@email.cz",
@@ -721,10 +714,7 @@ class TestContactImportErrorFixRetry:
         """Test full workflow: submit invalid data, see errors, fix them, retry successfully."""
         login(user, testapp)
 
-        # Make sure note does not exist
-        if note := Note.query.get(rc) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rc)
 
         # Step 1: Submit data with errors
         res = testapp.get(url_for("batch.import_contacts"))
