@@ -764,6 +764,44 @@ just-email@test.cz"""
         assert "jan.novak@seznam.cz" in note.note
         assert "602123456" in note.note
 
+    def test_valid_lines_normalized_when_errors_shown(self, user, testapp):
+        """Test that valid lines are cleaned up to show only RC, email, and phone."""
+        login(user, testapp)
+
+        rc = next(sample_of_rc(1))
+        rc = new_rc_if_ignored(rc)
+
+        # Submit data with extra text in valid line
+        res = testapp.get(url_for("batch.import_contacts"))
+        form = res.forms["contactImportForm"]
+
+        # Valid line has extra text, invalid line is missing RC
+        form[
+            "input_data"
+        ] = f"""JOHN DOE {rc} born 1990-01-01 contact: jan.novak@seznam.cz or phone 602123456 address: somewhere
+just-email@test.cz"""
+
+        res = form.submit()
+
+        # Check that errors are shown
+        assert "Řádky s chybami" in res
+        assert "chybí rodné číslo" in res
+
+        # Check that valid line is normalized (extra text removed)
+        assert "Validní řádky" in res
+        form = res.forms["contactImportForm"]
+        valid_lines = form["valid_lines"].value
+
+        # Should contain only RC, email, and phone
+        assert rc in valid_lines
+        assert "jan.novak@seznam.cz" in valid_lines
+        assert "602123456" in valid_lines
+
+        # Should NOT contain the extra text
+        assert "JOHN DOE" not in valid_lines
+        assert "born 1990-01-01" not in valid_lines
+        assert "somewhere" not in valid_lines
+
 
 class TestContactImportAuditLog:
     """Test audit logging for contact imports."""
