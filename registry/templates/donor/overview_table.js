@@ -27,9 +27,30 @@ $(document).ready( function () {
         }, {
             "targets": "note",
             "render": function ( data, type, row, meta ) {
-              if (data)
-                return `<span data-toggle="modal" data-target="#titleModal" title="${data}">⚠️</span>`;
-              return "";
+              if (!data) return "";
+
+              // Data is now structured: {emails: [], phones: [], other: "", raw: ""}
+              let icons = [];
+
+              // Add email icon(s) as mailto links
+              if (data.emails && data.emails.length > 0) {
+                data.emails.forEach(email => {
+                  icons.push(`<a href="mailto:${email}" title="${email}">📧</a>`);
+                });
+              }
+
+              // Add phone icon(s)
+              if (data.phones && data.phones.length > 0) {
+                const phoneList = data.phones.join("\n");
+                icons.push(`<span data-toggle="modal" data-target="#titleModal" title="${phoneList}">📞</span>`);
+              }
+
+              // Add warning icon if there's other text
+              if (data.other && data.other.trim()) {
+                icons.push(`<span data-toggle="modal" data-target="#titleModal" title="${data.raw}">⚠️</span>`);
+              }
+
+              return icons.join(" ");
             },
             "orderable": false,
         },
