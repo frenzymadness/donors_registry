@@ -10,7 +10,7 @@ from tempfile import NamedTemporaryFile
 from unittest.mock import MagicMock, patch
 
 from flask_migrate import Migrate, upgrade
-from pytest import fixture, skip
+from pytest import fixture
 from sqlalchemy.exc import IntegrityError
 from webtest import TestApp
 
@@ -118,9 +118,12 @@ def sample_of_rc(amount=100):
         yield sample(list(test_data[test_data.MISTO_ODBERU == dc].RC.unique()), 1)[0]
 
 
-def skip_if_ignored(rodne_cislo):
-    if _db.session.get(IgnoredDonors, rodne_cislo):
-        skip("Donor is ignored")
+def new_rc_if_ignored(rodne_cislo):
+    while True:
+        if _db.session.get(IgnoredDonors, rodne_cislo):
+            rodne_cislo = next(sample_of_rc(1))
+            continue
+        return rodne_cislo
 
 
 @fixture(scope="session", autouse=True)

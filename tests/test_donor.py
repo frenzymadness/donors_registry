@@ -11,14 +11,14 @@ from registry.donor.models import (
 )
 from registry.extensions import db
 
-from .fixtures import sample_of_rc, skip_if_ignored
+from .fixtures import new_rc_if_ignored, sample_of_rc
 from .helpers import login
 
 
 class TestDonorsOverview:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(100))
     def test_refresh_overview(self, rodne_cislo, test_data_df):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         # Check of the total amount of donations
         donor_overview = DonorsOverview.query.filter_by(rodne_cislo=rodne_cislo).first()
         last_imports = (
@@ -69,7 +69,7 @@ class TestDonorsOverview:
 class TestIgnore:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_ignore(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.show_ignored"))
         random_reason = str(randint(11111111, 99999999))
@@ -146,7 +146,7 @@ class TestIgnore:
 class TestOverride:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_override(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
 
@@ -198,7 +198,7 @@ class TestOverride:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
     def test_incorrect_override(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         form = res.forms["donorsOverrideForm"]
@@ -213,7 +213,7 @@ class TestOverride:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(1))
     def test_form_errors(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         form = res.forms["donorsOverrideForm"]

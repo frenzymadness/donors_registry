@@ -19,7 +19,7 @@ from registry.donor.models import (
 from registry.extensions import db
 from registry.list.models import Medals
 
-from .fixtures import sample_of_rc, skip_if_ignored
+from .fixtures import delete_note_if_exists, new_rc_if_ignored, sample_of_rc
 from .helpers import login
 
 
@@ -27,7 +27,7 @@ class TestDetail:
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(50))
     def test_detail(self, user, testapp, rodne_cislo):
         """Just a simple test that the detail page loads for some random donors"""
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         assert res.status_code == 200
@@ -40,11 +40,9 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_save_update_note(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         # Make sure no note exists for this RC
-        if note := Note.query.get(rodne_cislo) is not None:
-            db.session.delete(note)
-            db.session.commit()
+        delete_note_if_exists(rodne_cislo)
         existing_notes = Note.query.count()
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
@@ -69,7 +67,7 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(5))
     def test_emails_in_notes(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         # No e-mail in the note
@@ -95,7 +93,7 @@ class TestDetail:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_manual_import_prepare(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
 
         donation_centers = DonationCenter.query.all()
@@ -268,7 +266,7 @@ class TestAwardDocument:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(3))
     def test_email_award_document_no_email(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         login(user, testapp)
         res = testapp.get(url_for("donor.detail", rc=rodne_cislo))
         # Make sure the note is empty
@@ -304,7 +302,7 @@ class TestAwardDocument:
     def test_email_award_document(
         self, user, testapp, note, expected_to, medal_id, rodne_cislo, mock_smtp
     ):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         medal = db.session.get(Medals, medal_id)
         # Make sure at least some medals are already awarded
         awarded_medals = (

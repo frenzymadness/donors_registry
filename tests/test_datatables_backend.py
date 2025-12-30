@@ -15,7 +15,11 @@ from registry.donor.models import (
 )
 from registry.extensions import db
 from registry.list.models import Medals
-from tests.fixtures import delete_note_if_exists, sample_of_rc, skip_if_ignored
+from tests.fixtures import (
+    delete_note_if_exists,
+    new_rc_if_ignored,
+    sample_of_rc,
+)
 
 from .helpers import login
 
@@ -41,7 +45,7 @@ class TestDataTablesBackend:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_json_backend_search(self, user, testapp, rodne_cislo):
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         params = {
             "draw": "1",
             "order[0][column]": "0",
@@ -106,7 +110,7 @@ class TestDataTablesBackend:
     def test_json_backend_note_structure(self, user, testapp):
         """Test that note data is properly structured with emails, phones, and other text."""
         rodne_cislo = next(sample_of_rc(1))
-        skip_if_ignored(rodne_cislo)
+        rodne_cislo = new_rc_if_ignored(rodne_cislo)
         delete_note_if_exists(rodne_cislo)
 
         # Create note with mixed content
