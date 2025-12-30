@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1>Import e-mailů a telefonních čísel</h1>
+
+<div class="alert alert-info">
+    <h5>Instrukce:</h5>
+    <ul>
+        <li>Nahrajte soubor (.txt, .csv nebo .xlsx) s kontaktními údaji</li>
+        <li>Každý řádek může obsahovat rodné číslo, e-mail a/nebo telefonní číslo v libovolném pořadí</li>
+        <li><strong>Rodné číslo je povinné</strong> a musí existovat v databázi</li>
+        <li>E-mail a telefon jsou volitelné, ale alespoň jedno musí být uvedeno</li>
+        <li>Systém automaticky detekuje jednotlivé údaje</li>
+        <li>Duplicitní kontakty nebudou přidány</li>
+    </ul>
+    <h6>Příklady správných řádků:</h6>
+    <code>
+        9001011234 jan.novak@email.cz 602123456<br>
+        jan.novak@email.cz 9001011234<br>
+        900101/1234 +420 602 123 456<br>
+        602123456 900101/1234
+    </code>
+</div>
+
+{% with form=form %}
+<form id="contactImportForm" action="{{ url_for('batch.import_contacts_post') }}" method="POST">
+    {{ form.csrf_token }}
+
+    {% if form.invalid_lines_errors.data %}
+    <div class="form-group">
+        <label for="valid_lines">Validní řádky (není třeba nijak měnit)</label>
+        {{ form.valid_lines(rows=10, class_="form-control") }}
+    </div>
+    <div class="form-group">
+        <div class="row">
+            <div class="col-sm-8">
+                <label for="invalid_lines">Řádky s chybami</label>
+                {{ form.invalid_lines(rows=10, class_="form-control sync_scrolling") }}
+            </div>
+            <div class="col-sm-4">
+                <label for="invalid_lines_errors">Informace o chybách</label>
+                {{ form.invalid_lines_errors(rows=10, class_="form-control sync_scrolling") }}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="form-group">
+        <label for="input_data">Pole pro vstupní data s kontakty</label>
+
+        <input type="file" accept="text/plain,.csv,.xlsx" id="input_file" class="d-none">
+        <label for="input_file" class="btn btn-sm btn-primary float-right">Použít data ze souboru</label>
+
+        <div id="encodings" style="display: none;">
+            Pokud se data nezobrazují správně, zkuste použít jinou znakovou sadu:
+            <select id="encoding" class="custom-select" style="width: initial;">
+                <option value="utf-8" selected>UTF-8</option>
+                <option value="cp1250">CP1250</option>
+                <option value="iso-8859-2">ISO-8859-2</option>
+            </select>
+        </div>
+
+        {{ form.input_data(rows=30, class_="form-control") }}
+    </div>
+    {% endif %}
+    <button class="btn btn-success" type="submit">Zpracovat</button>
+</form>
+{% endwith %}
+
+<hr class="my-4">
+
+<h2>Import z datového souboru</h2>
+<form action="{{ url_for('batch.prepare_contacts_from_file') }}" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+        <label for="contact_file">Soubor s kontaktními údaji (.txt, .csv, .xlsx):</label>
+        <input type="file" name="contact_file" id="contact_file" accept=".txt,.csv,.xlsx" class="form-control-file" required>
+    </div>
+    <button class="btn btn-primary" type="submit">Připravit data ze souboru</button>
+</form>
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $(document).ready( function () {
+        // Synchronize scrolling of the two textareas with errors
+        $('.sync_scrolling').attr("data-scrolling", "false");
+        $('.sync_scrolling').scroll(function(){
+            if($(this).attr("data-scrolling") == "false"){
+                $('.sync_scrolling').not(this).attr("data-scrolling", "true");
+                $('.sync_scrolling').not(this).scrollTop($(this).scrollTop());
+            }
+            $(this).attr("data-scrolling", "false");
+        });
+
+        // File import for text files
+        const input_file = $('#input_file');
+        const encoding = $('#encoding');
+        input_file.change(function() {
+            const file = input_file[0].files[0];
+            if (!file) return;
+
+            const filename = file.name.toLowerCase();
+
+            // For text files, use FileReader
+            if (filename.endsWith('.txt')) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    $('#input_data').val(reader.result);
+                    $('#encodings').css("display", "block");
+                }
+                reader.readAsText(file, encoding.val());
+            } else {
+                // For CSV/XLSX, submit to server for processing
+                const form = $('form[action="{{ url_for("batch.prepare_contacts_from_file") }}"]');
+                const fileInput = form.find('#contact_file');
+
+                // Create a DataTransfer to set files
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                fileInput[0].files = dataTransfer.files;
+
+                // Submit the form
+                form.submit();
+            }
+        });
+
+        encoding.change(function() {
+            input_file.change();
+        });
+    });
+</script>
+{% endblock %}

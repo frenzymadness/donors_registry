@@ -17,6 +17,11 @@ from wtforms.validators import ValidationError
 from registry.list.models import DonationCenter, Medals
 
 EMAIL_RE = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+# Phone: with country code, or 9 digits starting with 1-9 (not part of longer number)
+PHONE_RE = r"(?:\+420|00420)\s?[1-9]\d{2}\s?\d{3}\s?\d{3}|(?<!\d)[1-9]\d{2}\s?\d{3}\s?\d{3}(?!\d)"
+# RC: slash format or 9-10 digits (valid)
+# This might collide with phone numbers, but it's not a problem because we validate the RC first.
+RC_RE = r"\b\d{6}/\d{3,4}\b|\b\d{9,10}\b"
 
 
 def capitalize(string):
