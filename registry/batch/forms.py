@@ -132,7 +132,21 @@ class ContactImportForm(FlaskForm):
             )
 
         if self.invalid_lines_content:
-            self.valid_lines.data = "\n".join(self.valid_lines_content)
+            # Normalize valid lines to show only RC, email, and phone for easier review
+            from .utils import process_contact_import_line
+
+            normalized_valid_lines = []
+            for line in self.valid_lines_content:
+                data = process_contact_import_line(line)
+                # Reconstruct line with only the parsed data
+                parts = [data["rodne_cislo"]]
+                if data["email"]:
+                    parts.append(data["email"])
+                if data["phone"]:
+                    parts.append(data["phone"])
+                normalized_valid_lines.append(" ".join(parts))
+
+            self.valid_lines.data = "\n".join(normalized_valid_lines)
             self.invalid_lines.data = ""
             self.invalid_lines_errors.data = ""
             for line, errors in self.invalid_lines_content:
