@@ -564,3 +564,25 @@ class DonorsOverride(db.Model):
                 result[field] = None
 
         return result
+
+
+class ContactImportLog(db.Model):
+    """Audit log for contact imports."""
+
+    __tablename__ = "contact_import_logs"
+    id = db.Column(db.Integer, primary_key=True)
+    imported_at = db.Column(db.DateTime, nullable=False)
+    imported_by_user_id = db.Column(
+        db.Integer, db.ForeignKey("users.id"), nullable=False
+    )
+    imported_by_user = db.relationship("User")
+    filename = db.Column(db.String, nullable=True)  # Null if pasted directly
+    input_data = db.Column(db.Text, nullable=False)
+    processed_lines_count = db.Column(db.Integer, nullable=False)
+    created_notes_count = db.Column(db.Integer, nullable=False, default=0)
+    updated_notes_count = db.Column(db.Integer, nullable=False, default=0)
+    emails_added_count = db.Column(db.Integer, nullable=False, default=0)
+    phones_added_count = db.Column(db.Integer, nullable=False, default=0)
+
+    def __repr__(self):
+        return f"<ContactImportLog({self.id}) at {self.imported_at}>"
