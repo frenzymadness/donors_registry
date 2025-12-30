@@ -23,6 +23,7 @@ from .utils import (
     get_test_data_df,
     test_data_ignored,
     test_data_medals,
+    test_data_notes,
     test_data_overrides,
     test_data_records,
 )
@@ -70,6 +71,7 @@ def db(app):
         test_data_medals(_db)
         test_data_overrides(_db)
         test_data_ignored(_db, limit=3)
+        test_data_notes(_db)
 
         DonorsOverview.refresh_overview()
 
