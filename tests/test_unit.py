@@ -8,6 +8,7 @@ from registry.utils import (
     NumericValidator,
     date_of_birth_from_rc,
     donor_as_row,
+    is_valid_rc,
     split_degrees,
 )
 
@@ -309,3 +310,19 @@ class TestUnit:
                 assert dc.title in row[-1]
             else:
                 assert dc.title not in row[-1]
+
+    @pytest.mark.parametrize(
+        "rc",
+        (
+            "12345678",
+            "12345678901",
+            1234567890,
+            None,
+            "770101123",
+            "510229123",
+            "8502287014",
+            "8502289285",
+        ),
+    )
+    def test_is_valid_rc_negative(self, rc):
+        assert not is_valid_rc(rc)

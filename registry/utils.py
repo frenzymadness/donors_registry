@@ -1,5 +1,6 @@
 """Helper utilities and decorators."""
 
+import datetime
 import os
 import re
 import smtplib
@@ -291,3 +292,61 @@ def get_empty_str_if_none(dictionary, key):
     """Returns empty string if the value for the given key is None"""
     value = dictionary.get(key, "")
     return value if value is not None else ""
+
+
+def is_valid_rc(value):
+    """
+    Validates Czech birth number (rodné číslo).
+    Supports:
+      - 9 digits (pre-1954, no checksum)
+      - 10 digits (post-1954, checksum mod 11)
+
+    Accepts formats with or without slash.
+    """
+    if not isinstance(value, str):
+        return False
+
+    # remove slash and spaces
+    rc = re.sub(r"[^\d]", "", value)
+
+    if len(rc) not in (9, 10):
+        return False
+
+    yy = int(rc[0:2])
+    mm = int(rc[2:4])
+    dd = int(rc[4:6])
+
+    # adjust month (women +50)
+    if mm > 50:
+        mm -= 50
+
+    # month validity
+    if not 1 <= mm <= 12:
+        return False
+
+    # year resolution
+    if len(rc) == 9:
+        # pre-1954
+        year = 1900 + yy
+        if year >= 1954:
+            return False
+    else:
+        # 10 digits
+        year = 1900 + yy if yy >= 54 else 2000 + yy
+
+    # date validity
+    try:
+        datetime.date(year, mm, dd)
+    except ValueError:
+        return False
+
+    # checksum for 10-digit RC
+    if len(rc) == 10:
+        num = int(rc[:9])
+        check = num % 11
+        if check == 10:
+            check = 0
+        if check != int(rc[9]):
+            return False
+
+    return True
