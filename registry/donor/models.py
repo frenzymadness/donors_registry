@@ -164,9 +164,30 @@ class DonorsOverview(db.Model):
             donor_dict[name] = getattr(self, name, None)
             # Note is special because note column contains
             # Note object but we need to get its text which
-            # is in Note.note attr.
+            # is in Note.note attr. We send it as structured data
+            # so the frontend can display different icons for different types.
             if donor_dict[name] is not None and name == "note":
-                donor_dict[name] = donor_dict[name].note
+                note_obj = donor_dict[name]
+                emails = note_obj.get_emails_from_note()
+                phones = note_obj.get_phones_from_note()
+
+                # Calculate "other text" by removing emails and phones
+                other_text = note_obj.note
+                for email in emails:
+                    other_text = other_text.replace(email, "")
+                for phone in phones:
+                    other_text = other_text.replace(phone, "")
+                # Clean up whitespace
+                other_text = "\n".join(
+                    line.strip() for line in other_text.split("\n") if line.strip()
+                )
+
+                donor_dict[name] = {
+                    "emails": emails,
+                    "phones": phones,
+                    "other": other_text,
+                    "raw": note_obj.note,  # Keep full text for fallback
+                }
             elif donor_dict[name] is not None and name in (
                 "first_name",
                 "last_name",

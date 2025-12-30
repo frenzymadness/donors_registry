@@ -15,7 +15,7 @@ from registry.donor.models import (
 )
 from registry.extensions import db
 from registry.list.models import Medals
-from tests.fixtures import sample_of_rc, skip_if_ignored
+from tests.fixtures import delete_note_if_exists, sample_of_rc, skip_if_ignored
 
 from .helpers import login
 
@@ -84,7 +84,11 @@ class TestDataTablesBackend:
         res = testapp.get(url_for("donor.overview_data"), params=params)
         assert res.status_code == 200
         assert len(res.json["data"]) == 1
-        assert res.json["data"][0]["note"] == note_text
+        # Note is now structured data
+        assert res.json["data"][0]["note"]["raw"] == note_text
+        assert res.json["data"][0]["note"]["other"] == note_text
+        assert res.json["data"][0]["note"]["emails"] == []
+        assert res.json["data"][0]["note"]["phones"] == []
 
         note = Note(rodne_cislo=second_rodne_cislo, note=note_text)
         db.session.add(note)
@@ -93,7 +97,49 @@ class TestDataTablesBackend:
         res = testapp.get(url_for("donor.overview_data"), params=params)
         assert res.status_code == 200
         assert len(res.json["data"]) == 2
-        assert res.json["data"][1]["note"] == note_text
+        # Note is now structured data
+        assert res.json["data"][1]["note"]["raw"] == note_text
+        assert res.json["data"][1]["note"]["other"] == note_text
+        assert res.json["data"][1]["note"]["emails"] == []
+        assert res.json["data"][1]["note"]["phones"] == []
+
+    def test_json_backend_note_structure(self, user, testapp):
+        """Test that note data is properly structured with emails, phones, and other text."""
+        rodne_cislo = next(sample_of_rc(1))
+        skip_if_ignored(rodne_cislo)
+        delete_note_if_exists(rodne_cislo)
+
+        # Create note with mixed content
+        note_text = "Please contact: jan.novak@seznam.cz or call 602123456\nImportant: Check blood type!"
+        note = Note(rodne_cislo=rodne_cislo, note=note_text)
+        db.session.add(note)
+        db.session.commit()
+
+        params = {
+            "draw": "1",
+            "order[0][column]": "0",
+            "order[0][dir]": "asc",
+            "start": "0",
+            "length": "100",
+            "search[value]": rodne_cislo,
+            "search[regex]": "false",
+        }
+
+        login(user, testapp)
+        res = testapp.get(url_for("donor.overview_data"), params=params)
+        assert res.status_code == 200
+        assert len(res.json["data"]) == 1
+
+        note_data = res.json["data"][0]["note"]
+
+        # Check structured data
+        assert note_data["raw"] == note_text
+        assert "jan.novak@seznam.cz" in note_data["emails"]
+        assert "602123456" in note_data["phones"]
+        assert "Check blood type!" in note_data["other"]
+        # Emails and phones should be removed from "other"
+        assert "jan.novak@seznam.cz" not in note_data["other"]
+        assert "602123456" not in note_data["other"]
 
     @pytest.mark.parametrize("direction", ("asc", "desc"))
     def test_json_backend_order_by_rodne_cislo(self, user, testapp, direction):
