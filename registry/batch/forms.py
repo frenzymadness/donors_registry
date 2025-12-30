@@ -5,7 +5,7 @@ from registry.donor.models import Batch, DonationCenter
 from registry.extensions import db
 from registry.utils import DataRequired
 
-from .utils import validate_import_data
+from .utils import validate_contact_import_data, validate_import_data
 
 
 class ImportForm(FlaskForm):
@@ -88,3 +88,64 @@ class DeleteBatchForm(FlaskForm):
     def validate(self, **kwargs):
         self.batch = db.session.get(Batch, self.batch_id.data)
         return self.batch is not None
+
+
+class ContactImportForm(FlaskForm):
+    """Form for importing email addresses and phone numbers to donor notes."""
+
+    input_data = TextAreaField("Vstupní data s kontakty")
+    valid_lines = TextAreaField("Bezchybné řádky")
+    invalid_lines = TextAreaField("Řádky s chybami")
+    invalid_lines_errors = TextAreaField("Chyby ve vstupních datech")
+
+    def __init__(self, *args, **kwargs):
+        super(ContactImportForm, self).__init__(*args, **kwargs)
+        self.reset_validator()
+
+    def reset_validator(self):
+        self.valid_lines_content, self.invalid_lines_content = None, None
+        self.invalid_lines_errors.data = ""
+
+    def validate(self, **kwargs):
+        """Validate the form."""
+        initial_validation = super(ContactImportForm, self).validate()
+        if not initial_validation:
+            # Because there are currently no validators, this is unused
+            # but we need keep it here for possible future use
+            return False  # pragma: no cover
+
+        self.reset_validator()
+
+        repeated_import = False
+        if self.valid_lines.data or self.invalid_lines.data:
+            # Repeated import with fixed errors
+            input_data = "\n".join([self.valid_lines.data, self.invalid_lines.data])
+            self.valid_lines_content, self.invalid_lines_content = (
+                validate_contact_import_data(input_data)
+            )
+            repeated_import = True
+        elif self.input_data.data:
+            # First import
+            self.valid_lines_content, self.invalid_lines_content = (
+                validate_contact_import_data(self.input_data.data)
+            )
+
+        if self.invalid_lines_content:
+            self.valid_lines.data = "\n".join(self.valid_lines_content)
+            self.invalid_lines.data = ""
+            self.invalid_lines_errors.data = ""
+            for line, errors in self.invalid_lines_content:
+                self.invalid_lines.data += line + "\n"
+                self.invalid_lines_errors.data += ", ".join(errors) + "\n"
+            return False
+
+        # Empty input validation
+        if (
+            repeated_import
+            and not self.valid_lines.data
+            and not self.invalid_lines.data
+        ) or (not repeated_import and not self.input_data.data):
+            self.input_data.errors.append("Chybí vstupní data")
+            return False
+
+        return True

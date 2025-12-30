@@ -1,5 +1,7 @@
 import re
 
+from registry.utils import is_valid_rc
+
 
 def get_part_of_line(line, delimiter=";"):
     try:
@@ -131,3 +133,139 @@ def validate_import_data(text_input):
             valid_lines.append(line)
 
     return valid_lines, invalid_lines
+
+
+def parse_contact_line(line):
+    """
+    Parse a line to extract rodne cislo, email, and phone number.
+    Returns: tuple (rodne_cislo, email, phone, errors)
+    """
+    from registry.donor.models import DonorsOverview
+    from registry.utils import EMAIL_RE, PHONE_RE, RC_RE
+
+    errors = []
+    rodne_cislo = None
+    email = None
+    phone = None
+
+    # Extract rodne cislo (mandatory)
+    rc_matches = re.findall(RC_RE, line)
+    rc_matches = [rc for rc in rc_matches if is_valid_rc(rc)]
+    if not rc_matches:
+        errors.append("chybí rodné číslo")
+    elif len(rc_matches) > 1:
+        errors.append("více než jedno rodné číslo")
+    else:
+        # Clean rodne cislo (remove slash and spaces)
+        rodne_cislo = rc_matches[0].replace("/", "").replace(" ", "")
+
+        # Remove RC from line to avoid ambiguity with phone numbers
+        line = line.replace(rodne_cislo, "")
+
+        # Check if donor exists
+        donor = DonorsOverview.query.get(rodne_cislo)
+        if not donor:
+            errors.append("dárce s tímto rodným číslem neexistuje")
+
+    # Extract email (optional)
+    email_matches = re.findall(EMAIL_RE, line)
+    if len(email_matches) == 1:
+        email = email_matches[0]
+    elif len(email_matches) > 1:
+        errors.append("více než jeden e-mail")
+
+    # Extract phone (optional)
+    phone_matches = re.findall(PHONE_RE, line)
+    if len(phone_matches) == 1:
+        phone = phone_matches[0]
+        # Normalize phone number (remove spaces)
+        phone = re.sub(r"\s+", "", phone)
+    elif len(phone_matches) > 1:
+        errors.append("více než jedno telefonní číslo")
+
+    # At least one contact method must be present
+    if not email and not phone and not errors:
+        errors.append("chybí e-mail nebo telefon")
+
+    return rodne_cislo, email, phone, errors
+
+
+def validate_contact_import_data(text_input):
+    """
+    Validate contact import data.
+    Returns: (valid_lines, invalid_lines)
+    - valid_lines: list of strings (original lines)
+    - invalid_lines: list of tuples (line, list of errors)
+    """
+    valid_lines = []
+    invalid_lines = []
+
+    for line in text_input.splitlines():
+        # Skip empty lines
+        if not line.strip():
+            continue
+
+        rodne_cislo, email, phone, errors = parse_contact_line(line)
+
+        if errors:
+            invalid_lines.append((line, errors))
+        else:
+            valid_lines.append(line)
+
+    return valid_lines, invalid_lines
+
+
+def process_contact_import_line(line):
+    """
+    Process a validated contact import line and return structured data.
+    Returns: dict with keys: rodne_cislo, email, phone
+    """
+    rodne_cislo, email, phone, errors = parse_contact_line(line)
+
+    return {"rodne_cislo": rodne_cislo, "email": email, "phone": phone}
+
+
+def convert_xlsx_to_text(file):
+    """
+    Convert XLSX file to plain text, one row per line.
+    Returns: string with all rows joined by newlines
+    """
+    from openpyxl import load_workbook
+
+    workbook = load_workbook(filename=file, read_only=True)
+    sheet = workbook.active
+
+    lines = []
+    for row in sheet.iter_rows(values_only=True):
+        # Skip empty rows
+        if not any(row):
+            continue
+        # Join all non-None cells with spaces
+        row_text = " ".join(str(cell) for cell in row if cell is not None)
+        lines.append(row_text)
+
+    workbook.close()
+    return "\n".join(lines)
+
+
+def convert_csv_to_text(file, encoding="utf-8"):
+    """
+    Convert CSV file to plain text, one row per line.
+    Returns: string with all rows joined by newlines
+    """
+    import csv
+    from io import StringIO
+
+    # Read file content
+    content = file.read().decode(encoding)
+
+    # Parse CSV
+    reader = csv.reader(StringIO(content))
+    lines = []
+    for row in reader:
+        # Join all cells with spaces
+        row_text = " ".join(cell for cell in row if cell)
+        if row_text.strip():
+            lines.append(row_text)
+
+    return "\n".join(lines)

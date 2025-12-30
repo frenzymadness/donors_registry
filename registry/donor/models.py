@@ -531,6 +531,19 @@ class Note(db.Model):
     def get_emails_from_note(self):
         return re.findall(EMAIL_RE, self.note)
 
+    def get_phones_from_note(self):
+        """Extract all phone numbers from note."""
+        from registry.utils import PHONE_RE
+
+        return re.findall(PHONE_RE, self.note)
+
+    def get_all_contacts(self):
+        """Get structured contact information from note."""
+        return {
+            "emails": self.get_emails_from_note(),
+            "phones": self.get_phones_from_note(),
+        }
+
 
 class DonorsOverride(db.Model):
     __tablename__ = "donors_override"

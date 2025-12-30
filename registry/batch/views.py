@@ -8,7 +8,7 @@ from openpyxl import load_workbook
 from werkzeug.datastructures import Headers
 from werkzeug.wrappers import Response
 
-from registry.donor.models import Batch, DonorsOverview, Record
+from registry.donor.models import Batch, DonorsOverview, Note, Record
 from registry.extensions import db
 from registry.list.models import DonationCenter
 from registry.utils import (
@@ -17,7 +17,12 @@ from registry.utils import (
     record_as_input_data,
 )
 
-from .forms import DeleteBatchForm, ImportForm
+from .forms import ContactImportForm, DeleteBatchForm, ImportForm
+from .utils import (
+    convert_csv_to_text,
+    convert_xlsx_to_text,
+    process_contact_import_line,
+)
 
 blueprint = Blueprint("batch", __name__, static_folder="../static")
 
@@ -248,3 +253,140 @@ def prepare_data_from_trinec():
     except Exception as e:  # noqa: B902
         flash(f"Při zpracování souboru došlo k chybě: {str(e)}", "danger")
         return redirect(url_for("batch.import_data"))
+
+
+@blueprint.get("/import_contacts/")
+@login_required
+def import_contacts():
+    """Display contact import form."""
+    contact_form = ContactImportForm()
+    return render_template("batch/import_contacts.html", form=contact_form)
+
+
+@blueprint.post("/import_contacts_post")
+@login_required
+def import_contacts_post():
+    """Process contact import form submission."""
+    contact_form = ContactImportForm(request.form)
+
+    if contact_form.validate_on_submit():
+        # Process valid lines
+        stats = {
+            "total": 0,
+            "new_notes": 0,
+            "emails_added": 0,
+            "phones_added": 0,
+            "emails_skipped": 0,
+            "phones_skipped": 0,
+        }
+
+        for line in contact_form.valid_lines_content:
+            data = process_contact_import_line(line)
+            rodne_cislo = data["rodne_cislo"]
+            email = data["email"]
+            phone = data["phone"]
+
+            stats["total"] += 1
+
+            # Get or create note
+            note = Note.query.get(rodne_cislo)
+            note_is_new = False
+            note_updated = False
+
+            if not note:
+                note = Note(rodne_cislo=rodne_cislo, note="")
+                note_is_new = True
+                stats["new_notes"] += 1
+
+            # Check and add email
+            if email:
+                if email in note.note:
+                    stats["emails_skipped"] += 1
+                else:
+                    if note.note:
+                        note.note += "\n" + email
+                    else:
+                        note.note = email
+                    stats["emails_added"] += 1
+                    note_updated = True
+
+            # Check and add phone
+            if phone:
+                if phone in note.note:
+                    stats["phones_skipped"] += 1
+                else:
+                    if note.note:
+                        note.note += "\n" + phone
+                    else:
+                        note.note = phone
+                    stats["phones_added"] += 1
+                    note_updated = True
+
+            # Save note if updated or new
+            if note_is_new or note_updated:
+                db.session.add(note)
+
+        db.session.commit()
+
+        # Flash success message with statistics
+        flash(
+            f"Import kontaktů proběhl úspěšně. "
+            f"Zpracováno: {stats['total']} řádků, "
+            f"Nových poznámek: {stats['new_notes']}, "
+            f"E-mailů přidáno: {stats['emails_added']} (přeskočeno: {stats['emails_skipped']}), "
+            f"Telefonů přidáno: {stats['phones_added']} (přeskočeno: {stats['phones_skipped']})",
+            "success",
+        )
+
+        return redirect(url_for("donor.overview"))
+    else:
+        flash_errors(contact_form)
+        return render_template("batch/import_contacts.html", form=contact_form)
+
+
+@blueprint.post("/prepare_contacts_from_file")
+@login_required
+def prepare_contacts_from_file():
+    """Process uploaded file and convert to text format."""
+    if "contact_file" not in request.files:
+        flash("Nebyl vybrán žádný soubor", "danger")
+        return redirect(url_for("batch.import_contacts"))
+
+    file = request.files["contact_file"]
+
+    if file.filename == "":
+        flash("Nebyl vybrán žádný soubor", "danger")
+        return redirect(url_for("batch.import_contacts"))
+
+    try:
+        filename = file.filename.lower()
+
+        # Determine file type and convert
+        if filename.endswith(".xlsx"):
+            input_data_text = convert_xlsx_to_text(file)
+        elif filename.endswith(".csv"):
+            input_data_text = convert_csv_to_text(file)
+        elif filename.endswith(".txt"):
+            # Text file - read directly
+            input_data_text = file.read().decode("utf-8")
+        else:
+            flash(
+                "Nepodporovaný formát souboru. Použijte .txt, .csv nebo .xlsx", "danger"
+            )
+            return redirect(url_for("batch.import_contacts"))
+
+        # Create and pre-populate the form
+        contact_form = ContactImportForm()
+        contact_form.input_data.data = input_data_text
+
+        line_count = len(input_data_text.strip().splitlines())
+        flash(
+            f"Soubor byl úspěšně načten. Nalezeno {line_count} řádků.",
+            "success",
+        )
+
+        return render_template("batch/import_contacts.html", form=contact_form)
+
+    except Exception as e:  # noqa: B902
+        flash(f"Při zpracování souboru došlo k chybě: {str(e)}", "danger")
+        return redirect(url_for("batch.import_contacts"))

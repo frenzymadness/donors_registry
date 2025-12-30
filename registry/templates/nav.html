@@ -9,8 +9,14 @@
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('donor.overview') }}">Přehled dárců</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('batch.import_data') }}">Import dat</a>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
+        Import dat
+      </a>
+      <div class="dropdown-menu">
+          <a class="dropdown-item" href="{{ url_for('batch.import_data') }}">Import darování</a>
+          <a class="dropdown-item" href="{{ url_for('batch.import_contacts') }}">Import kontaktů</a>
+      </div>
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbardrop" data-toggle="dropdown">
