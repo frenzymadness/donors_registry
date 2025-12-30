@@ -251,9 +251,9 @@ def send_email_with_award_doc(to, award_doc_content, medal, config):
 
     msg_first_part = (
         f"Vážení,\n\n"
-        f"v letošním roce jste získali {capitalize_first(medal.title_acc)} za {medal.minimum_donations} bezpříspěvkových odběrů krve.\n\n"  # noqa: E501
+        f"v letošním roce jste získali {capitalize_first(medal.title_acc)} za {medal.minimum_donations} bezpříspěvkových odběrů krve.\n\n"
         f"Český červený kříž Vám děkuje za tento vysoce lidský a humánní čin.\n\n"
-        f"Zasíláme Vám potvrzení o ocenění pro Vašeho zaměstnavatele, případně zdravotní pojišťovnu.\n\n"  # noqa: E501
+        f"Zasíláme Vám potvrzení o ocenění pro Vašeho zaměstnavatele, případně zdravotní pojišťovnu.\n\n"
     )
 
     msg_last_part = (
@@ -264,11 +264,13 @@ def send_email_with_award_doc(to, award_doc_content, medal, config):
     )
 
     if medal.slug in ("br", "st"):
-        msg_middle_part = f"{capitalize_first(medal.title_acc)}, si prosím vyzvedněte na odběrném místě, kde darujete krev či plazmu.\n\n"  # noqa: E501
+        msg_middle_part = f"{capitalize_first(medal.title_acc)}, si prosím vyzvedněte na odběrném místě, kde darujete krev či plazmu.\n\n"
     elif medal.slug in ("zl", "kr3"):
-        msg_middle_part = "Předávání ocenění se uskuteční na podzim v Třinci a Frýdku-Místku dle Vašeho odběrného místa. Pozvánka na slavnostní oceňování Vám dorazi s dostatečným předstihem.\n\n"  # noqa: E501
+        msg_middle_part = "Předávání ocenění se uskuteční na podzim v Třinci a Frýdku-Místku dle Vašeho odběrného místa. Pozvánka na slavnostní oceňování Vám dorazi s dostatečným předstihem.\n\n"
     elif medal.slug in ("kr2", "kr1", "plk"):
-        msg_middle_part = "Pozvánku na slavnostní oceňování obdržíte s dostatečným předstihem.\n\n"  # noqa: E501
+        msg_middle_part = (
+            "Pozvánku na slavnostní oceňování obdržíte s dostatečným předstihem.\n\n"
+        )
 
     msg.set_content(msg_first_part + msg_middle_part + msg_last_part)
 

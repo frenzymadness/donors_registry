@@ -30,7 +30,7 @@ def repair_two_semicolons(line):
     return repaired_line
 
 
-def repair_line_part_by_part(line):  # noqa: C901 FIXME
+def repair_line_part_by_part(line):
     errors = []
 
     # In the case when the count of fields is not
