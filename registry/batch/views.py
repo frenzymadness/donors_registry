@@ -156,7 +156,7 @@ def download_batch(id):
 
 @blueprint.post("/prepare_data_from_trinec")
 @login_required
-def prepare_data_from_trinec():  # noqa: C901
+def prepare_data_from_trinec():
     """Process data from Třinec Excel file."""
     if "trinec_file" not in request.files:
         flash("Nebyl vybrán žádný soubor", "danger")
