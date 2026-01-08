@@ -260,11 +260,12 @@ def email_award_document(rc, medal_slug):
     css = CSS(url=url_for("static", filename="css/award_document.css", _external=True))
     pdf_content = HTML(string=award_document_html).write_pdf(stylesheets=[css])
 
-    send_email_with_award_doc(
+    if send_email_with_award_doc(
         to=emails, award_doc_content=pdf_content, medal=medal, config=current_app.config
-    )
-
-    flash("E-mail odeslán.", "success")
+    ):
+        flash("E-mail odeslán.", "success")
+    else:
+        flash("E-mail nebyl odeslán.", "danger")
     return redirect(url_for("donor.detail", rc=rc))
 
 
