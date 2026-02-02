@@ -202,19 +202,32 @@ def prepare_data_from_trinec():
 
         try:
             # Maps real column names in the Excel to expected names
-            column_map = {
-                "rodné číslo": get_close_matches("Rodné číslo", headers, n=1)[0],
-                "jméno": get_close_matches("Jméno", headers, n=1)[0],
-                "příjmení": get_close_matches("Příjmení", headers, n=1)[0],
-                "ulice": get_close_matches("TB ulice", headers, n=1)[0],
-                "město": get_close_matches("TB město", headers, n=1)[0],
-                "psč": get_close_matches("TB psč", headers, n=1)[0],
-                "pojišťovna": get_close_matches("Pojišť.", headers, n=1)[0],
-                "odběr": get_close_matches("Odběr poř.číslo", headers, n=1)[0],
-            }
+            columns = [
+                "rodné číslo",
+                "jméno",
+                "příjmení",
+                "ulice",
+                "město",
+                "psč",
+                "pojišťovna",
+                "odběr",
+            ]
+            look_for = [
+                "Rodné číslo",
+                "Jméno",
+                "Příjmení",
+                "TB ulice",
+                "TB město",
+                "TB psč",
+                "Pojišť.",
+                "Odběr poř.číslo",
+            ]
+            column_map = {}
+            for column, name in zip(columns, look_for):
+                column_map[column] = get_close_matches(name, headers, n=1)[0]
         except IndexError:
             flash(
-                "Při zpracování souboru došlo k chybě: Sloupce se nepodařilo rozpoznat",
+                f"Při zpracování souboru došlo k chybě: Sloupce se nepodařilo rozpoznat. Nenalezen sloupec '{column}' obvykle nazvaný '{name}' nebo podobně.",
                 "danger",
             )
             return redirect(url_for("batch.import_data"))
