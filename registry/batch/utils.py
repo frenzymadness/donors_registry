@@ -163,7 +163,9 @@ def parse_contact_line(line):
         line = line.replace(rodne_cislo, "")
 
         # Check if donor exists
-        donor = DonorsOverview.query.get(rodne_cislo)
+        from registry.extensions import db
+
+        donor = db.session.get(DonorsOverview, rodne_cislo)
         if not donor:
             errors.append("dárce s tímto rodným číslem neexistuje")
 

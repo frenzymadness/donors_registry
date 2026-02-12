@@ -40,7 +40,7 @@ def import_data(rodne_cislo=None):
     import_form = ImportForm()
     if rodne_cislo:
         donation_center_id = request.args.get("donation_center")
-        donation_center = DonationCenter.query.get(donation_center_id)
+        donation_center = db.session.get(DonationCenter, donation_center_id)
         import_form.donation_center_id.default = donation_center_id
         # Special case for manual imports - empty value in db
         if donation_center_id == "-1":
@@ -308,7 +308,7 @@ def import_contacts_post():
             stats["total"] += 1
 
             # Get or create note
-            note = Note.query.get(rodne_cislo)
+            note = db.session.get(Note, rodne_cislo)
             note_is_new = False
             note_updated = False
 

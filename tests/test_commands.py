@@ -71,9 +71,11 @@ class TestCommands:
         result = runner.invoke(import_emails, ["tests/data/emails_import.csv"])
         assert result.exit_code == 0
 
-        assert Note.query.get("391105000").note == "\nfoo@example.com"
-        assert Note.query.get("0457098862").note == "foo@example.com"
-        assert Note.query.get("9701037137").note == "foo@example.com"
-        assert Note.query.get("151008110").note == "Note\ncontent\nfoo@example.com"
-        assert Note.query.get("130811802") is None
-        assert Note.query.get("0552277759") is None
+        assert db.session.get(Note, "391105000").note == "\nfoo@example.com"
+        assert db.session.get(Note, "0457098862").note == "foo@example.com"
+        assert db.session.get(Note, "9701037137").note == "foo@example.com"
+        assert (
+            db.session.get(Note, "151008110").note == "Note\ncontent\nfoo@example.com"
+        )
+        assert db.session.get(Note, "130811802") is None
+        assert db.session.get(Note, "0552277759") is None
