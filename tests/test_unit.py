@@ -3,6 +3,7 @@ from flask import url_for
 from wtforms.validators import ValidationError
 
 from registry.donor.models import DonorsOverview
+from registry.extensions import db
 from registry.list.models import DonationCenter
 from registry.utils import (
     NumericValidator,
@@ -294,7 +295,7 @@ class TestUnit:
 
     @pytest.mark.parametrize("rodne_cislo", sample_of_rc(10))
     def test_donor_as_row(self, rodne_cislo):
-        donor = DonorsOverview.query.get(rodne_cislo)
+        donor = db.session.get(DonorsOverview, rodne_cislo)
         row = donor_as_row(donor)
 
         donation_centers = DonationCenter.query.order_by(

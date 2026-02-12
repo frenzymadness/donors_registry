@@ -422,7 +422,7 @@ class TestContactImportIntegration:
         assert "Zpracováno: 1 řádků" in res
 
         # Verify note was created
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note is not None
         assert "jan.novak@seznam.cz" in note.note
         assert "602123456" in note.note
@@ -451,7 +451,7 @@ class TestContactImportIntegration:
         assert res.text.count("přeskočeno: 1") == 2
 
         # Verify note wasn't duplicated
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note.note.count("jan.novak@seznam.cz") == 1
         assert note.note.count("602123456") == 1
 
@@ -499,7 +499,7 @@ just-email@test.cz
         assert "Nových poznámek: 1" in res
 
         # Verify note was created
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note is not None
         assert note.note == "jan.novak@seznam.cz"
 
@@ -520,7 +520,7 @@ just-email@test.cz
         assert "Nových poznámek: 1" in res
 
         # Verify note was created
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note is not None
         assert note.note == "+420734000000"
 
@@ -543,7 +543,7 @@ just-email@test.cz
         assert res.status_code == 200
 
         # Verify contacts were appended
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert "Existing note text" in note.note
         assert "jan.novak@seznam.cz" in note.note
         assert "602123456" in note.note
@@ -557,7 +557,7 @@ just-email@test.cz
         rc = new_rc_if_ignored(rc)
         login(user, testapp)
 
-        note_before = Note.query.get(rc)
+        note_before = db.session.get(Note, rc)
 
         res = testapp.get(url_for("batch.import_contacts"))
         form = res.forms["contactImportForm"]
@@ -567,7 +567,7 @@ just-email@test.cz
 
         assert "Vstupní data s kontakty - Chybí vstupní data" in res
 
-        note_after = Note.query.get(rc)
+        note_after = db.session.get(Note, rc)
         assert (
             note_before.note == note_after.note if note_before else note_after is None
         )
@@ -764,7 +764,7 @@ just-email@test.cz"""
         assert f"{rc} jan.novak@seznam.cz 602123456" in res
 
         # Verify no data was imported yet
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note is None
 
         # Step 3: Fix the errors and resubmit
@@ -786,7 +786,7 @@ just-email@test.cz"""
         assert "Zpracováno: 1 řádků" in res
 
         # Verify data was imported
-        note = Note.query.get(rc)
+        note = db.session.get(Note, rc)
         assert note is not None
         assert "jan.novak@seznam.cz" in note.note
         assert "602123456" in note.note

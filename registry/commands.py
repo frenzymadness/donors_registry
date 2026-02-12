@@ -81,12 +81,12 @@ def import_emails(csv_file):
                 counter["invalid emails"] += 1
                 continue
 
-            donor = DonorsOverview.query.get(rodne_cislo)
+            donor = db.session.get(DonorsOverview, rodne_cislo)
 
             if not donor:
                 continue
 
-            note = Note.query.get(rodne_cislo)
+            note = db.session.get(Note, rodne_cislo)
 
             if note:
                 if email in note.note:

@@ -224,7 +224,7 @@ def render_award_document(rc, medal_slug):
 @blueprint.get("/detail/<rc>/email_award_document/<medal_slug>")
 @login_required
 def email_award_document(rc, medal_slug):
-    note = Note.query.get(rc)
+    note = db.session.get(Note, rc)
     emails = None
     if note:
         emails = note.get_emails_from_note()
