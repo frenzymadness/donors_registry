@@ -1,6 +1,6 @@
 """User models."""
 
-import datetime as dt
+from datetime import datetime, timezone
 
 from flask_login import UserMixin
 
@@ -18,7 +18,9 @@ class User(UserMixin, db.Model):
         nullable=False,
     )
     password = db.Column(db.LargeBinary(128), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
+    created_at = db.Column(
+        db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc)
+    )
     active = db.Column(db.Boolean(), default=False)
 
     def __init__(self, email, password=None, **kwargs):
