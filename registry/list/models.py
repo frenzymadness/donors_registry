@@ -28,6 +28,9 @@ class Medals(db.Model):
     title_acc = db.Column(db.String, nullable=False)
     title_instr = db.Column(db.String, nullable=False)
 
+    def use_snapshot(self):
+        return self.slug in ("kr3", "kr2", "kr1", "plk")
+
     def __repr__(self):
         return f"<Medals({self.slug!r})>"
 

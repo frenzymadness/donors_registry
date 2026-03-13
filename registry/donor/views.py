@@ -42,6 +42,7 @@ from .forms import (
 )
 from .models import (
     AwardedMedals,
+    AwardEligibilitySnapshot,
     DonorsOverride,
     DonorsOverview,
     IgnoredDonors,
@@ -50,6 +51,55 @@ from .models import (
 )
 
 blueprint = Blueprint("donor", __name__, static_folder="../static")
+
+
+def get_eligible_donors_for_medal(medal):
+    """Get eligible donors for a medal, respecting snapshots.
+
+    Returns:
+        list of DonorsOverview objects, or None if snapshot required but doesn't exist
+    """
+    if medal.use_snapshot():
+        current_year = datetime.now().year
+        eligible_rodne_cisla = AwardEligibilitySnapshot.get_eligible_rodne_cisla(
+            medal.id, current_year
+        )
+
+        if eligible_rodne_cisla is None:
+            # No snapshot exists
+            flash(
+                f"Pro {medal.title} nebyl dosud vytvořen snapshot pro rok {current_year}. "
+                "Nejprve vytvořte snapshot na stránce přípravy ocenění.",
+                "danger",
+            )
+            return None
+
+        if not eligible_rodne_cisla:
+            # Snapshot exists but is empty
+            return []
+
+        return (
+            DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.rodne_cislo.in_(eligible_rodne_cisla),
+                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+                )
+            )
+            .order_by(collate(DonorsOverview.last_name, "czech"))
+            .all()
+        )
+    else:
+        # No snapshot needed - use current data
+        return (
+            DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.donation_count_total >= medal.minimum_donations,
+                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+                )
+            )
+            .order_by(collate(DonorsOverview.last_name, "czech"))
+            .all()
+        )
 
 
 @blueprint.get("/awarded/")
@@ -296,16 +346,12 @@ def render_confirmation_document(rc):
 def render_award_documents_for_award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
     medal_kr3 = Medals.query.filter(Medals.slug == "kr3").first_or_404()
-    donors = (
-        DonorsOverview.query.filter(
-            and_(
-                DonorsOverview.donation_count_total >= medal.minimum_donations,
-                getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
-            )
-        )
-        .order_by(collate(DonorsOverview.last_name, "czech").asc())
-        .all()
-    )
+
+    donors = get_eligible_donors_for_medal(medal)
+
+    if donors is None:
+        # No snapshot exists for this medal
+        return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
 
     # Show date of the award only for lower three medals
     awarded_at = datetime.now().strftime("%-d. %-m. %Y") if medal < medal_kr3 else ""
@@ -326,16 +372,12 @@ def render_envelope_labels():
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
     if print_envelope_labels_form.validate_on_submit():
         medal = print_envelope_labels_form.medal
-        donors = (
-            DonorsOverview.query.filter(
-                and_(
-                    DonorsOverview.donation_count_total >= medal.minimum_donations,
-                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-                )
-            )
-            .order_by(collate(DonorsOverview.last_name, "czech").asc())
-            .all()
-        )
+
+        donors = get_eligible_donors_for_medal(medal)
+
+        if donors is None:
+            # No snapshot exists for this medal
+            return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
 
         # To skip already used labels, we prepend some
         # empty donors to the list.
@@ -364,16 +406,12 @@ def render_envelope():
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
     if print_envelope_labels_form.validate_on_submit():
         medal = print_envelope_labels_form.medal
-        donors = (
-            DonorsOverview.query.filter(
-                and_(
-                    DonorsOverview.donation_count_total >= medal.minimum_donations,
-                    getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
-                )
-            )
-            .order_by(collate(DonorsOverview.last_name, "czech").asc())
-            .all()
-        )
+
+        donors = get_eligible_donors_for_medal(medal)
+
+        if donors is None:
+            # No snapshot exists for this medal
+            return redirect(url_for("donor.award_prep", medal_slug=medal.slug))
 
         return render_template(
             "donor/envelope_DL.html",
@@ -401,12 +439,61 @@ def remove_medal():
 @login_required
 def award_prep(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
-    donors = DonorsOverview.query.filter(
-        and_(
-            DonorsOverview.donation_count_total >= medal.minimum_donations,
-            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+
+    snapshot_info = None
+    if medal.use_snapshot():
+        current_year = datetime.now().year
+        eligible_rodne_cisla = AwardEligibilitySnapshot.get_eligible_rodne_cisla(
+            medal.id, current_year
         )
-    ).all()
+
+        if eligible_rodne_cisla is None:
+            # No snapshot exists - show live data and button to create snapshot
+            donors = DonorsOverview.query.filter(
+                and_(
+                    DonorsOverview.donation_count_total >= medal.minimum_donations,
+                    getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+                )
+            ).all()
+            snapshot_info = {"exists": False, "year": current_year}
+        else:
+            # Snapshot exists - use it
+            if eligible_rodne_cisla:
+                donors = DonorsOverview.query.filter(
+                    and_(
+                        DonorsOverview.rodne_cislo.in_(eligible_rodne_cisla),
+                        getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(
+                            False
+                        ),
+                    )
+                ).all()
+            else:
+                # Snapshot exists but is empty
+                donors = []
+
+            # Get snapshot creation timestamp
+            first_snapshot = (
+                AwardEligibilitySnapshot.query.filter_by(
+                    medal_id=medal.id, year=current_year
+                )
+                .order_by(AwardEligibilitySnapshot.created_at)
+                .first()
+            )
+            snapshot_info = {
+                "exists": True,
+                "year": current_year,
+                "created_at": first_snapshot.created_at if first_snapshot else None,
+                "count": len(eligible_rodne_cisla),
+            }
+    else:
+        # Use current donation counts for bronze, silver, and gold
+        donors = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+            )
+        ).all()
+
     award_medal_form = AwardMedalForm()
     award_medal_form.add_checkboxes([d.rodne_cislo for d in donors])
     print_envelope_labels_form = PrintEnvelopeLabelsForm()
@@ -425,6 +512,7 @@ def award_prep(medal_slug):
         override_column_names=json.dumps(DonorsOverview.basic_fields),
         print_envelope_labels_form=print_envelope_labels_form,
         all_emails=all_emails,
+        snapshot_info=snapshot_info,
     )
 
 
@@ -432,12 +520,21 @@ def award_prep(medal_slug):
 @login_required
 def award_prep_download_table(medal_slug):
     medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
-    donors = DonorsOverview.query.filter(
-        and_(
-            DonorsOverview.donation_count_total >= medal.minimum_donations,
-            getattr(DonorsOverview, "awarded_medal_" + medal_slug).is_(False),
+
+    donors = get_eligible_donors_for_medal(medal)
+
+    if donors is None:
+        # No snapshot exists for this medal
+        return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
+
+    if medal.use_snapshot() and not donors:
+        # Snapshot exists but is empty (only check this for snapshot medals)
+        current_year = datetime.now().year
+        flash(
+            f"Snapshot pro {medal.title} ({current_year}) neobsahuje žádné oprávněné dárce.",
+            "warning",
         )
-    ).all()
+        return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
 
     wb = Workbook()
     ws = wb.active
@@ -491,6 +588,37 @@ def award_prep_download_table(medal_slug):
             "Content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",  # noqa
         },
     )
+
+
+@blueprint.post("/create_snapshot/<medal_slug>")
+@login_required
+def create_snapshot(medal_slug):
+    medal = Medals.query.filter(Medals.slug == medal_slug).first_or_404()
+
+    if not medal.use_snapshot():
+        flash("Tento typ medaile nevyužívá snapshoty.", "danger")
+        return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
+
+    current_year = datetime.now().year
+
+    # Check if snapshot already exists for this year
+    existing = AwardEligibilitySnapshot.get_eligible_rodne_cisla(medal.id, current_year)
+    if existing is not None:
+        flash(
+            f"Snapshot pro {medal.title} ({current_year}) již existuje.",
+            "warning",
+        )
+        return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
+
+    # Create the snapshot
+    count = AwardEligibilitySnapshot.create_snapshot(medal, current_year)
+    flash(
+        f"Vytvořen snapshot pro {medal.title} ({current_year}): "
+        f"{count} oprávněných dárců.",
+        "success",
+    )
+
+    return redirect(url_for("donor.award_prep", medal_slug=medal_slug))
 
 
 @blueprint.post("/award_medal")
