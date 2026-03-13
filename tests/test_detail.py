@@ -10,6 +10,7 @@ from sqlalchemy import and_
 
 from registry.donor.models import (
     AwardedMedals,
+    AwardEligibilitySnapshot,
     Batch,
     DonationCenter,
     DonorsOverview,
@@ -256,6 +257,12 @@ class TestAwardDocument:
         medal = db.session.get(Medals, medal_id)
         medal_kr3 = Medals.query.filter(Medals.slug == "kr3").first_or_404()
         today = datetime.now().strftime("%-d. %-m. %Y") if medal < medal_kr3 else ""
+
+        # Create snapshot for medals that require it
+        if medal.use_snapshot():
+            current_year = datetime.now().year
+            AwardEligibilitySnapshot.create_snapshot(medal, current_year)
+
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         rows = page.text.count("<tr") - 1  # Minus 1 for table header
@@ -415,6 +422,12 @@ class TestEnvelopeLabels:
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_envelope_labels(self, user, testapp, medal_id):
         medal = db.session.get(Medals, medal_id)
+
+        # Create snapshot for medals that require it
+        if medal.use_snapshot():
+            current_year = datetime.now().year
+            AwardEligibilitySnapshot.create_snapshot(medal, current_year)
+
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         labels = page.forms["printEnvelopeLabelsForm"].submit()
@@ -452,6 +465,12 @@ class TestEnvelopeLabels:
     @pytest.mark.parametrize("medal_id", range(1, 8))
     def test_envelope_labels_skip(self, user, testapp, medal_id, skip):
         medal = db.session.get(Medals, medal_id)
+
+        # Create snapshot for medals that require it
+        if medal.use_snapshot():
+            current_year = datetime.now().year
+            AwardEligibilitySnapshot.create_snapshot(medal, current_year)
+
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         page.forms["printEnvelopeLabelsForm"].fields["skip"][0].value = skip
@@ -554,6 +573,15 @@ class TestAwardPrepExport:
         medal = db.session.get(Medals, medal_id)
         donation_centers = DonationCenter.query.all()
         dc_names = [dc.title for dc in donation_centers]
+
+        # Create snapshot for medals that require it
+        if medal.use_snapshot():
+            current_year = datetime.now().year
+            count = AwardEligibilitySnapshot.create_snapshot(medal, current_year)
+            if count == 0:
+                # Skip test for empty snapshots
+                pytest.skip(f"No eligible donors for {medal.slug}")
+
         login(user, testapp)
         page = testapp.get(url_for("donor.award_prep", medal_slug=medal.slug))
         table_data = page.click(description="Stáhnout tabulku pro odběrná místa").body

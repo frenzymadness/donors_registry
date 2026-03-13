@@ -73,6 +73,170 @@ class AwardedMedals(db.Model):
     __tableargs__ = (db.PrimaryKeyConstraint(rodne_cislo, medal_id),)
 
 
+class AwardEligibilitySnapshot(db.Model):
+    """Stores eligible donors for annual medal awards.
+
+    For higher-value medals (gold and above), we need to know who was eligible
+    based on donations from the previous year. This table stores a snapshot of
+    eligible rodne_cislo values for a given medal and year.
+    """
+
+    __tablename__ = "award_eligibility_snapshots"
+    medal_id = db.Column(db.ForeignKey(Medals.id), nullable=False)
+    medal = db.relationship("Medals")
+    year = db.Column(db.Integer, nullable=False)
+    rodne_cislo = db.Column(db.String(10), nullable=False)
+    created_at = db.Column(db.DateTime, nullable=False)
+    __table_args__ = (db.PrimaryKeyConstraint("medal_id", "year", "rodne_cislo"),)
+
+    @classmethod
+    def create_snapshot(cls, medal, year):
+        """Create a snapshot of eligible donors for the given medal and year.
+
+        The snapshot uses donation counts as of the creation time (now).
+        Only checks donors who are currently eligible (not already awarded),
+        then verifies they were also eligible on the cutoff date.
+
+        Args:
+            medal: Medals object
+            year: Year for which awards are being prepared (e.g., 2026)
+
+        Returns:
+            Number of eligible donors found
+        """
+        from datetime import datetime
+
+        from sqlalchemy import and_
+
+        # Check if snapshot already exists for this medal/year
+        existing = cls.query.filter_by(medal_id=medal.id, year=year).first()
+        if existing:
+            # Snapshot already created, return count (excluding marker)
+            all_entries = cls.query.filter_by(medal_id=medal.id, year=year).all()
+            return len([e for e in all_entries if e.rodne_cislo != "__EMPTY__"])
+
+        # Cutoff date is now (when snapshot is created)
+        cutoff_datetime = datetime.now()
+        cutoff_date = cutoff_datetime.strftime("%Y-%m-%d %H:%M:%S")
+
+        # First, get currently eligible donors who haven't been awarded (optimization)
+        currently_eligible = DonorsOverview.query.filter(
+            and_(
+                DonorsOverview.donation_count_total >= medal.minimum_donations,
+                getattr(DonorsOverview, "awarded_medal_" + medal.slug).is_(False),
+            )
+        ).all()
+
+        candidate_rodne_cisla = [d.rodne_cislo for d in currently_eligible]
+
+        if not candidate_rodne_cisla:
+            # No current candidates - insert marker and return 0
+            marker = cls(
+                medal_id=medal.id,
+                year=year,
+                rodne_cislo="__EMPTY__",
+                created_at=cutoff_datetime,
+            )
+            db.session.add(marker)
+            db.session.commit()
+            return 0
+
+        # Build IN clause with proper placeholders for SQLite
+        placeholders = ",".join([f":rc_{i}" for i in range(len(candidate_rodne_cisla))])
+
+        # Query to calculate historical donation counts for candidates
+        # Uses the same logic as donors_overview but with date filter
+        query = text(
+            f"""
+            SELECT "rodne_cislo"
+            FROM (
+                SELECT
+                    "outer_records"."rodne_cislo",
+                    (
+                        SELECT SUM("donation_count"."donation_count")
+                        FROM (
+                            SELECT (
+                                SELECT "records"."donation_count"
+                                FROM "records"
+                                    JOIN "batches"
+                                        ON "batches"."id" = "records"."batch_id"
+                                WHERE "records"."rodne_cislo" = "outer_records"."rodne_cislo"
+                                    AND "batches"."imported_at" <= :cutoff_date
+                                    AND (
+                                        "batches"."donation_center_id" = "donation_center_null"."donation_center_id"
+                                        OR (
+                                            "batches"."donation_center_id" IS NULL AND
+                                            "donation_center_null"."donation_center_id" IS NULL
+                                        )
+                                    )
+                                ORDER BY "batches"."imported_at" DESC,
+                                    "records"."donation_count" DESC
+                                LIMIT 1
+                            ) AS "donation_count"
+                            FROM (
+                                SELECT "donation_centers"."id" AS "donation_center_id"
+                                FROM "donation_centers"
+                                UNION
+                                SELECT NULL AS "donation_centers"
+                            ) AS "donation_center_null"
+                            WHERE "donation_count" IS NOT NULL
+                        ) AS "donation_count"
+                    ) AS historical_total
+                FROM (
+                    SELECT DISTINCT "rodne_cislo"
+                    FROM "records"
+                    WHERE "rodne_cislo" IN ({placeholders})
+                ) AS "outer_records"
+            ) AS results
+            WHERE historical_total >= :minimum_donations
+        """
+        )
+
+        # Build parameters dict with individual rodne_cislo parameters
+        params = {
+            "cutoff_date": cutoff_date,
+            "minimum_donations": medal.minimum_donations,
+        }
+        for i, rc in enumerate(candidate_rodne_cisla):
+            params[f"rc_{i}"] = rc
+
+        result = db.session.execute(query, params)
+
+        eligible_rodne_cisla = [row[0] for row in result]
+
+        # Store the snapshot
+        for rodne_cislo in eligible_rodne_cisla:
+            snapshot = cls(
+                medal_id=medal.id,
+                year=year,
+                rodne_cislo=rodne_cislo,
+                created_at=cutoff_datetime,
+            )
+            db.session.add(snapshot)
+
+        db.session.commit()
+        return len(eligible_rodne_cisla)
+
+    @classmethod
+    def get_eligible_rodne_cisla(cls, medal_id, year):
+        """Get list of eligible rodne_cislo for a medal and year.
+
+        Returns:
+            List of rodne_cislo strings, or None if snapshot doesn't exist
+        """
+        # Check if snapshot was ever created (even if empty)
+        snapshot_exists = (
+            cls.query.filter_by(medal_id=medal_id, year=year).first() is not None
+        )
+
+        if not snapshot_exists:
+            return None
+
+        # Return all eligible rodne_cisla (excluding marker for empty snapshots)
+        snapshots = cls.query.filter_by(medal_id=medal_id, year=year).all()
+        return [s.rodne_cislo for s in snapshots if s.rodne_cislo != "__EMPTY__"]
+
+
 class DonorsOverview(db.Model):
     __tablename__ = "donors_overview"
     rodne_cislo = db.Column(db.String(10), primary_key=True)

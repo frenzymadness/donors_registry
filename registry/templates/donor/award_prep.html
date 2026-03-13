@@ -3,6 +3,29 @@
 
 <h1>Přehled dárců k ocenění: {{ medal.title }}</h1>
 
+{% if snapshot_info %}
+<div class="alert {% if snapshot_info.exists %}alert-info{% else %}alert-warning{% endif %}" role="alert">
+    {% if snapshot_info.exists %}
+        <strong>Snapshot vytvořen:</strong> {{ snapshot_info.created_at.strftime('%d. %m. %Y v %H:%M') }}
+        <br>
+        <strong>Počet oprávněných dárců:</strong> {{ snapshot_info.count }}
+        <br>
+        <em>Seznam oprávněných dárců byl zmrazen ke dni {{ snapshot_info.created_at.strftime('%d. %m. %Y %H:%M') }}. Nový snapshot bude možné vytvořit až v roce {{ snapshot_info.year + 1 }}.</em>
+    {% else %}
+        <strong>Snapshot pro rok {{ snapshot_info.year }} nebyl dosud vytvořen.</strong>
+        <br>
+        Zobrazená data jsou aktuální (nezmrazená). Pro zmrazení seznamu oprávněných dárců ke dnešnímu dni použijte tlačítko níže.
+        <br>
+        <form action="{{ url_for('donor.create_snapshot', medal_slug=medal.slug) }}" method="POST" style="margin-top: 10px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="btn btn-warning" onclick="return confirm('Opravdu chcete vytvořit snapshot pro rok {{ snapshot_info.year }}? Tuto akci nelze vrátit zpět.');">
+                <strong>Vytvořit snapshot pro {{ snapshot_info.year }}</strong>
+            </button>
+        </form>
+    {% endif %}
+</div>
+{% endif %}
+
 <a class="btn btn-primary" role="button" href="{{ url_for('donor.render_award_documents_for_award_prep', medal_slug=medal.slug) }}" target="_blank">Potvrzení k medailím pro všechny</a>
 {% with form=print_envelope_labels_form %}
 <form id="printEnvelopeLabelsForm" action="{{ url_for('donor.render_envelope_labels') }}" method="POST" class="form-inline" role="form" target="_blank">
