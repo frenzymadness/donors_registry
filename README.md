@@ -6,6 +6,7 @@ Registry of blood donors for Czech Red Cross in Frýdek-Místek.
 
 1. Create and activate a new virtual environment
 1. Install all development dependencies via `pip install -r requirements/dev.txt`
+1. Copy `.env.example` to `.env` and fill in the required values: `cp .env.example .env`
 1. Prepare a new database and apply all existing migrations via `flask db upgrade`
 1. Add a user account via `flask create-user <email> <password>`
 1. You can install anonymized test data via `flask install-test-data` (needs empty database and with all migrations applied)
