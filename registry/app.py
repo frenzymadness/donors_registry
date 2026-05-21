@@ -4,7 +4,7 @@ import logging
 import sys
 from random import choice
 
-from flask import Flask, flash, redirect, url_for
+from flask import Flask, flash, redirect, send_from_directory, url_for
 
 from registry import batch, commands, donor, public, user
 from registry.extensions import (
@@ -30,6 +30,10 @@ def create_app(config_object="registry.settings"):
     register_blueprints(app)
     register_commands(app)
     configure_logger(app)
+
+    @app.route("/favicon.ico")
+    def favicon():
+        return send_from_directory(app.static_folder, "favicon.ico")
 
     @app.errorhandler(404)
     def page_not_found(e):
